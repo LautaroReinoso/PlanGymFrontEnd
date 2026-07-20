@@ -1,0 +1,45 @@
+<!-- TemplateEditModal -->
+<gp-modal
+  [isOpen]="isOpen()"
+  title="Editar plantilla"
+  size="sm"
+  (closed)="onClose()"
+>
+  <div class="edit-modal-body">
+
+    <app-input-field
+      label="Nombre"
+      type="text"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      placeholder="ej: Fuerza 3x semana"
+    />
+
+    <app-input-field
+      label="Descripción (opcional)"
+      type="text"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+      placeholder="ej: Para principiantes"
+    />
+
+    @if (errorMessage()) {
+      <div class="edit-error" role="alert">{{ errorMessage() }}</div>
+    }
+
+    <div class="edit-modal-actions">
+      <gp-button variant="ghost" size="md" (click)="onClose()">
+        Cancelar
+      </gp-button>
+      <gp-button
+        variant="primary" size="md"
+        [disabled]="!canSave()"
+        [loading]="isSaving()"
+        (click)="onSave()"
+      >
+        Guardar cambios
+      </gp-button>
+    </div>
+
+  </div>
+</gp-modal>

@@ -1,0 +1,57 @@
+<!-- TemplateDay -->
+<section class="day-card">
+
+  <!-- Header del día -->
+  <header class="day-header">
+    <div class="day-title-group">
+      <h2>{{ day().dayNumber }}</h2>
+      <h3 class="day-name">{{ day().name }}</h3>
+    </div>
+    <div class="day-icon">
+      <gp-icon-button  icon="edit" [variant]="'ghost'"   (click)="onEditDay()">
+      
+      </gp-icon-button>
+      <gp-icon-button icon="delete" [variant]="'ghost'" (click)="onRemoveDay()">
+  
+      </gp-icon-button>
+    </div>
+
+   
+
+  </header>
+   
+  <!-- Lista de ejercicios -->
+  @if (day().exercises.length === 0) {
+    <p class="day-empty">Sin ejercicios todavía.</p>
+  } @else {
+    <ul class="exercise-list">
+      @for (de of day().exercises; track de.id) {
+        <li class="exercise-item">
+          <div class="exercise-main">
+            <span class="exercise-name">{{ de.exerciseName }}</span>
+            <span class="exercise-detail">
+              {{ de.sets }} × {{ de.reps }} · {{ de.restSeconds }}s descanso
+            </span>
+          </div>
+          <button
+            class="exercise-remove-btn"
+            (click)="onRemoveExercise(de.id)"
+            aria-label="Quitar ejercicio"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Agregar ejercicio -->
+  <gp-button variant="ghost" size="sm" [fullWidth]="true" (click)="onAddExercise()">
+    + Agregar ejercicio
+  </gp-button>
+
+</section>

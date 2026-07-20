@@ -1,0 +1,166 @@
+<!-- TemplateDetailPage -->
+<div class="builder-page">
+
+  <!-- ── Back ── -->
+  <button class="back-btn" (click)="goBack()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+    Plantillas
+  </button>
+
+  <!-- ── Error global ── -->
+  @if (error()) {
+  <div class="error-banner" role="alert">{{ error() }}</div>
+  }
+
+  <!-- ── Skeleton ── -->
+  @if (isLoading()) {
+  <div class="skeleton-header">
+    <gp-skeleton shape="line" width="40%" height="26px" />
+    <gp-skeleton shape="line" width="20%" />
+  </div>
+  <div class="skeleton-badges">
+    <gp-skeleton shape="rect" width="70px" height="32px" radius="999px" />
+    <gp-skeleton shape="rect" width="70px" height="32px" radius="999px" />
+    <gp-skeleton shape="rect" width="70px" height="32px" radius="999px" />
+  </div>
+  <gp-skeleton shape="card" width="100%" height="220px" />
+  }
+
+  <!-- ── Contenido ── -->
+  @if (!isLoading() && template()) {
+
+  <!-- Header -->
+  <div class="template-header">
+    <span class="template-header-accent" aria-hidden="true"></span>
+    <div class="template-header-text">
+      <h1 class="template-name">{{ template()!.name }}</h1>
+      @if (template()!.description) {
+      <p class="template-desc">{{ template()!.description }}</p>
+      }
+    </div>
+    <div class="template-header-actions">
+      <button class="header-action-btn" (click)="openEditModal()" aria-label="Editar plantilla">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+        </svg>
+      </button>
+      <button class="header-action-btn header-action-btn--danger" (click)="openDeleteConfirm()"
+        aria-label="Eliminar plantilla">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Fila de badges + botón agregar día ── -->
+  @if (sortedDays().length > 0) {
+  <div class="days-nav">
+
+    <!-- FIX #7: usar <button> en vez de gp-badge para accesibilidad -->
+    <div class="days-badges" role="tablist" aria-label="Días del plan">
+      @for (day of sortedDays(); track day.id) {
+      <button class="day-badge" [class.day-badge--active]="selectedDayId() === day.id" (click)="selectDay(day.id)"
+        role="tab" [attr.aria-selected]="selectedDayId() === day.id">
+        <div class="day-badge-index" [class.day-badge-index--active]="selectedDayId() === day.id">
+          {{ day.orderIndex }}
+        </div>
+        <div class="day-badge-content">
+          <span class="day-badge-name">{{ day.name }}</span>
+          <span class="day-badge-count">{{ day.exercises.length }} ejerc.</span>
+        </div>
+
+      </button>
+      }
+    </div>
+
+    @if (canAddDay()) {
+    <button class="add-day-btn" (click)="addDay()" [disabled]="isAddingDay()" aria-label="Agregar día">
+      @if (isAddingDay()) {
+      <svg class="spinning" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5">
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83
+                         M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+      </svg>
+      } @else {
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      Día
+      }
+    </button>
+    }
+  </div>
+
+  <!-- FIX #6: renombrar a .selected-day-panel para evitar conflicto con .day-content -->
+  @if (selectedDay()) {
+  <div class="selected-day-panel" role="tabpanel">
+    <app-template-day [day]="selectedDay()!" (addExercise)="openExerciseModal()" (editDay)="openEditModal()"
+      (removeExercise)="removeExercise($event)" (removeDay)="removeDay($event)" />
+  </div>
+  }
+
+  } @else {
+  <!-- Estado vacío -->
+  <div class="empty-state">
+    <div class="empty-icon" aria-hidden="true">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    </div>
+    <h3 class="empty-title">Sin días todavía</h3>
+    <p class="empty-sub">Agregá el primer día para empezar a armar el plan.</p>
+    <gp-button variant="primary" size="md" [loading]="isAddingDay()" (click)="addDay()">
+      + Agregar primer día
+    </gp-button>
+  </div>
+  }
+  }
+
+  <!-- ── Modal: agregar ejercicio ── -->
+  <!-- FIX #1: limpio, sin contenido interno -->
+  <app-add-exercises-modal [isOpen]="showExerciseModal()" [exercises]="exercises()"
+    [exercisesLoading]="exercisesLoading()" [isSaving]="isAddingExercise()" (closed)="showExerciseModal.set(false)"
+    (exerciseSelected)="onExerciseSelected($event)" (exerciseCreated)="onExerciseCreated($event)" />
+
+<app-edit-day-modal
+  [isOpen]="showEditDayModal()"
+  [day]="selectedDay()"
+  [isSaving]="isSavingDay()"
+  [errorMessage]="editDayError()"
+  (closed)="showEditDayModal.set(false)"
+  (saved)="onDaySaved($event)"
+/>
+  <!-- ── Modal: editar info ── -->
+  <app-template-edit-modal [isOpen]="showEditModal()" [initialName]="template()?.name ?? ''"
+    [initialDescription]="template()?.description ?? ''" [isSaving]="isSavingEdit()" [errorMessage]="editError()"
+    (closed)="showEditModal.set(false)" (saved)="confirmEdit($event)" />
+
+  <!-- FIX #8: modal de eliminación descomentado con gp-modal -->
+  <gp-modal [isOpen]="showDeleteConfirm()" title="Eliminar plantilla" size="sm" (closed)="showDeleteConfirm.set(false)">
+    <div class="delete-confirm-body">
+      <p class="delete-confirm-text">
+        ¿Eliminar <strong>{{ template()?.name }}</strong>?
+        Esta acción no se puede deshacer.
+      </p>
+      @if (deleteError()) {
+      <div class="delete-error" role="alert">{{ deleteError() }}</div>
+      }
+      <div class="delete-confirm-actions">
+        <gp-button variant="ghost" size="md" (click)="showDeleteConfirm.set(false)">
+          Cancelar
+        </gp-button>
+        <gp-button variant="danger" size="md" [loading]="isDeleting()" (click)="confirmDelete()">
+          Eliminar
+        </gp-button>
+      </div>
+    </div>
+  </gp-modal>
+
+</div>

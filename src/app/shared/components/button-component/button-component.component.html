@@ -1,0 +1,11 @@
+<button
+  [type]="type()"
+  [class]="hostClasses"
+  [disabled]="isDisabled"
+>
+  @if (loading()) {
+    <span class="btn__spinner"></span>
+  } @else {
+    <ng-content />
+  }
+</button>

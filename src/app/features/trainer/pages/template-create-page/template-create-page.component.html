@@ -1,0 +1,62 @@
+<!-- TemplateCreatePage -->
+<div class="create-page">
+
+  <!-- ── Back ── -->
+  <button class="back-btn" (click)="onCancel()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2">
+      <path d="M15 18l-6-6 6-6"/>
+    </svg>
+    Plantillas
+  </button>
+
+  <!-- ── Header ── -->
+  <div class="page-header">
+    <span class="header-accent" aria-hidden="true"></span>
+    <div>
+      <h1 class="page-title">Nueva plantilla</h1>
+      <p class="page-subtitle">Definí el nombre y agregá días desde el editor.</p>
+    </div>
+  </div>
+
+  <!-- ── Form ── -->
+  <div class="create-form">
+
+    <gp-input
+      label="Nombre"
+      type="text"
+      [errorMsg]="nameError()"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      placeholder="ej: Fuerza 3x semana"
+    />
+
+    <gp-input
+      label="Descripción (opcional)"
+      type="text"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+      placeholder="ej: Para principiantes"
+    />
+
+    @if (error()) {
+      <div class="create-error" role="alert">{{ error() }}</div>
+    }
+
+    <div class="create-actions">
+      <gp-button variant="ghost" size="md" (click)="onCancel()">
+        Cancelar
+      </gp-button>
+      <gp-button
+        variant="primary" size="md"
+        [disabled]="!canSave()"
+        [loading]="isSaving()"
+        (click)="onSave()"
+      >
+        Crear y continuar
+      </gp-button>
+    </div>
+
+  </div>
+
+</div>

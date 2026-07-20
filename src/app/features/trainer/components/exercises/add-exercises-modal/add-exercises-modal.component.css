@@ -1,0 +1,369 @@
+/* ─────────────────────────────────────────────
+   GymPlan — AddExerciseModal CSS
+   Tabs + lista de ejercicios + parámetros + form
+───────────────────────────────────────────── */
+
+:host { display: block; }
+
+@keyframes tabIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* ── Modal body ──────────────────────────────── */
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Tabs ────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: #0F0F16;
+  border: 1px solid #2A2A38;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B6B80;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+
+.tab:hover:not(.tab--active) {
+  background: #1C1C26;
+  color: #9898A8;
+}
+
+.tab--active {
+  background: #1C1C26;
+  color: #4F6EF7;
+  font-weight: 600;
+  border: 1px solid rgba(79, 110, 247, 0.2);
+}
+
+.tab:focus-visible {
+  outline: 2px solid #4F6EF7;
+  outline-offset: 2px;
+}
+
+/* ── Tab panel ───────────────────────────────── */
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: tabIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ── Buscador ────────────────────────────────── */
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar svg {
+  position: absolute;
+  left: 12px;
+  color: #6B6B80;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.search-input {
+  width: 100%;
+  background: #13131A;
+  border: 1.5px solid #2A2A38;
+  border-radius: 10px;
+  padding: 10px 14px 10px 36px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  color: #F0F0F5;
+  outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+
+.search-input::placeholder { color: #6B6B80; }
+
+.search-input:focus {
+  border-color: #4F6EF7;
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+}
+
+/* ── Lista de ejercicios ─────────────────────── */
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A38 transparent;
+}
+
+.exercise-list::-webkit-scrollbar { width: 4px; }
+.exercise-list::-webkit-scrollbar-thumb {
+  background: #2A2A38;
+  border-radius: 2px;
+}
+
+/* Skeleton loader */
+.exercise-list-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.exercise-skeleton {
+  height: 52px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #1C1C26 25%, #252534 50%, #1C1C26 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Empty */
+.exercise-empty {
+  padding: 24px;
+  text-align: center;
+  color: #6B6B80;
+  font-size: 14px;
+}
+
+/* Item */
+.exercise-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: #13131A;
+  border: 1.5px solid #232330;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 150ms, background 150ms;
+}
+
+.exercise-item:hover {
+  background: #1C1C26;
+  border-color: #3A3A52;
+}
+
+.exercise-item--selected {
+  border-color: #4F6EF7;
+  background: rgba(79, 110, 247, 0.07);
+}
+
+.exercise-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.exercise-item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F0F0F5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.exercise-item-muscle {
+  font-size: 11px;
+  color: #6B6B80;
+}
+
+.global-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #818CF8;
+  background: rgba(79, 110, 247, 0.1);
+  border: 1px solid rgba(79, 110, 247, 0.2);
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+
+.check-icon {
+  flex-shrink: 0;
+  color: #4F6EF7;
+}
+
+/* ── Parámetros ──────────────────────────────── */
+
+.params-section {
+  background: rgba(79, 110, 247, 0.04);
+  border: 1px solid rgba(79, 110, 247, 0.15);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: tabIn 0.2s ease both;
+}
+
+.params-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6B6B80;
+  margin: 0;
+}
+
+.params-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.param-field,
+.notes-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.param-field label,
+.notes-field label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #9898A8;
+}
+
+.param-field input,
+.notes-field input {
+  background: #13131A;
+  border: 1.5px solid #2A2A38;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 13px;
+  color: #F0F0F5;
+  outline: none;
+  transition: border-color 200ms;
+  width: 100%;
+}
+
+.param-field input:focus,
+.notes-field input:focus {
+  border-color: #4F6EF7;
+}
+
+/* ── Select grupo muscular ───────────────────── */
+
+.select-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.select-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #9898A8;
+}
+
+.select-field--error .select-label {
+  color: #EF4444;
+}
+
+.select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select-input {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #13131A;
+  border: 1.5px solid #2A2A38;
+  border-radius: 10px;
+  padding: 13px 40px 13px 16px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  color: #F0F0F5;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+
+.select-input:focus {
+  border-color: #4F6EF7;
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+}
+
+.select-field--error .select-input {
+  border-color: #EF4444;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  color: #6B6B80;
+  pointer-events: none;
+}
+
+.select-error {
+  font-size: 12px;
+  color: #EF4444;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+/* ── Acciones ────────────────────────────────── */
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #2A2A38;
+}
+
+/* ── Mobile ──────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .params-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-panel, .params-section { animation: none; }
+  .exercise-skeleton { animation: none; background: #1C1C26; }
+}

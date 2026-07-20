@@ -1,0 +1,286 @@
+/* ─────────────────────────────────────────────
+   GymPlan — Sidebar CSS
+   Desktop: posición fija 240px.
+   Mobile: drawer deslizable desde la izquierda.
+───────────────────────────────────────────── */
+
+:host {
+  display: block;
+}
+
+/* ── Keyframes ──────────────────────────────── */
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Sidebar base ────────────────────────────── */
+
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 240px;
+  height: 100dvh;
+  background: #13131A;
+  border-right: 1px solid #2A2A38;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 12px;
+  z-index: 50;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar { display: none; }
+
+/* ── Header ──────────────────────────────────── */
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-bottom: 32px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-logo-name {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #F0F0F5;
+}
+
+.sidebar-close-btn {
+  display: none;          /* solo visible en mobile */
+  place-items: center;
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 8px;
+  color: #6B6B80;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+}
+
+.sidebar-close-btn:hover {
+  background: #1C1C26;
+  color: #F0F0F5;
+}
+
+/* ── Section label ───────────────────────────── */
+
+.sidebar-section-label {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6B6B80;
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+
+/* ── Nav ─────────────────────────────────────── */
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+/* ── Nav item ────────────────────────────────── */
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #9898A8;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color      150ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.nav-item:hover {
+  background: #1C1C26;
+  color: #F0F0F5;
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid #4F6EF7;
+  outline-offset: 2px;
+}
+
+/* Indicador lateral — línea azul del ítem activo */
+.nav-item-indicator {
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%) scaleY(0);
+  width: 3px;
+  height: 60%;
+  background: #4F6EF7;
+  border-radius: 0 3px 3px 0;
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Nav item activo ─────────────────────────── */
+
+.nav-item--active {
+  background: rgba(79, 110, 247, 0.1);
+  color: #4F6EF7;
+}
+
+.nav-item--active .nav-item-icon {
+  color: #4F6EF7;
+}
+
+.nav-item--active .nav-item-indicator {
+  transform: translateY(-50%) scaleY(1);
+}
+
+/* ── Ícono del nav ───────────────────────────── */
+
+.nav-item-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color 150ms;
+}
+
+.nav-item-label {
+  flex: 1;
+}
+
+/* ── Spacer ──────────────────────────────────── */
+
+.sidebar-spacer {
+  flex: 1;
+  min-height: 24px;
+}
+
+/* ── Usuario ─────────────────────────────────── */
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #1C1C26;
+  border: 1px solid #2A2A38;
+  margin-bottom: 8px;
+}
+
+.user-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(79, 110, 247, 0.15);
+  border: 1.5px solid rgba(79, 110, 247, 0.3);
+  display: grid;
+  place-items: center;
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4F6EF7;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.user-mail {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #F0F0F5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 11px;
+  color: #6B6B80;
+}
+
+/* ── Logout ──────────────────────────────────── */
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6B6B80;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+  text-align: left;
+}
+
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #EF4444;
+}
+
+.logout-btn:focus-visible {
+  outline: 2px solid #EF4444;
+  outline-offset: 2px;
+}
+
+/* ── Mobile — drawer ─────────────────────────── */
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    border-right: none;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+  }
+
+  .sidebar--open {
+    transform: translateX(0);
+    animation: slideInLeft 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar-close-btn {
+    display: grid;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+  .nav-item-indicator {
+    transition: none;
+  }
+}

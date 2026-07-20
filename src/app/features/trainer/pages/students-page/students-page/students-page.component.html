@@ -1,0 +1,112 @@
+<!-- StudentsPage -->
+<div class="students-page">
+
+  <!-- ── Header ── -->
+  <div class="page-header">
+    <div class="page-header-text">
+      <h1 class="page-title">Mis alumnos</h1>
+      <p class="page-subtitle">
+        @if (!isLoading()) {
+          {{ students().length }} alumnos · {{ activeCount() }} con plan activo
+        } @else {
+          Cargando…
+        }
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Buscador ── -->
+  @if (!isEmpty()) {
+    <div class="search-bar">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        class="search-input"
+        type="search"
+        placeholder="Buscar alumno por nombre o correo…"
+        [value]="searchTerm()"
+        (input)="onSearch($any($event.target).value)"
+        aria-label="Buscar alumno"
+      />
+    </div>
+  }
+
+  <!-- ── Error ── -->
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error() }}
+      <button class="error-retry" (click)="loadStudents()">Reintentar</button>
+    </div>
+  }
+
+  <!-- ── Skeleton loader ── -->
+  @if (isLoading()) {
+    <div class="students-grid">
+      @for (s of skeletons; track $index) {
+        <div class="skeleton-card">
+          <div class="skeleton-card-header">
+            <gp-skeleton shape="circle" width="44px" height="44px" />
+            <div class="skeleton-lines">
+              <gp-skeleton shape="line" width="60%" />
+              <gp-skeleton shape="line" width="80%" />
+            </div>
+          </div>
+          <gp-skeleton shape="line" width="40%" />
+          <div class="skeleton-footer">
+            <gp-skeleton shape="rect" width="70px" height="24px" radius="999px" />
+            <gp-skeleton shape="line" width="30%" />
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── Lista de alumnos ── -->
+  @if (!isLoading() && !error()) {
+    @if (isEmpty()) {
+      <!-- Estado vacío -->
+      <div class="empty-state">
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">Sin alumnos todavía</h3>
+        <p class="empty-sub">Cuando tengas alumnos asignados aparecerán aquí.</p>
+      </div>
+    } @else if (noResults()) {
+      <!-- Sin resultados de búsqueda -->
+      <div class="empty-state">
+        <div class="empty-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">Sin resultados</h3>
+        <p class="empty-sub">No hay alumnos que coincidan con "{{ searchTerm() }}".</p>
+      </div>
+    } @else {
+      <div class="students-grid">
+        @for (student of filtered(); track student.id) {
+          <app-student-card
+            [student]="student"
+            [routerLink]="['/trainer/students', student.id]"
+          />
+        }
+      </div>
+    }
+  }
+
+</div>

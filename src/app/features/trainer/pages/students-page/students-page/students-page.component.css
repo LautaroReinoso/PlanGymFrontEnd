@@ -1,0 +1,169 @@
+/* ─────────────────────────────────────────────
+   GymPlan — StudentsPage CSS
+───────────────────────────────────────────── */
+
+:host { display: block; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header ──────────────────────────────────── */
+
+/* ── Buscador ────────────────────────────────── */
+
+.search-bar {
+  position: relative;
+  margin-bottom: 24px;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s both;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6B6B80;
+  pointer-events: none;
+  transition: color 200ms;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  background: #1C1C26;
+  border: 1.5px solid #2A2A38;
+  border-radius: 10px;
+  padding: 11px 16px 11px 40px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  color: #F0F0F5;
+  outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+
+.search-input::placeholder { color: #6B6B80; }
+
+.search-input:focus {
+  border-color: #4F6EF7;
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+}
+
+.search-input:focus + .search-icon,
+.search-bar:focus-within .search-icon {
+  color: #4F6EF7;
+}
+
+/* ── Error ───────────────────────────────────── */
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  font-size: 14px;
+  color: #FCA5A5;
+  margin-bottom: 24px;
+}
+
+.error-retry {
+  margin-left: auto;
+  background: none;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: #FCA5A5;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.error-retry:hover { background: rgba(239, 68, 68, 0.1); }
+
+/* ── Grid ────────────────────────────────────── */
+
+.students-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* ── Skeleton card ───────────────────────────── */
+
+.skeleton-card {
+  background: #1C1C26;
+  border: 1px solid #2A2A38;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid #2A2A38;
+}
+
+/* ── Estado vacío ────────────────────────────── */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  text-align: center;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #1C1C26;
+  border: 1px solid #2A2A38;
+  display: grid;
+  place-items: center;
+  color: #6B6B80;
+}
+
+.empty-title {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #F0F0F5;
+}
+
+.empty-sub {
+  font-size: 14px;
+  color: #6B6B80;
+  max-width: 280px;
+}
+
+/* ── Mobile ──────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .students-grid { grid-template-columns: 1fr; }
+  .search-input  { max-width: 100%; }
+}

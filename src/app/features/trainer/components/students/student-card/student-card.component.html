@@ -1,0 +1,57 @@
+<!-- StudentCard -->
+<article class="student-card" [class.student-card--active]="!!student().activeWorkout">
+
+  <!-- Línea de acento superior -->
+  <span class="card-accent-line" aria-hidden="true"></span>
+
+  <!-- Header: avatar + info -->
+  <div class="card-header">
+    <div class="avatar" [class]="'avatar--' + avatarMod()" aria-hidden="true">
+      {{ initials() }}
+    </div>
+    <div class="student-info">
+      <span class="student-name">{{ displayName() }}</span>
+      <span class="student-mail">{{ student().mail }}</span>
+    </div>
+  </div>
+
+  <!-- Plan activo -->
+  <div class="plan-info">
+    @if (student().activeWorkout) {
+      <div class="plan-name">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
+        </svg>
+        {{ student().activeWorkout!.templateName }}
+      </div>
+    } @else {
+      <span class="no-plan">Sin plan asignado</span>
+    }
+  </div>
+
+  <!-- Footer: badge + adherencia -->
+  <div class="card-footer">
+    @if (student().activeWorkout) {
+        <!-- [dot]="true" -->
+      <gp-badge variant="elevated" >Activo</gp-badge>
+    } @else {
+      <gp-badge variant="default">Sin plan</gp-badge>
+    }
+
+    @if (student().adherencePercent !== undefined) {
+      <span class="adherence">
+        {{ student().adherencePercent }}% adherencia
+      </span>
+    }
+
+    <!-- Flecha -->
+    <span class="card-arrow" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </span>
+  </div>
+
+</article>

@@ -1,0 +1,245 @@
+
+
+/* ─────────────────────────────────────────────
+   Base
+───────────────────────────────────────────── */
+
+.card {
+  position: relative;
+  overflow: hidden;
+
+  border-radius: 16px;
+  border: 1px solid var(--border-default, #2A2A38);
+
+  background: var(--surface-card, #1C1C26);
+  color: var(--text-primary, #F0F0F5);
+
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+/* Animación opcional */
+
+.card--animated {
+  animation: cardIn .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* Línea superior */
+
+.card::before {
+
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  top: 0;
+
+  transform: translateX(-50%);
+
+  width: 40%;
+  height: 1px;
+
+  opacity: 0;
+
+  background: linear-gradient(
+      to right,
+      transparent,
+      rgba(79,110,247,.35),
+      transparent
+  );
+
+  transition:
+      opacity .25s ease,
+      width .25s ease;
+}
+
+/* ─────────────────────────────────────────────
+   Padding
+───────────────────────────────────────────── */
+
+.card--pad-none { padding:0; }
+
+.card--pad-sm { padding:16px; }
+
+.card--pad-md { padding:24px; }
+
+.card--pad-lg { padding:32px; }
+
+/* ─────────────────────────────────────────────
+   Variantes
+───────────────────────────────────────────── */
+
+.card--default{
+
+    background:#1C1C26;
+
+    border-color:#2A2A38;
+
+    box-shadow:
+        0 2px 12px rgba(0,0,0,.28);
+}
+
+.card--elevated{
+
+    background:#20202E;
+
+    border-color:#34344A;
+
+    box-shadow:
+        0 8px 32px rgba(0,0,0,.42);
+}
+
+.card--flat{
+
+    background:#13131A;
+
+    border-color:#1D1D29;
+
+    box-shadow:none;
+}
+
+.card--accent{
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(79,110,247,.05),
+            #1C1C26 65%
+        );
+
+    border-color:rgba(79,110,247,.28);
+
+    box-shadow:
+        inset 0 0 0 1px rgba(79,110,247,.05);
+}
+
+.card--accent::before{
+
+    opacity:1;
+}
+
+/* ─────────────────────────────────────────────
+   Interactive
+───────────────────────────────────────────── */
+
+.card--interactive{
+
+    cursor:pointer;
+
+    user-select:none;
+}
+
+.card--interactive:hover{
+
+    transform:translateY(-2px);
+}
+
+.card--default.card--interactive:hover{
+
+    border-color:#3A3A52;
+
+    box-shadow:
+        0 8px 26px rgba(0,0,0,.35);
+}
+
+.card--elevated.card--interactive:hover{
+
+    border-color:#41415C;
+
+    box-shadow:
+        0 14px 38px rgba(0,0,0,.48);
+}
+
+.card--flat.card--interactive:hover{
+
+    border-color:#303040;
+
+    background:#181821;
+}
+
+.card--accent.card--interactive:hover{
+
+    border-color:rgba(79,110,247,.45);
+
+    box-shadow:
+        0 10px 30px rgba(79,110,247,.12),
+        inset 0 0 0 1px rgba(79,110,247,.08);
+}
+
+.card--interactive:hover::before{
+
+    opacity:1;
+
+    width:60%;
+}
+
+.card--interactive:active{
+
+    transform:translateY(0);
+}
+
+.card--interactive:focus-visible{
+
+    outline:2px solid #4F6EF7;
+
+    outline-offset:3px;
+}
+
+/* ─────────────────────────────────────────────
+   Selected
+───────────────────────────────────────────── */
+
+.card--selected{
+
+    border-color:rgba(79,110,247,.6);
+
+    box-shadow:
+        0 0 0 2px rgba(79,110,247,.12);
+}
+
+.card--selected::before{
+
+    opacity:1;
+
+    width:70%;
+}
+
+/* ─────────────────────────────────────────────
+   Disabled
+───────────────────────────────────────────── */
+
+.card--disabled{
+
+    opacity:.55;
+
+    filter:grayscale(.15);
+
+    pointer-events:none;
+}
+
+/* ─────────────────────────────────────────────
+   Reduced motion
+───────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce){
+
+    .card,
+    .card::before{
+
+        transition:none;
+    }
+
+    .card--animated{
+
+        animation:none;
+    }
+
+    .card--interactive:hover{
+
+        transform:none;
+    }
+}

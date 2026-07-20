@@ -1,0 +1,57 @@
+<!-- ─────────────────────────────────────────────
+     GymPlan — Trainer Layout
+     sidebar fijo + área de contenido scrolleable
+───────────────────────────────────────────── -->
+<div class="trainer-layout">
+
+  <!-- Overlay mobile (cierra el sidebar al tocar fuera) -->
+  @if (sidebarOpen()) {
+    <div
+      class="sidebar-overlay"
+      (click)="closeSidebar()"
+      aria-hidden="true"
+    ></div>
+  }
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [isOpen]="sidebarOpen()"
+    (closeRequest)="closeSidebar()"
+  />
+
+  <!-- Área principal -->
+  <div class="trainer-main">
+
+    <!-- Top bar mobile -->
+    <header class="topbar">
+      <button
+        class="topbar-menu-btn"
+        (click)="toggleSidebar()"
+        aria-label="Abrir menú"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+
+      <div class="topbar-logo">
+        <svg width="22" height="22" viewBox="0 0 36 36" fill="none">
+          <rect width="36" height="36" rx="10" fill="#4F6EF7"/>
+          <rect x="6"  y="15" width="6"  height="6" rx="2" fill="white"/>
+          <rect x="24" y="15" width="6"  height="6" rx="2" fill="white"/>
+          <rect x="11" y="17" width="14" height="2" rx="1" fill="white"/>
+        </svg>
+        <span class="topbar-logo-name">GymPlan</span>
+      </div>
+    </header>
+
+    <!-- Contenido de la página activa -->
+    <main class="trainer-content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>

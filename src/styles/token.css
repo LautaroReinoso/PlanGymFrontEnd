@@ -1,0 +1,43 @@
+/* You can add global styles to this file, and also import other style files */
+/* tokens.css */
+:root {
+  /* Color */
+  --color-bg:        #0A0A0F;
+  --color-surface:   #13131A;
+  --color-card:      #1C1C26;
+  --color-border:    #2A2A38;
+  --color-accent:    #4F6EF7;   /* electric blue */
+  --color-accent-dim:#4F6EF720;
+  --color-success:   #22C55E;
+  --color-warning:   #F59E0B;
+  --color-danger:    #EF4444;
+  --color-text:      #F0F0F5;
+  --color-muted:     #6B6B80;
+
+  /* Typography */
+  --font-display:    'Syne', sans-serif;
+  --font-body:       'DM Sans', sans-serif;
+
+  /* Spacing (escala 4px) */
+  --space-1: 4px;  --space-2: 8px;
+  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px;
+  --space-8: 32px; --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-glow: 0 0 24px rgba(79,110,247,0.2);
+
+  /* Transitions */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 400ms;
+}

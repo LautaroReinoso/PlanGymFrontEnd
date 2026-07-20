@@ -1,0 +1,239 @@
+/* ─────────────────────────────────────────────
+   GymPlan — TemplateCard CSS
+   4 variantes de color con gradiente oscuro.
+   blue | celeste | purple | green
+───────────────────────────────────────────── */
+
+:host { display: block; }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Base ────────────────────────────────────── */
+
+.template-card {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 20px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  overflow: hidden;
+  border: 1px solid transparent;
+  animation: cardIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition:
+    transform    200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow   200ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.template-card:hover {
+  transform: translateY(-3px);
+}
+
+.template-card:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.3);
+  outline-offset: 2px;
+}
+
+/* ── Variante: blue ──────────────────────────── */
+
+.template-card--blue {
+  background: linear-gradient(135deg, #1a1f3a 0%, #131320 100%);
+  border-color: rgba(79, 110, 247, 0.35);
+}
+
+.template-card--blue:hover {
+  box-shadow: 0 12px 32px rgba(79, 110, 247, 0.2);
+  border-color: rgba(79, 110, 247, 0.55);
+}
+
+.template-card--blue .card-accent-line {
+  background: linear-gradient(to right, transparent, #4F6EF7, transparent);
+}
+
+.template-card--blue .stat,
+.template-card--blue .stat-dot { color: rgba(129, 140, 248, 0.7); }
+
+.template-card--blue .card-students {
+  background: rgba(79, 110, 247, 0.12);
+  border-color: rgba(79, 110, 247, 0.25);
+  color: #818CF8;
+}
+
+/* ── Variante: celeste ───────────────────────── */
+
+.template-card--celeste {
+  background: linear-gradient(135deg, #0f2030 0%, #0a0f1a 100%);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.template-card--celeste:hover {
+  box-shadow: 0 12px 32px rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+.template-card--celeste .card-accent-line {
+  background: linear-gradient(to right, transparent, #38BDF8, transparent);
+}
+
+.template-card--celeste .stat,
+.template-card--celeste .stat-dot { color: rgba(125, 211, 252, 0.7); }
+
+.template-card--celeste .card-students {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.2);
+  color: #7DD3FC;
+}
+
+/* ── Variante: purple ────────────────────────── */
+
+.template-card--purple {
+  background: linear-gradient(135deg, #1e1030 0%, #130a1e 100%);
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.template-card--purple:hover {
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.5);
+}
+
+.template-card--purple .card-accent-line {
+  background: linear-gradient(to right, transparent, #8B5CF6, transparent);
+}
+
+.template-card--purple .stat,
+.template-card--purple .stat-dot { color: rgba(196, 181, 253, 0.7); }
+
+.template-card--purple .card-students {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #C4B5FD;
+}
+
+/* ── Variante: green ─────────────────────────── */
+
+.template-card--green {
+  background: linear-gradient(135deg, #0d2018 0%, #080f0d 100%);
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+.template-card--green:hover {
+  box-shadow: 0 12px 32px rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.template-card--green .card-accent-line {
+  background: linear-gradient(to right, transparent, #22C55E, transparent);
+}
+
+.template-card--green .stat,
+.template-card--green .stat-dot { color: rgba(134, 239, 172, 0.7); }
+
+.template-card--green .card-students {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.18);
+  color: #86EFAC;
+}
+
+/* ── Línea de acento superior ────────────────── */
+
+.card-accent-line {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+/* ── Nombre ──────────────────────────────────── */
+
+.card-name {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #F0F0F5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  margin: 0;
+}
+
+/* ── Descripción ─────────────────────────────── */
+
+.card-description {
+  font-size: 13px;
+  color: #9898A8;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  flex: 1;
+}
+
+.card-description--empty {
+  color: #6B6B80;
+  font-style: italic;
+}
+
+/* ── Footer ──────────────────────────────────── */
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 12px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  gap: 8px;
+}
+
+.card-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.stat-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.card-students {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 3px 9px 3px 7px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .template-card { animation: none; transition: border-color 100ms; }
+  .template-card:hover { transform: none; box-shadow: none; }
+}

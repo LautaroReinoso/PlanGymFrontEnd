@@ -1,0 +1,450 @@
+/* ─────────────────────────────────────────────
+   GymPlan — TemplateBuilderPage CSS
+   UX con fila de badges de días + vista única
+───────────────────────────────────────────── */
+
+:host { display: block; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Back ────────────────────────────────────── */
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #6B6B80;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 24px;
+  transition: color 150ms;
+}
+.back-btn:hover { color: #F0F0F5; }
+
+/* ── Error ───────────────────────────────────── */
+
+.error-banner {
+  padding: 14px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: #FCA5A5;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* ── Skeleton ────────────────────────────────── */
+
+.skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.skeleton-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* ── Template header ─────────────────────────── */
+
+.template-header {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.template-header-accent {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, transparent, #38BDF8, transparent);
+}
+
+.template-header-text { flex: 1; min-width: 0; }
+
+.template-name {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #F0F0F5;
+  margin-bottom: 3px;
+}
+
+.template-desc {
+  font-size: 13px;
+  color: #7DD3FC;
+  opacity: 0.8;
+}
+
+.template-header-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.header-action-btn {
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 8px;
+  color: #7DD3FC;
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms, transform 150ms;
+}
+
+.header-action-btn:hover {
+  background: rgba(56, 189, 248, 0.16);
+  transform: translateY(-1px);
+}
+
+.header-action-btn--danger {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.18);
+  color: #FCA5A5;
+}
+
+.header-action-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* ── Fila de badges de días ──────────────────── */
+
+.days-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s both;
+}
+
+.days-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* Badge de día */
+.day-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1.5px solid #2A2A38;
+  background: #1C1C26;
+  color: var(--color-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  gap: 6px;
+  display: flex;
+  align-items: center;
+  transition:
+    background  150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color       150ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform   150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.day-badge:hover:not(.day-badge--active) {
+  background: #232330;
+  border-color: #3A3A52;
+  color: #F0F0F5;
+}
+
+.day-badge--active {
+  background: rgba(79, 110, 247, 0.12);
+  border-color: rgba(79, 110, 247, 0.5);
+  color: #818CF8;
+  font-weight: 600;
+  transform: translateY(-1px);
+}
+.day-badge-index{
+  background: var(--color-surface);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.day-badge-index--active  {
+  color: var(--color-text);
+  background: #4F6EF7;
+}
+.day-badge-content {
+   display: flex;
+   flex-direction: column;
+  align-items: center;
+}
+.day-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.day-content app-template-day {
+  flex: 1;
+}
+
+.day-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+.day-badge-name {
+    color: var(--color-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+.day-badge-count {
+    color: var(--color-muted);
+  font-size: 10px;
+  font-weight: 400;
+}
+.day-exercises {
+  font-size: 11px;
+  opacity: .7;
+}
+
+.day-badge:focus-visible {
+  outline: 2px solid #4F6EF7;
+  outline-offset: 2px;
+}
+
+/* Botón agregar día — compacto, va al final de los badges */
+.add-day-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px dashed #2A2A38;
+  background: transparent;
+  color: #6B6B80;
+  cursor: pointer;
+  transition: border-color 150ms, color 150ms;
+  flex-shrink: 0;
+}
+
+.add-day-btn:hover:not(:disabled) {
+  border-color: #4F6EF7;
+  color: #4F6EF7;
+}
+
+.add-day-btn:disabled { cursor: wait; opacity: 0.6; }
+
+.spinning { animation: spin 0.7s linear infinite; }
+
+/* ── Contenido del día seleccionado ──────────── */
+
+.day-content {
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Estado vacío ────────────────────────────── */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 24px;
+  text-align: center;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.empty-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: #1C1C26;
+  border: 1px solid #2A2A38;
+  display: grid;
+  place-items: center;
+  color: #6B6B80;
+}
+
+.empty-title {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #F0F0F5;
+}
+
+.empty-sub {
+  font-size: 14px;
+  color: #6B6B80;
+  max-width: 260px;
+  margin-bottom: 4px;
+}
+
+/* ── Modal: ejercicio ────────────────────────── */
+
+.exercise-modal-body { display: flex; flex-direction: column; gap: 16px; }
+
+.exercise-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.exercise-search svg {
+  position: absolute;
+  left: 12px;
+  color: #6B6B80;
+  pointer-events: none;
+}
+
+.exercise-search input {
+  width: 100%;
+  background: #13131A;
+  border: 1.5px solid #2A2A38;
+  border-radius: 10px;
+  padding: 10px 14px 10px 36px;
+  font-size: 14px;
+  color: #F0F0F5;
+  outline: none;
+  transition: border-color 200ms;
+}
+
+.exercise-search input:focus { border-color: #4F6EF7; }
+
+.exercise-options-loading { display: flex; flex-direction: column; gap: 8px; }
+
+.exercise-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A38 transparent;
+}
+
+.exercise-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: #13131A;
+  border: 1.5px solid #2A2A38;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #F0F0F5;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 150ms, background 150ms;
+}
+
+.exercise-option:hover { background: #1C1C26; border-color: #3A3A52; }
+
+.exercise-option--selected {
+  border-color: #4F6EF7;
+  background: rgba(79, 110, 247, 0.08);
+  color: #818CF8;
+}
+
+.exercise-params {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.param-field { display: flex; flex-direction: column; gap: 6px; }
+
+.param-field label { font-size: 12px; color: #9898A8; font-weight: 500; }
+
+.param-field input {
+  background: #13131A;
+  border: 1.5px solid #2A2A38;
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 14px;
+  color: #F0F0F5;
+  outline: none;
+  transition: border-color 200ms;
+}
+
+.param-field input:focus { border-color: #4F6EF7; }
+
+.exercise-error {
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #FCA5A5;
+}
+
+.exercise-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid #2A2A38;
+}
+
+/* ── Modal: confirmar eliminar ───────────────── */
+
+.delete-confirm-body { display: flex; flex-direction: column; gap: 16px; }
+
+.delete-confirm-text { font-size: 14px; color: #9898A8; line-height: 1.6; }
+
+.delete-confirm-text strong { color: #F0F0F5; }
+
+.delete-error {
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #FCA5A5;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #2A2A38;
+}
+
+/* ── Mobile ──────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .exercise-params { grid-template-columns: 1fr; }
+  .template-header { flex-direction: column; }
+  .template-header-actions { align-self: flex-end; }
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .template-header, .days-nav, .day-content, .empty-state { animation: none; }
+  .day-badge--active { transform: none; }
+  .spinning { animation: spin 1.5s linear infinite; }
+}

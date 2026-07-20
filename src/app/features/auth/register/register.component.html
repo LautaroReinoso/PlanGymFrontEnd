@@ -1,0 +1,108 @@
+<!-- ─────────────────────────────────────────────
+     GymPlan — Register Template
+───────────────────────────────────────────── -->
+<div class="register-page">
+
+  <!-- Fondo grilla -->
+  <div class="grid-bg" aria-hidden="true">
+    <div class="grid-line" *ngFor="let i of [0,1,2,3,4]"></div>
+  </div>
+
+  <main class="register-panel">
+
+    <!-- ── Pantalla de éxito ── -->
+    @if (registerOk()) {
+      <div class="success-state">
+        <div class="success-icon" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+        </div>
+        <h2 class="success-title">¡Cuenta creada!</h2>
+        <p class="success-sub">Redirigiendo al login…</p>
+      </div>
+    }
+
+    <!-- ── Formulario ── -->
+    @if (!registerOk()) {
+
+      <header class="register-header">
+        <div class="logo-mark" aria-hidden="true">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <rect width="36" height="36" rx="10" fill="#4F6EF7"/>
+            <rect x="6"  y="15" width="6"  height="6" rx="2" fill="white"/>
+            <rect x="24" y="15" width="6"  height="6" rx="2" fill="white"/>
+            <rect x="11" y="17" width="14" height="2" rx="1" fill="white"/>
+          </svg>
+        </div>
+        <h1 class="logo-name">GymPlan</h1>
+        <p class="register-subtitle">Creá tu cuenta gratis</p>
+      </header>
+
+      <form
+        class="register-form"
+        [formGroup]="form"
+        (ngSubmit)="onSubmit()"
+        novalidate
+      >
+
+        <gp-input
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          formControlName="mail"
+          [errorMsg]="mailError()"
+        />
+
+        <gp-input
+          label="Contraseña"
+          type="password"
+          autocomplete="new-password"
+          formControlName="password"
+          [errorMsg]="passwordError()"
+          hint="Mínimo 6 caracteres"
+        />
+
+        <gp-input
+          label="Confirmar contraseña"
+          type="password"
+          autocomplete="new-password"
+          formControlName="confirmPassword"
+          [errorMsg]="confirmError()"
+        />
+
+        <!-- Error del servidor -->
+        @if (errorMessage()) {
+          <div class="server-error" role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <gp-button
+          type="submit"
+          variant="primary"
+          size="lg"
+          [loading]="isLoading()"
+          [fullWidth]="true"
+        >
+          Crear cuenta
+        </gp-button>
+
+      </form>
+
+      <p class="login-prompt">
+        ¿Ya tenés cuenta?
+        <a routerLink="/login" class="login-link">Iniciar sesión</a>
+      </p>
+
+    }
+
+  </main>
+</div>

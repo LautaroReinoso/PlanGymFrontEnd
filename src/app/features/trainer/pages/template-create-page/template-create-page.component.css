@@ -1,0 +1,102 @@
+/* ─────────────────────────────────────────────
+   GymPlan — TemplateCreatePage CSS
+   Mismo lenguaje celeste del builder header,
+   para que crear y editar se sientan consistentes.
+───────────────────────────────────────────── */
+
+:host { display: block; max-width: 480px; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Back ────────────────────────────────────── */
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #6B6B80;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 24px;
+  transition: color 150ms;
+}
+
+.back-btn:hover { color: #F0F0F5; }
+
+/* ── Header ──────────────────────────────────── */
+
+.page-header {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 20px 22px;
+  margin-bottom: 28px;
+  background: rgba(56, 189, 248, 0.05);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 16px;
+  overflow: hidden;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.header-accent {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(
+    to bottom, transparent, #38BDF8, transparent
+  );
+}
+
+.page-title {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #F0F0F5;
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #7DD3FC;
+  opacity: 0.85;
+}
+
+/* ── Form ────────────────────────────────────── */
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.05s both;
+}
+
+.create-error {
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #FCA5A5;
+}
+
+.create-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #2A2A38;
+}
+
+/* ── Mobile ──────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .create-actions { flex-direction: column-reverse; }
+  .create-actions gp-button { width: 100%; }
+}

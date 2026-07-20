@@ -1,0 +1,86 @@
+<!-- ─────────────────────────────────────────────
+     GymPlan — Login Template (refactored)
+     Usa gp-input y gp-button del shared
+───────────────────────────────────────────── -->
+<div class="login-page">
+
+  <!-- Fondo con líneas de grilla animadas -->
+  <div class="grid-bg" aria-hidden="true">
+    <div class="grid-line" *ngFor="let i of [0,1,2,3,4]"></div>
+  </div>
+
+  <!-- Panel central -->
+  <main class="login-panel">
+
+    <!-- Logo / Marca -->
+    <header class="login-header">
+      <div class="logo-mark" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <rect width="36" height="36" rx="10" fill="var(--color-accent)"/>
+          <rect x="6"  y="15" width="6"  height="6" rx="2" fill="white"/>
+          <rect x="24" y="15" width="6"  height="6" rx="2" fill="white"/>
+          <rect x="11" y="17" width="14" height="2" rx="1" fill="white"/>
+        </svg>
+      </div>
+      <h1 class="logo-name">GymPlan</h1>
+      <p class="login-subtitle">Accedé a tu cuenta</p>
+    </header>
+
+    <!-- Formulario -->
+    <form
+      class="login-form"
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      novalidate
+    >
+
+      <!-- Email — gp-input con formControlName -->
+      <gp-input
+        label="Correo electrónico"
+        type="email"
+        autocomplete="email"
+        formControlName="mail"
+        [errorMsg]="mailError()"
+      />
+
+      <!-- Contraseña — gp-input tipo password (toggle incluido) -->
+      <gp-input
+        label="Contraseña"
+        type="password"
+        autocomplete="current-password"
+        formControlName="password"
+        [errorMsg]="passwordError()"
+      />
+
+      <!-- Error global del servidor -->
+      <div *ngIf="errorMessage()" class="server-error" role="alert">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ errorMessage() }}
+      </div>
+
+      <!-- Submit — gp-button -->
+      <gp-button
+        type="submit"
+        variant="primary"
+        size="lg"
+        [loading]="isLoading()"
+        [fullWidth]="true"
+      >
+        Ingresar
+      </gp-button>
+
+    </form>
+
+    <!-- Registro -->
+    <p class="register-prompt">
+      ¿No tenés cuenta?
+      <a   [routerLink]="['/register']" class="register-link">Registrarse</a>
+    </p>
+
+  </main>
+</div>

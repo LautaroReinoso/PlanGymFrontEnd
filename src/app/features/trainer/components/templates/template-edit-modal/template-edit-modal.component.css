@@ -1,0 +1,29 @@
+/* ─────────────────────────────────────────────
+   GymPlan — TemplateEditModal CSS
+───────────────────────────────────────────── */
+
+:host { display: block; }
+
+.edit-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-error {
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #FCA5A5;
+}
+
+.edit-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #2A2A38;
+  margin-top: 4px;
+}

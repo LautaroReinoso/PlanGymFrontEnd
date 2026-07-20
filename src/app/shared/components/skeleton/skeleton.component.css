@@ -1,0 +1,68 @@
+/* ─────────────────────────────────────────────
+   GymPlan — Skeleton CSS
+   Shimmer con gradiente animado.
+   Formas: line | circle | rect | card
+───────────────────────────────────────────── */
+
+:host {
+  display: block;
+}
+
+/* ── Keyframes ──────────────────────────────── */
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* ── Base ────────────────────────────────────── */
+
+.skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    #1C1C26 25%,
+    #252534 50%,
+    #1C1C26 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Formas ──────────────────────────────────── */
+
+/* Línea de texto */
+.skeleton--line {
+  height: 14px;
+  border-radius: 6px;
+}
+
+/* Avatar / círculo */
+.skeleton--circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Bloque rectangular genérico */
+.skeleton--rect {
+  height: 48px;
+  border-radius: 10px;
+}
+
+/* Card completa */
+.skeleton--card {
+  height: 140px;
+  border-radius: 16px;
+  border: 1px solid #1E1E2A;
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: #1C1C26;
+  }
+}

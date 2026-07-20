@@ -1,0 +1,80 @@
+/* ─────────────────────────────────────────────
+   GymPlan — EditDayModal CSS
+───────────────────────────────────────────── */
+
+:host { display: block; }
+
+/* ── Body ────────────────────────────────────── */
+
+.edit-day-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Info del día (solo lectura) ─────────────── */
+
+.day-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(79, 110, 247, 0.05);
+  border: 1px solid rgba(79, 110, 247, 0.15);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.day-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day-meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6B6B80;
+}
+
+.day-meta-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F0F0F5;
+}
+
+.day-meta-divider {
+  width: 1px;
+  height: 28px;
+  background: #2A2A38;
+  flex-shrink: 0;
+}
+
+/* ── Error servidor ──────────────────────────── */
+
+.edit-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #FCA5A5;
+}
+
+.edit-error svg { flex-shrink: 0; color: #EF4444; }
+
+/* ── Acciones ────────────────────────────────── */
+
+.edit-day-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #2A2A38;
+  margin-top: 4px;
+}

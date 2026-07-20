@@ -1,0 +1,274 @@
+/* ─────────────────────────────────────────────
+   GymPlan — Register CSS
+   Mismo lenguaje visual que el login.
+───────────────────────────────────────────── */
+
+
+/* ── Keyframes ──────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gridDrift {
+  from { transform: translateY(0); }
+  to   { transform: translateY(60px); }
+}
+
+@keyframes shimmerGlow {
+  0%, 100% { box-shadow: 0 0 20px var(--color-accent-glow); }
+  50%       { box-shadow: 0 0 36px rgba(79, 110, 247, 0.4); }
+}
+
+@keyframes successPop {
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes checkDraw {
+  from { stroke-dashoffset: 40; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* ── Página ──────────────────────────────────── */
+
+.register-page {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  overflow: hidden;
+  padding: 24px 16px;
+  font-family: var(--font-body);
+}
+
+/* ── Fondo grilla ────────────────────────────── */
+
+.grid-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+  animation: fadeIn 1.2s var(--ease-smooth) both;
+}
+
+.grid-line {
+  flex: 1;
+  border-right: 1px solid rgba(79, 110, 247, 0.06);
+  animation: gridDrift 12s linear infinite alternate;
+}
+
+.grid-line:nth-child(odd) {
+  animation-direction: alternate-reverse;
+  animation-duration: 16s;
+}
+
+.grid-bg::before,
+.grid-bg::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 40%;
+  z-index: 1;
+}
+
+.grid-bg::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--color-bg), transparent);
+}
+
+.grid-bg::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--color-bg), transparent);
+}
+
+/* ── Panel ───────────────────────────────────── */
+
+.register-panel {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 40px 36px;
+  animation: slideUp 0.6s var(--ease-spring) 0.1s both;
+}
+
+.register-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 60%; height: 1px;
+  background: linear-gradient(
+    to right, transparent, var(--color-accent), transparent
+  );
+}
+
+/* ── Header ──────────────────────────────────── */
+
+.register-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 32px;
+  animation: slideUp 0.6s var(--ease-spring) 0.2s both;
+}
+
+.logo-mark {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  animation: shimmerGlow 3s ease-in-out infinite;
+}
+
+.logo-name {
+  font-family: var(--font-display);
+  font-size: 24px; font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.register-subtitle {
+  font-size: 14px;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* ── Form ────────────────────────────────────── */
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideUp 0.6s var(--ease-spring) 0.3s both;
+}
+
+/* ── Error servidor ──────────────────────────── */
+
+.server-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+  font-size: 14px;
+  color: #FCA5A5;
+  animation: slideUp 0.3s var(--ease-smooth);
+}
+
+.server-error svg {
+  flex-shrink: 0;
+  color: var(--color-danger);
+}
+
+/* ── Link a login ────────────────────────────── */
+
+.login-prompt {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.login-link {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+  position: relative;
+  transition: color 200ms var(--ease-smooth);
+}
+
+.login-link::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -1px;
+  width: 0%; height: 1px;
+  background: var(--color-accent);
+  transition: width 250ms var(--ease-smooth);
+}
+
+.login-link:hover { color: #818CF8; }
+.login-link:hover::after { width: 100%; }
+
+.login-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ── Pantalla de éxito ───────────────────────── */
+
+.success-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0;
+  animation: fadeIn 0.4s var(--ease-smooth);
+}
+
+.success-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--color-success-dim);
+  border: 1.5px solid rgba(34, 197, 94, 0.3);
+  display: grid;
+  place-items: center;
+  color: var(--color-success);
+  animation: successPop 0.5s var(--ease-spring) both;
+}
+
+.success-icon svg {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: checkDraw 0.4s var(--ease-smooth) 0.3s forwards;
+}
+
+.success-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.success-sub {
+  font-size: 14px;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .register-panel,
+  .register-header,
+  .register-form { animation: fadeIn 0.3s ease both; }
+  .grid-line     { animation: none; }
+  .logo-mark     { animation: none; }
+  .success-icon  { animation: none; }
+  .success-icon svg { stroke-dashoffset: 0; animation: none; }
+}
+
+/* ── Mobile ──────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .register-panel { padding: 32px 24px; border-radius: 16px; }
+}

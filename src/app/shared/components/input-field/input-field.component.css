@@ -1,0 +1,262 @@
+/* ─────────────────────────────────────────────
+   GymPlan — InputField CSS
+   Label flotante con transición suave.
+   Estados: default | focused | floating | error | disabled
+───────────────────────────────────────────── */
+
+:host {
+  display: block;
+}
+
+/* ── Keyframes ──────────────────────────────── */
+
+@keyframes errorShake {
+  0%,100% { transform: translateX(0); }
+  20%     { transform: translateX(-5px); }
+  40%     { transform: translateX(5px); }
+  60%     { transform: translateX(-3px); }
+  80%     { transform: translateX(3px); }
+}
+
+@keyframes errorIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Wrapper ─────────────────────────────────── */
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Input nativo ────────────────────────────── */
+
+.input-field {
+  width: 100%;
+  height: 56px;                       /* altura fija para que el label tenga espacio */
+  padding: 20px 16px 6px 16px;        /* top alto para dejar sitio al label flotado */
+  background: #13131A;
+  border: 1.5px solid #2A2A38;
+  border-radius: 12px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 15px;
+  color: #F0F0F5;
+  outline: none;
+  transition:
+    border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    background   200ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* Quitar estilos de autofill del browser */
+  -webkit-text-fill-color: #F0F0F5;
+}
+
+/* Autofill: mantener colores del design system */
+.input-field:-webkit-autofill,
+.input-field:-webkit-autofill:hover,
+.input-field:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 40px #16161F inset;
+  -webkit-text-fill-color: #F0F0F5;
+  transition: background-color 9999s ease-out;
+}
+
+.input-field::placeholder {
+  color: transparent;          /* placeholder oculto — la label hace ese rol */
+  transition: color 150ms;
+}
+
+/* Tipo search: padding izquierdo para el ícono */
+.input-wrapper:has(.input-icon-left) .input-field {
+  padding-left: 40px;
+}
+
+/* Tipo password: padding derecho para el botón */
+.input-wrapper:has(.input-action) .input-field {
+  padding-right: 44px;
+}
+
+/* ── Label flotante ──────────────────────────── */
+
+.input-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #6B6B80;
+  pointer-events: none;
+  transform-origin: left center;
+  transition:
+    top       220ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 220ms cubic-bezier(0.4, 0, 0.2, 1),
+    font-size 220ms cubic-bezier(0.4, 0, 0.2, 1),
+    color     200ms cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+/* Label ajustada para search */
+.input-wrapper:has(.input-icon-left) .input-label {
+  left: 40px;
+}
+
+/* ── Estado: flotando (foco o con valor) ─────── */
+
+.input-wrapper--floating .input-label {
+  top: 10px;
+  transform: translateY(0) scale(0.78);
+  font-size: 15px;               /* scale lo reduce visualmente a ~12px */
+  color: #9898A8;
+  font-weight: 500;
+}
+
+/* ── Estado: focused ─────────────────────────── */
+
+.input-wrapper--focused .input-field {
+  border-color: #4F6EF7;
+  background: #16161F;
+}
+
+.input-wrapper--focused .input-label {
+  color: #4F6EF7;
+}
+
+/* Línea de acento inferior — se expande desde el centro */
+.input-focus-line {
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    #4F6EF7,
+    transparent
+  );
+  border-radius: 0 0 2px 2px;
+  transition: width 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.input-wrapper--focused .input-focus-line {
+  width: 80%;
+}
+
+/* ── Estado: error ───────────────────────────── */
+
+.input-wrapper--error .input-field {
+  border-color: #EF4444;
+  animation: errorShake 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-wrapper--error .input-label {
+  color: #EF4444;
+}
+
+.input-wrapper--error.input-wrapper--focused .input-field {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-wrapper--error .input-focus-line {
+  background: linear-gradient(
+    to right,
+    transparent,
+    #EF4444,
+    transparent
+  );
+}
+
+/* ── Estado: disabled ────────────────────────── */
+
+.input-wrapper--disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.input-wrapper--disabled .input-field {
+  cursor: not-allowed;
+}
+
+/* ── Ícono izquierdo (search) ────────────────── */
+
+.input-icon-left {
+  position: absolute;
+  left: 14px;
+  color: #6B6B80;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  transition: color 200ms;
+}
+
+.input-wrapper--focused .input-icon-left {
+  color: #4F6EF7;
+}
+
+/* ── Botón acción derecha (password toggle) ──── */
+
+.input-action {
+  position: absolute;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  color: #6B6B80;
+  border-radius: 6px;
+  transition: color 150ms;
+}
+
+.input-action:hover {
+  color: #F0F0F5;
+}
+
+.input-action:focus-visible {
+  outline: 2px solid #4F6EF7;
+  outline-offset: 2px;
+}
+
+/* ── Mensajes debajo ─────────────────────────── */
+
+.input-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 12px;
+  color: #EF4444;
+  animation: errorIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-error svg {
+  flex-shrink: 0;
+  color: #EF4444;
+}
+
+.input-hint {
+  margin-top: 6px;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 12px;
+  color: #6B6B80;
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .input-label,
+  .input-field,
+  .input-focus-line {
+    transition: none;
+  }
+
+  .input-wrapper--error .input-field {
+    animation: none;
+  }
+}

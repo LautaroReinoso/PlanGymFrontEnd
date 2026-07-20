@@ -1,0 +1,195 @@
+/* ─────────────────────────────────────────────
+   GymPlan — Button CSS
+   Variantes: primary | secondary | ghost | danger
+   Tamaños:   sm | md | lg
+───────────────────────────────────────────── */
+
+:host {
+  display: inline-flex;
+}
+
+:host(.btn--full-width) {
+  display: flex;
+  width: 100%;
+}
+
+/* ── Keyframes ──────────────────────────────── */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes btnPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* ── Base ────────────────────────────────────── */
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Syne', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  outline: none;
+  transition:
+    background  200ms cubic-bezier(0.4, 0, 0.2, 1),
+    color       200ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow  200ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform   150ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity     200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:active:not(.btn--disabled):not(.btn--loading) {
+  animation: btnPop 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn:focus-visible {
+  outline: 2px solid #4F6EF7;
+  outline-offset: 3px;
+}
+
+/* ── Tamaños ─────────────────────────────────── */
+
+.btn--sm {
+  padding: 7px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  gap: 6px;
+}
+
+.btn--md {
+  padding: 11px 20px;
+  font-size: 14px;
+}
+
+.btn--lg {
+  padding: 14px 28px;
+  font-size: 15px;
+  border-radius: 12px;
+  gap: 10px;
+}
+
+/* ── Variante: primary ───────────────────────── */
+
+.btn--primary {
+  background: #4F6EF7;
+  color: #ffffff;
+  border: 1.5px solid transparent;
+}
+
+.btn--primary:hover:not(.btn--disabled):not(.btn--loading) {
+  background: #3D5CE8;
+  box-shadow: 0 4px 20px rgba(79, 110, 247, 0.4);
+  transform: translateY(-1px);
+}
+
+/* ── Variante: secondary ─────────────────────── */
+
+.btn--secondary {
+  background: rgba(79, 110, 247, 0.1);
+  color: #4F6EF7;
+  border: 1.5px solid rgba(79, 110, 247, 0.25);
+}
+
+.btn--secondary:hover:not(.btn--disabled):not(.btn--loading) {
+  background: rgba(79, 110, 247, 0.18);
+  border-color: rgba(79, 110, 247, 0.5);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.08);
+}
+
+/* ── Variante: ghost ─────────────────────────── */
+
+.btn--ghost {
+  background: transparent;
+  color: #9898A8;
+  border: 1.5px solid #2A2A38;
+}
+
+.btn--ghost:hover:not(.btn--disabled):not(.btn--loading) {
+  background: #1C1C26;
+  color: #F0F0F5;
+  border-color: #3A3A50;
+}
+
+/* ── Variante: danger ────────────────────────── */
+
+.btn--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  border: 1.5px solid rgba(239, 68, 68, 0.25);
+}
+
+.btn--danger:hover:not(.btn--disabled):not(.btn--loading) {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+}
+
+/* ── Estado: full width ──────────────────────── */
+
+.btn--full-width {
+  width: 100%;
+}
+
+/* ── Estado: disabled ────────────────────────── */
+
+.btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Estado: loading ─────────────────────────── */
+
+.btn--loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* ── Spinner ─────────────────────────────────── */
+
+.btn__spinner {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn__spinner svg {
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Contenido ───────────────────────────────── */
+
+.btn__content {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  transition: opacity 150ms;
+}
+
+.btn__content--hidden {
+  opacity: 0;
+}
+
+/* ── Reduced motion ──────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: opacity 100ms, background 100ms;
+  }
+  .btn:active { animation: none; }
+  .btn__spinner svg { animation: spin 1.2s linear infinite; }
+}

@@ -1,0 +1,80 @@
+<!-- EditDayModal -->
+<gp-modal
+  [isOpen]="isOpen()"
+  title="Editar día"
+  size="sm"
+  (closed)="onClose()"
+>
+  <div class="edit-day-body">
+
+    <!-- Info del día — solo lectura -->
+    @if (day()) {
+      <div class="day-meta">
+        <div class="day-meta-item">
+          <span class="day-meta-label">Plantilla</span>
+          <span class="day-meta-value">{{ day()!.workoutTemplateName }}</span>
+        </div>
+        <div class="day-meta-divider" aria-hidden="true"></div>
+        <div class="day-meta-item">
+          <span class="day-meta-label">Posición</span>
+          <span class="day-meta-value">Día {{ day()!.orderIndex + 1 }}</span>
+        </div>
+        @if (dayOfWeekLabel()) {
+          <div class="day-meta-divider" aria-hidden="true"></div>
+          <div class="day-meta-item">
+            <span class="day-meta-label">Día de semana</span>
+            <span class="day-meta-value">{{ dayOfWeekLabel() }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Nombre -->
+    <gp-input
+      label="Nombre del día"
+      type="text"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event)"
+      [errorMsg]="nameError()"
+      placeholder="ej: Empuje, Piernas, Full Body…"
+    />
+
+    <!-- Descripción -->
+    <gp-input
+      label="Descripción (opcional)"
+      type="text"
+      [ngModel]="description()"
+      (ngModelChange)="description.set($event)"
+      placeholder="ej: Enfoque en pecho y hombros"
+    />
+
+    <!-- Error del servidor -->
+    @if (errorMessage()) {
+      <div class="edit-error" role="alert">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8"  x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <!-- Acciones -->
+    <div class="edit-day-actions">
+      <gp-button variant="ghost" size="md" (click)="onClose()">
+        Cancelar
+      </gp-button>
+      <gp-button
+        variant="primary" size="md"
+        [disabled]="!canSave()"
+        [loading]="isSaving()"
+        (click)="onSave()"
+      >
+        Guardar
+      </gp-button>
+    </div>
+
+  </div>
+</gp-modal>

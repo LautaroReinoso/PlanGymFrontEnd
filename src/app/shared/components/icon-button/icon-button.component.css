@@ -1,0 +1,119 @@
+.action-btn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+   padding: 6px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+border: 1px solid #3A3A52;
+  transition: background 150ms, color 150ms;
+  margin: 0px 2px;
+}
+
+.action-btn svg {
+     color: #6B6B80;
+  width: 16px;
+}
+.action-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+}
+.action-btn:hover svg{
+  color: #EF4444;
+}
+/* ─────────────────────────────────────────────
+   Variants
+───────────────────────────────────────────── */
+
+/* Ghost (por defecto) */
+.icon-btn--ghost {
+  background: #1C1C26;
+  color: #B7B7C8;
+  border: 1px solid #2A2A38;
+}
+
+.icon-btn--ghost:hover:not(:disabled) {
+  background: #232331;
+  border-color: #3A3A52;
+  color: #F0F0F5;
+}
+
+.icon-btn--ghost:active:not(:disabled) {
+  background: #181821;
+  transform: scale(.96);
+}
+
+
+/* Primary */
+.icon-btn--primary {
+  background: #4F6EF7;
+  color: white;
+  border: 1px solid #4F6EF7;
+  box-shadow: 0 4px 16px rgba(79,110,247,.25);
+}
+
+.icon-btn--primary:hover:not(:disabled) {
+  background: #6480FA;
+  border-color: #6480FA;
+  box-shadow: 0 8px 20px rgba(79,110,247,.35);
+}
+
+.icon-btn--primary:active:not(:disabled) {
+  background: #4563E6;
+  transform: scale(.96);
+}
+
+
+/* Danger */
+.icon-btn--danger {
+  background: rgba(220, 38, 38, .12);
+  color: #F87171;
+  border: 1px solid rgba(220,38,38,.25);
+}
+
+.icon-btn--danger:hover:not(:disabled) {
+  background: rgba(220,38,38,.22);
+  border-color: rgba(220,38,38,.45);
+  color: #FCA5A5;
+}
+
+.icon-btn--danger:active:not(:disabled) {
+  background: rgba(220,38,38,.28);
+  transform: scale(.96);
+}
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition:
+    background .18s ease,
+    color .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .15s ease;
+}
+
+.icon-btn:focus-visible {
+  outline: 2px solid #4F6EF7;
+  outline-offset: 2px;
+}
+
+.icon-btn:disabled,
+.icon-btn--loading {
+  opacity: .55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
