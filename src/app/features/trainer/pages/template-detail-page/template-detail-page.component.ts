@@ -23,9 +23,11 @@ import {
   WorkoutTemplate,
   WorkoutTemplateDay,
   Exercise,
+  MuscleGroup,
   UpdateTemplateRequest,
   CreateExerciseRequest,
 } from '../../models/trainer.models';
+import { muscleGroupLabel } from '../../models/muscle-group.util';
 
 import { TemplateDayComponent } from '../../components/templates/template-day/template-day.component';
 import { TemplateEditModalComponent } from '../../components/templates/template-edit-modal/template-edit-modal.component';
@@ -37,6 +39,9 @@ import {
   ExerciseSelection,
 } from '../../components/exercises/add-exercises-modal/add-exercises-modal.component';
 import { EditDayModalComponent, UpdateDayRequest } from '../../components/templates/edit-day-modal/edit-day-modal.component';
+import { BadgeComponent } from "../../../../shared/components/badge-component/badge.component";
+import { IconButtonComponent } from '../../../../shared/components/icon-button/icon-button.component';
+import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym-loader.component';
 @Component({
   selector: 'app-template-detail-page',
   standalone: true,
@@ -45,11 +50,13 @@ import { EditDayModalComponent, UpdateDayRequest } from '../../components/templa
     TemplateDayComponent,
     TemplateEditModalComponent,
     ButtonComponent,
-    SkeletonComponent,
     ModalComponent,
     AddExercisesModalComponent,
-    EditDayModalComponent
-  ],
+    EditDayModalComponent,
+    BadgeComponent,
+    IconButtonComponent,
+    GymLoaderComponent
+],
   templateUrl: './template-detail-page.component.html',
   styleUrl: './template-detail-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,8 +81,28 @@ export class TemplateDetailPageComponent implements OnInit {
   readonly selectedDayId = signal<number | null>(null);
 
   readonly sortedDays = computed(() =>
-    [...(this.template()?.days ?? [])].sort((a, b) => a.dayNumber - b.dayNumber)
+    [...(this.template()?.days ?? [])].sort((a, b) => a.orderIndex - b.orderIndex)
   );
+
+  // ── Resumen por grupo muscular (agregado de todos los días) ──
+  readonly muscleGroupSummary = computed(() => {
+    const days = this.template()?.days ?? [];
+    const counts = new Map<MuscleGroup, number>();
+
+    for (const day of days) {
+      for (const ex of day.exercises) {
+        counts.set(ex.primaryMuscle, (counts.get(ex.primaryMuscle) ?? 0) + 1);
+      }
+    }
+
+    return Array.from(counts.entries())
+      .map(([muscleGroup, count]) => ({
+        muscleGroup,
+        label: muscleGroupLabel(muscleGroup),
+        count,
+      }))
+      .sort((a, b) => b.count - a.count);
+  });
 
   readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
     const id = this.selectedDayId();
@@ -110,7 +137,7 @@ export class TemplateDetailPageComponent implements OnInit {
   readonly isAddingExercise = signal(false);
 
   // ── Modal: editar info ────────────────────────
-  readonly showEditModal = signal(false);
+
   readonly isSavingEdit = signal(false);
   readonly editError = signal<string | null>(null);
 
@@ -119,6 +146,7 @@ export class TemplateDetailPageComponent implements OnInit {
   readonly isSavingDay = signal(false);
   readonly editDayError = signal<string | null>(null);
   // ── Modal: eliminar plantilla ─────────────────
+    readonly showEditTemplateModal = signal(false);
   readonly showDeleteConfirm = signal(false);
   readonly isDeleting = signal(false);
   readonly deleteError = signal<string | null>(null);
@@ -178,7 +206,7 @@ export class TemplateDetailPageComponent implements OnInit {
     this.templateSvc.deleteDay(this.templateId(), dayId).subscribe({
       next: () => {
         this.template.update(t => t
-          ? { ...t, days: t.days.filter(d => d.id !== dayId) }
+          ? { ...t, days: this.renumber(t.days.filter(d => d.id !== dayId)) }
           : t
         );
       },
@@ -215,8 +243,9 @@ export class TemplateDetailPageComponent implements OnInit {
       exerciseId: selection.exerciseId,
       sets: selection.sets,
       reps: selection.reps,
+      repsMax: selection.repsMax,
       restSeconds: selection.restSeconds,
-      weight: selection.weight,
+      weightSuggestion: selection.weight,
       orderIndex: order,
       notes: selection.notes
 
@@ -252,7 +281,7 @@ export class TemplateDetailPageComponent implements OnInit {
     this.exerciseSvc.create(dto).subscribe({
       next: (newExercise) => {
         // Ejercicio creado → ahora agregarlo al día seleccionado
-        this.templateSvc.addExerciseToDay(this.templateId(), {
+        this.templateSvc.addExerciseToDay(dayId, {
           exerciseId: newExercise.id,
           sets: 3,
           reps: 10,
@@ -292,7 +321,7 @@ export class TemplateDetailPageComponent implements OnInit {
           ...t,
           days: t.days.map(d =>
             d.id === dayId
-              ? { ...d, exercises: d.exercises.filter(e => e.id !== exerciseId) }
+              ? { ...d, exercises: this.renumber(d.exercises.filter(e => e.id !== exerciseId)) }
               : d
           ),
         } : t);
@@ -301,11 +330,48 @@ export class TemplateDetailPageComponent implements OnInit {
     });
   }
 
+  /**
+   * Reordena los ejercicios del día seleccionado (drag & drop).
+   * Optimista: se actualiza el signal al instante y, si el PATCH falla,
+   * se restaura el snapshot previo.
+   */
+  onReorderExercises(orderedIds: number[]): void {
+    const day = this.selectedDay();
+    if (!day) return;
+
+    const snapshot = this.template();
+    const byId = new Map(day.exercises.map(e => [e.id, e]));
+    const reordered = orderedIds
+      .map((id, i) => {
+        const ex = byId.get(id);
+        return ex ? { ...ex, orderIndex: i + 1 } : null;
+      })
+      .filter((e): e is NonNullable<typeof e> => e !== null);
+
+    if (reordered.length !== day.exercises.length) return; // lista inconsistente: no tocar nada
+
+    this.template.update(t => t ? {
+      ...t,
+      days: t.days.map(d => d.id === day.id ? { ...d, exercises: reordered } : d),
+    } : t);
+
+    // El backend espera WorkoutDay.id (workoutDayId), no WorkoutTemplateDay.id
+    this.templateSvc.reorderExercises(day.workoutDayId, orderedIds).subscribe({
+      error: () => {
+        this.template.set(snapshot);
+        this.error.set('No se pudo guardar el nuevo orden de los ejercicios.');
+      },
+    });
+  }
+
   // ── Editar info ───────────────────────────────
   openEditModal(): void {
-    console.log('openEditModal called');
     this.editError.set(null);
-    this.showEditModal.set(true);
+    this.showEditDayModal.set(true);
+  }
+    openEditTemplateModal(): void {
+    this.editError.set(null);
+    this.showEditTemplateModal.set(true);
   }
 
   confirmEdit(dto: UpdateTemplateRequest): void {
@@ -315,7 +381,7 @@ export class TemplateDetailPageComponent implements OnInit {
     this.templateSvc.update(this.templateId(), dto).subscribe({
       next: (updated) => {
         this.isSavingEdit.set(false);
-        this.showEditModal.set(false);
+        this.showEditTemplateModal.set(false);
         // Parchear solo name/description — conservar days intactos
         this.template.update(t => t
           ? { ...t, name: updated.name, description: updated.description }
@@ -362,19 +428,23 @@ onDaySaved(dto: UpdateDayRequest): void {
   this.isSavingDay.set(true);
 
   // ✅ workoutDayId — el que espera el endpoint
-  this.templateSvc.updateDay(day.workoutDayId, dto).subscribe({
-    next: (updatedDay) => {
-      this.isSavingDay.set(false);
-      this.showEditDayModal.set(false);
-      // Parchear el signal local con name y description actualizados
-      this.template.update(t => t ? {
-        ...t,
-        days: t.days.map(d =>
-          d.id === day.id
-            ? { ...d, name: updatedDay.name, description: updatedDay.description }
-            : d
-        ),
-      } : t);
+  this.templateSvc.updateDay(this.templateId(), day.workoutDayId, dto).subscribe({
+    next: () => {
+      // Si cambió el orden, el backend desplaza a los demás días: se recarga el
+      // template para tener los orderIndex consistentes (1..n).
+      this.templateSvc.getById(this.templateId()).subscribe({
+        next: (data) => {
+          this.template.set(data);
+          this.selectedDayId.set(day.id);
+          this.isSavingDay.set(false);
+          this.showEditDayModal.set(false);
+        },
+        error: () => {
+          this.isSavingDay.set(false);
+          this.showEditDayModal.set(false);
+          this.error.set('El día se guardó, pero no se pudo recargar la plantilla.');
+        },
+      });
     },
     error: () => {
       this.isSavingDay.set(false);
@@ -382,4 +452,11 @@ onDaySaved(dto: UpdateDayRequest): void {
     },
   });
 }
+
+  /** Renumera 1..n respetando el orden actual (tras borrar, sin recargar del server). */
+  private renumber<T extends { orderIndex: number }>(items: T[]): T[] {
+    return [...items]
+      .sort((a, b) => a.orderIndex - b.orderIndex)
+      .map((item, i) => ({ ...item, orderIndex: i + 1 }));
+  }
 }

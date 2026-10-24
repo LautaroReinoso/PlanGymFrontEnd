@@ -1,0 +1,13 @@
+    .avatar-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px; /* Ajustá al tamaño que tenías en tu CSS */
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid;
+      font-weight: 600;
+      font-size: 1rem;
+      user-select: none;
+      flex-shrink: 0;
+    }

@@ -1,0 +1,55 @@
+<li class="ex-card" [class.ex-card--done]="done()" (click)="toggleExpand()">
+
+  <div class="ex-card__row">
+    <button
+      class="ex-card__check"
+      type="button"
+      [attr.aria-pressed]="done()"
+      (click)="onToggleDone($event)"
+    >
+      @if (done()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      }
+    </button>
+
+    <gp-muscle-icon [muscleGroup]="exercise().primaryMuscle" [size]="22" />
+
+    <div class="ex-card__info">
+      <span class="ex-card__name">{{ exercise().exerciseName }}</span>
+      <span class="ex-card__meta">
+        {{ muscleLabel(exercise().primaryMuscle) }} · {{ exercise().sets }}×{{ repsLabel() }}
+      </span>
+    </div>
+  </div>
+
+  @if (expanded()) {
+    <div class="ex-card__detail">
+      <div class="ex-card__detail-grid">
+        <div>
+          <span class="ex-card__detail-label">Series × reps</span>
+          <span class="ex-card__detail-value">{{ exercise().sets }} × {{ repsLabel() }}</span>
+        </div>
+        @if (exercise().weightSuggestion) {
+          <div>
+            <span class="ex-card__detail-label">Peso</span>
+            <span class="ex-card__detail-value">{{ exercise().weightSuggestion }} kg</span>
+          </div>
+        }
+        <div>
+          <span class="ex-card__detail-label">Descanso</span>
+          <span class="ex-card__detail-value">{{ restText() }}</span>
+        </div>
+      </div>
+
+      @if (exercise().notes) {
+        <div class="ex-card__notes">
+          <span class="ex-card__detail-label">Notas</span>
+          <p>{{ exercise().notes }}</p>
+        </div>
+      }
+    </div>
+  }
+
+</li>

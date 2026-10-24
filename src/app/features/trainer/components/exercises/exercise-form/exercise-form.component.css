@@ -1,0 +1,161 @@
+.exercise-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font: 500 13px 'DM Sans', sans-serif;
+  color: var(--color-muted-light);
+}
+
+.form-select {
+  appearance: none;
+  background: var(--color-surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B6B80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+    no-repeat right 12px center;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 36px 12px 14px;
+  color: var(--color-text);
+  font: 400 14px 'DM Sans', sans-serif;
+  transition: border-color 0.2s var(--ease-smooth);
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.form-error {
+  font: 400 12px 'DM Sans', sans-serif;
+  color: var(--color-danger);
+}
+
+.form-textarea {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--color-text);
+  font: 400 14px 'DM Sans', sans-serif;
+  resize: vertical;
+  min-height: 84px;
+  transition: border-color 0.2s var(--ease-smooth);
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.form-textarea::placeholder { color: var(--color-muted); }
+
+/* ── Dificultad ──────────────────────────────── */
+
+.difficulty-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.difficulty-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted-light);
+  font: 600 14px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease-smooth), background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
+}
+
+.difficulty-btn:hover { border-color: var(--color-muted); }
+
+.difficulty-btn--active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.difficulty-picker-label {
+  font: 500 13px 'DM Sans', sans-serif;
+  color: var(--color-muted-light);
+  margin-left: 4px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ── Grillas extra ──────────────────────────── */
+.form-row--3 { grid-template-columns: repeat(3, 1fr); }
+.form-row--4 { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.form-label--sm { font-size: 12px; }
+
+.form-fieldset {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px 14px 14px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.form-fieldset legend { padding: 0 6px; }
+
+.form-input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--color-text);
+  font: 400 14px 'DM Sans', sans-serif;
+  width: 100%;
+  min-width: 0;
+  transition: border-color 0.2s var(--ease-smooth);
+}
+.form-input:focus { outline: none; border-color: var(--color-accent); }
+
+/* ── Chips de músculos secundarios ───────────── */
+.chip-picker { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted-light);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font: 500 12px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease-smooth), background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
+}
+.chip:hover:not(:disabled) { border-color: var(--color-muted); }
+.chip--active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.chip:disabled { opacity: 0.35; cursor: not-allowed; }
+
+@media (max-width: 600px) {
+  .form-row--3 { grid-template-columns: 1fr 1fr; }
+  .form-row--4 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .form-row, .form-row--3 { grid-template-columns: 1fr; }
+}

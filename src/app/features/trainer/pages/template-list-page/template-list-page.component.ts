@@ -22,6 +22,7 @@ import { WorkoutTemplateSummary } from '../../models/trainer.models';
 import { TemplateCardComponent } from '../../components/templates/template-card/template-card.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
 import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
+import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym-loader.component';
 
 @Component({
   selector: 'app-templates-list-page',
@@ -30,7 +31,7 @@ import { SkeletonComponent } from '../../../../shared/components/skeleton/skelet
     CommonModule,
     TemplateCardComponent,
     ButtonComponent,
-    SkeletonComponent,
+    GymLoaderComponent
   ],
   templateUrl: './template-list-page.component.html',
   styleUrl: './template-list-page.component.css',

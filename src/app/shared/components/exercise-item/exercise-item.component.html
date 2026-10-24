@@ -1,0 +1,61 @@
+<li
+  class="exercise-item"
+  [class.clickable]="clickable()"
+  [class.selected]="selected()"
+  (click)="onItemClick()"
+>
+  @if (index() !== null) {
+    <span class="exercise-index">{{ index() }}</span>
+  }
+
+  @if (muscleGroup()) {
+    <gp-muscle-icon [muscleGroup]="muscleGroup()!" />
+  }
+
+  <div class="exercise-info">
+    <div class="exercise-name-row">
+      <span class="exercise-name">{{ name() }}</span>
+      @if (badge()) {
+        <gp-badge [variant]="badge()!.variant" size="sm">{{ badge()!.text }}</gp-badge>
+      }
+    </div>
+    @if (detail()) {
+      <span class="exercise-detail">{{ detail() }}</span>
+    }
+  </div>
+
+  @if (selected()) {
+    <svg class="exercise-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M20 6 9 17l-5-5"/>
+    </svg>
+  }
+
+  <div class="exercise-actions">
+    @if (showEdit()) {
+      <button class="exercise-icon-btn" (click)="onEdit($event)" aria-label="Editar ejercicio" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+        </svg>
+      </button>
+    }
+    @if (showDelete()) {
+      <button class="exercise-icon-btn danger" (click)="onDelete($event)" aria-label="Eliminar ejercicio" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/>
+          <path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/>
+          <path d="M9 6V4h6v2"/>
+        </svg>
+      </button>
+    }
+    @if (showRemove()) {
+      <button class="exercise-icon-btn" (click)="onRemove($event)" aria-label="Quitar ejercicio" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    }
+  </div>
+</li>

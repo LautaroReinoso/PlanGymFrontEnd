@@ -1,57 +1,97 @@
-<!-- StudentCard -->
-<article class="student-card" [class.student-card--active]="!!student().activeWorkout">
+<!-- StudentCard — rediseñado -->
+<article class="student-card" [class.student-card--pending]="status() === 'pending'" (click)="onClick()" role="button"
+  tabindex="0" (keydown.enter)="onClick()" (keydown.space)="onClick()"
+  [attr.aria-label]="'Ver detalle de ' + displayName()">
 
-  <!-- Línea de acento superior -->
-  <span class="card-accent-line" aria-hidden="true"></span>
+  <!-- ── Columna izquierda ── -->
+  <div class="card-left">
 
-  <!-- Header: avatar + info -->
-  <div class="card-header">
-    <div class="avatar" [class]="'avatar--' + avatarMod()" aria-hidden="true">
-      {{ initials() }}
-    </div>
+    <!-- Avatar con iniciales -->
+    <app-avatar [initials]="initials()" [identifier]="student().id" [isPending]="status() === 'pending'" />
+
+    <!-- Info del alumno -->
     <div class="student-info">
+
+      <!-- Nombre o DNI -->
       <span class="student-name">{{ displayName() }}</span>
-      <span class="student-mail">{{ student().mail }}</span>
+
+      <!-- DNI secundario (solo si tiene nombre) -->
+      @if (student().fullName) {
+      <span class="student-dni">DNI {{ dniFormatted() }}</span>
+      } @else {
+      <span class="student-pending-label">Registro pendiente</span>
+      <span class="student-pending-sub">Aún no completó sus datos</span>
+      }
+
+      <!-- Badge de estado -->
+      <div class="status-badge-wrap">
+        @switch (status()) {
+        @case ('active') {
+        <span class="status-badge status-badge--active">
+          <span class="status-dot" aria-hidden="true"></span>
+          Activo
+        </span>
+        }
+        @case ('no-plan') {
+        <span class="status-badge status-badge--no-plan">
+          <span class="status-dot" aria-hidden="true"></span>
+          Sin plan
+        </span>
+        }
+        @case ('pending') {
+        <span class="status-badge status-badge--pending">
+          <span class="status-dot" aria-hidden="true"></span>
+          Pendiente
+        </span>
+        }
+        }
+      </div>
+
     </div>
   </div>
 
-  <!-- Plan activo -->
-  <div class="plan-info">
+  <!-- Divisor vertical -->
+  <div class="card-divider" aria-hidden="true"></div>
+
+  <!-- ── Columna derecha: plan ── -->
+  <div class="card-right">
+
     @if (student().activeWorkout) {
-      <div class="plan-name">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2">
-          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
-        </svg>
-        {{ student().activeWorkout!.templateName }}
-      </div>
-    } @else {
-      <span class="no-plan">Sin plan asignado</span>
-    }
-  </div>
-
-  <!-- Footer: badge + adherencia -->
-  <div class="card-footer">
-    @if (student().activeWorkout) {
-        <!-- [dot]="true" -->
-      <gp-badge variant="elevated" >Activo</gp-badge>
-    } @else {
-      <gp-badge variant="default">Sin plan</gp-badge>
-    }
-
-    @if (student().adherencePercent !== undefined) {
-      <span class="adherence">
-        {{ student().adherencePercent }}% adherencia
-      </span>
-    }
-
-    <!-- Flecha -->
-    <span class="card-arrow" aria-hidden="true">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2">
-        <path d="M9 18l6-6-6-6"/>
+    <span class="plan-label">Plan actual</span>
+    <span class="plan-name">{{ student().activeWorkout!.templateName }}</span>
+    @if (daysLabel()) {
+    <div class="plan-days">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
-    </span>
+      {{ daysLabel() }}
+    </div>
+    }
+    } @else if (status() === 'pending') {
+    <span class="plan-label">Plan actual</span>
+    <span class="plan-empty">Sin asignar</span>
+    <div class="plan-pending-info">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      Asigná una plantilla cuando complete su registro
+    </div>
+    } @else {
+    <span class="plan-label">Plan actual</span>
+    <span class="plan-empty">Sin plan asignado</span>
+    }
+
   </div>
+
+  <!-- Flecha de navegación -->
+  <svg class="card-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+    aria-hidden="true">
+    <path d="M9 18l6-6-6-6" />
+  </svg>
 
 </article>

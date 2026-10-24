@@ -1,0 +1,14 @@
+  :host {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+ 
+    .silhouette {
+      fill: #ffffff;
+      opacity: 0.28;
+    }
+ 
+    .highlight {
+      fill: #4F6EF7;
+    }

@@ -1,6 +1,7 @@
 <!-- ─────────────────────────────────────────────
-     GymPlan — Login Template (refactored)
-     Usa gp-input y gp-button del shared
+     GymPlan — Login Template
+     Dos modos: Entrenador (mail + contraseña) y Alumno (solo DNI).
+     Usa gp-input y gp-button del shared.
 ───────────────────────────────────────────── -->
 <div class="login-page">
 
@@ -23,64 +24,141 @@
         </svg>
       </div>
       <h1 class="logo-name">GymPlan</h1>
-      <p class="login-subtitle">Accedé a tu cuenta</p>
+      <p class="login-subtitle">
+        {{ isStudentMode() ? 'Ingresá con tu DNI para ver tu plan' : 'Accedé a tu cuenta' }}
+      </p>
     </header>
 
-    <!-- Formulario -->
-    <form
-      class="login-form"
-      [formGroup]="form"
-      (ngSubmit)="onSubmit()"
-      novalidate
+    <!-- Selector de modo -->
+    <div
+      class="mode-switch"
+      [class.is-student]="isStudentMode()"
+      role="tablist"
+      aria-label="Tipo de acceso"
     >
+      <span class="mode-indicator" aria-hidden="true"></span>
 
-      <!-- Email — gp-input con formControlName -->
-      <gp-input
-        label="Correo electrónico"
-        type="email"
-        autocomplete="email"
-        formControlName="mail"
-        [errorMsg]="mailError()"
-      />
-
-      <!-- Contraseña — gp-input tipo password (toggle incluido) -->
-      <gp-input
-        label="Contraseña"
-        type="password"
-        autocomplete="current-password"
-        formControlName="password"
-        [errorMsg]="passwordError()"
-      />
-
-      <!-- Error global del servidor -->
-      <div *ngIf="errorMessage()" class="server-error" role="alert">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        {{ errorMessage() }}
-      </div>
-
-      <!-- Submit — gp-button -->
-      <gp-button
-        type="submit"
-        variant="primary"
-        size="lg"
-        [loading]="isLoading()"
-        [fullWidth]="true"
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.active]="!isStudentMode()"
+        [attr.aria-selected]="!isStudentMode()"
+        (click)="setMode('trainer')"
       >
-        Ingresar
-      </gp-button>
+        Entrenador
+      </button>
 
-    </form>
+      <button
+        type="button"
+        role="tab"
+        class="mode-tab"
+        [class.active]="isStudentMode()"
+        [attr.aria-selected]="isStudentMode()"
+        (click)="setMode('student')"
+      >
+        Alumno
+      </button>
+    </div>
 
-    <!-- Registro -->
-    <p class="register-prompt">
-      ¿No tenés cuenta?
-      <a   [routerLink]="['/register']" class="register-link">Registrarse</a>
-    </p>
+    <!-- ── Formulario ENTRENADOR ─────────────── -->
+    @if (!isStudentMode()) {
+      <form
+        class="login-form"
+        [class.switched]="switched()"
+        [formGroup]="trainerForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+      >
+
+        <gp-input
+          label="Correo electrónico"
+          type="email"
+          autocomplete="email"
+          formControlName="mail"
+          [errorMsg]="mailError()"
+        />
+
+        <gp-input
+          label="Contraseña"
+          type="password"
+          autocomplete="current-password"
+          formControlName="password"
+          [errorMsg]="passwordError()"
+        />
+
+        <ng-container *ngTemplateOutlet="serverError" />
+
+        <gp-button
+          type="submit"
+          variant="primary"
+          size="lg"
+          [loading]="isLoading()"
+          [fullWidth]="true"
+        >
+          Ingresar
+        </gp-button>
+
+      </form>
+
+      <!-- Registro (solo entrenadores) -->
+      <p class="register-prompt">
+        ¿No tenés cuenta?
+        <a [routerLink]="['/register']" class="register-link">Registrarse</a>
+      </p>
+    }
+
+    <!-- ── Formulario ALUMNO ─────────────────── -->
+    @if (isStudentMode()) {
+      <form
+        class="login-form"
+        [class.switched]="switched()"
+        [formGroup]="studentForm"
+        (ngSubmit)="onSubmit()"
+        novalidate
+      >
+
+        <!-- type="tel" abre el teclado numérico en el celular -->
+        <gp-input
+          label="DNI"
+          type="tel"
+          autocomplete="off"
+          hint="Solo números, sin puntos"
+          formControlName="dni"
+          [errorMsg]="dniError()"
+        />
+
+        <ng-container *ngTemplateOutlet="serverError" />
+
+        <gp-button
+          type="submit"
+          variant="primary"
+          size="lg"
+          [loading]="isLoading()"
+          [fullWidth]="true"
+        >
+          Ingresar
+        </gp-button>
+
+      </form>
+
+      <p class="register-prompt">
+        ¿Tu DNI no funciona? Pedile a tu entrenador que te dé de alta.
+      </p>
+    }
 
   </main>
 </div>
+
+<!-- Error global del servidor (compartido por ambos formularios) -->
+<ng-template #serverError>
+  <div *ngIf="errorMessage()" class="server-error" role="alert">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ errorMessage() }}
+  </div>
+</ng-template>

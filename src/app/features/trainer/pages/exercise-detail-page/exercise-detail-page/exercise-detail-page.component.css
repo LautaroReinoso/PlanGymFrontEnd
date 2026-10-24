@@ -1,0 +1,68 @@
+/* ─────────────────────────────────────────────
+   GymPlan — ExerciseDetailPage CSS
+───────────────────────────────────────────── */
+
+:host { display: block; }
+
+.detail-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Back ────────────────────────────────────── */
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #6B6B80;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  width: fit-content;
+}
+
+.back-btn:hover { color: #F0F0F5; }
+
+/* ── Error / skeleton ──────────────────────────── */
+
+.error-banner {
+  padding: 14px 16px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  color: #FCA5A5;
+  font-size: 14px;
+}
+
+.detail-skeleton {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+/* ── Acciones ──────────────────────────────────── */
+
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.detail-actions gp-button { flex: 1; }
+
+.detail-actions svg { flex-shrink: 0; }
+
+/* ── Mobile ────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .detail-page { padding: 20px 16px 40px; }
+  .detail-actions { flex-direction: column; }
+}

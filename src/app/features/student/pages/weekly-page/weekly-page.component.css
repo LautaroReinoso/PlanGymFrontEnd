@@ -1,0 +1,88 @@
+:host { display: block; }
+.week { display: flex; flex-direction: column; gap: var(--space-5); }
+
+.week__header { display: flex; flex-direction: column; gap: var(--space-2); }
+.week__title { font: 700 26px var(--font-display); color: var(--color-text); margin: 0; }
+.week__nav { display: flex; align-items: center; gap: var(--space-2); }
+.week__range { flex: 1; text-align: center; font-size: 14px; color: var(--color-muted-light); }
+
+.nav-btn {
+  width: 36px; height: 36px; display: grid; place-items: center;
+  background: var(--color-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm); color: var(--color-text); cursor: pointer;
+}
+.nav-btn svg { width: 18px; height: 18px; }
+.nav-btn:disabled { opacity: .35; cursor: default; }
+
+.card {
+  background: var(--color-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-4);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  animation: fadeUp .4s var(--ease-smooth) both;
+}
+.card--error { border-color: var(--color-danger); color: var(--color-text); font-size: 14px; }
+.card--empty { color: var(--color-muted); font-size: 14px; text-align: center; }
+.card p { margin: 0; }
+
+/* Tira semanal */
+.strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.strip__cell {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 0 8px; border-radius: var(--radius-sm);
+  background: var(--color-card); border: 1px solid var(--color-border);
+}
+.strip__label { font-size: 11px; color: var(--color-muted); }
+.strip__num { font: 700 16px var(--font-body); color: var(--color-text); }
+.strip__dot { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+.strip__cell--trained { background: var(--color-accent-dim); border-color: var(--color-accent); }
+.strip__cell--trained .strip__dot { background: var(--color-accent); }
+.strip__cell--today { box-shadow: inset 0 0 0 2px var(--color-celeste); }
+.strip__cell--future .strip__num { color: var(--color-muted); }
+
+/* Progreso */
+.progress__head { display: flex; justify-content: space-between; align-items: baseline; }
+.progress__label { font-size: 13px; color: var(--color-muted-light); }
+.progress__value { font: 700 18px var(--font-display); color: var(--color-text); }
+.progress__bar { height: 8px; background: var(--color-surface); border-radius: var(--radius-full); overflow: hidden; }
+.progress__fill {
+  height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-celeste));
+  transition: width var(--duration-slow) var(--ease-smooth);
+}
+.progress__done { font-size: 13px; color: var(--color-success); }
+
+/* Siguiente */
+.next {
+  display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer;
+  font-family: inherit; padding: var(--space-5); border-radius: var(--radius-lg);
+  border: 1px solid var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent-dim), transparent 70%), var(--color-card);
+  box-shadow: var(--shadow-glow);
+  animation: fadeUp .4s var(--ease-smooth) both;
+}
+.next__eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--color-celeste); }
+.next__name { font: 700 20px var(--font-display); color: var(--color-text); }
+.next__meta { font-size: 13px; color: var(--color-muted-light); }
+
+/* Lista de días */
+.section-title { font-size: 14px; font-weight: 600; color: var(--color-text); margin: 0 0 var(--space-3); }
+.days { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.day {
+  width: 100%; display: flex; align-items: center; gap: var(--space-3);
+  background: var(--color-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-4);
+  font-family: inherit; text-align: left; cursor: pointer;
+  transition: border-color 200ms var(--ease-smooth);
+}
+.day:hover { border-color: var(--color-accent); }
+.day__check {
+  width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center;
+  border-radius: 50%; border: 2px solid var(--color-border); color: #fff;
+}
+.day__check svg { width: 14px; height: 14px; }
+.day--done .day__check { background: var(--color-success); border-color: var(--color-success); }
+.day__text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.day__name { font-size: 15px; font-weight: 600; color: var(--color-text); }
+.day__meta { font-size: 12px; color: var(--color-muted); }
+.day--done .day__meta { color: var(--color-success); }
+.day__chevron { width: 18px; height: 18px; color: var(--color-muted); }

@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 
 import { ENVIRONMENT } from '../../../../environments/tokens/environment.token';
 import { StudentSummary, StudentWorkout } from '../models/trainer.models';
+import { CreateStudentRequest, userResponse } from '../models/student.models';
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {
@@ -18,16 +19,25 @@ export class StudentService {
 
   /** Lista de alumnos asignados al trainer autenticado */
   getMyStudents(): Observable<StudentSummary[]> {
-    return this.http.get<StudentSummary[]>(`${this.api}/admin/trainer/students`);
+    return this.http.get<StudentSummary[]>(`${this.api}/v1/users/students`);
   }
 
   /** Detalle de un alumno */
   getStudentById(id: number): Observable<StudentSummary> {
-    return this.http.get<StudentSummary>(`${this.api}/admin/trainer/students/${id}`);
+    return this.http.get<StudentSummary>(`${this.api}/v1/users/students/${id}`);
   }
 
   /** Workout activo del alumno */
   getStudentWorkout(studentId: number): Observable<StudentWorkout> {
-    return this.http.get<StudentWorkout>(`${this.api}/admin/trainer/students/${studentId}/workout`);
+    return this.http.get<StudentWorkout>(`${this.api}/v1/users/students/${studentId}/workout`);
   }
+
+    /** Lista de alumnos asignados al trainer autenticado */
+createStudent(request: CreateStudentRequest): Observable<userResponse> {
+  console.log(request)
+  return this.http.post<userResponse>(
+    `${this.api}/auth/student`,
+    request
+  );
+}
 }

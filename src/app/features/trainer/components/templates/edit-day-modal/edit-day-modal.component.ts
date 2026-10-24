@@ -34,6 +34,7 @@ import { ButtonComponent } from '../../../../../shared/components/button-compone
 export interface UpdateDayRequest {
   name: string;
   description: string;
+  orderIndex: number;
 }
 
 // Nombres de días de la semana para el selector opcional
@@ -70,6 +71,7 @@ export class EditDayModalComponent {
   // ── Estado del form ───────────────────────────
   readonly name        = signal('');
   readonly description = signal('');
+  readonly orderIndex  = signal(0);
   readonly submitted   = signal(false);
 
   // Validación
@@ -98,6 +100,7 @@ export class EditDayModalComponent {
       if (this.isOpen() && d) {
         this.name.set(d.name ?? '');
         this.description.set(d.description ?? '');
+        this.orderIndex.set(d.orderIndex);
         this.submitted.set(false);
       }
     });
@@ -112,6 +115,7 @@ export class EditDayModalComponent {
     this.saved.emit({
       name:        this.name().trim(),
       description: this.description().trim(),
+      orderIndex:  this.orderIndex(),
     });
   }
 

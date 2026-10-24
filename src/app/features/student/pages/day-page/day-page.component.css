@@ -1,0 +1,113 @@
+.day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.day__back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 0;
+  padding: var(--space-1) var(--space-2) var(--space-1) 0;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color 200ms var(--ease-smooth);
+}
+
+.day__back svg {
+  width: 18px;
+  height: 18px;
+}
+
+.day__back:hover { color: var(--color-text); }
+
+.day__back:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.day__error {
+  background: var(--color-card);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+.day__header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day__eyebrow {
+  font-size: 12px;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.day__name {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.day__meta {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.day__desc {
+  font-size: 14px;
+  color: var(--color-muted);
+  margin: var(--space-2) 0 0;
+  line-height: 1.5;
+}
+
+.day__exercises {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.day__empty {
+  text-align: center;
+  padding: var(--space-10) var(--space-4);
+  color: var(--color-muted);
+  font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* ── Registrar el día ── */
+.day__finish { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2); }
+.day__finish gp-button { display: block; }
+.day__done {
+  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  padding: var(--space-4); border-radius: var(--radius-md);
+  background: var(--color-success-dim); border: 1px solid var(--color-success);
+  color: var(--color-success); font-weight: 600; font-size: 14px;
+  animation: fadeUp .3s var(--ease-spring) both;
+}
+.day__done svg { width: 18px; height: 18px; }
+.day__mark-error { margin: 0; font-size: 13px; color: var(--color-danger); text-align: center; }

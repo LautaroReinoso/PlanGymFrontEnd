@@ -1,0 +1,176 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ── Header ── */
+.dashboard__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.dashboard__mail {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin: 2px 0 0;
+}
+
+.dashboard__subtitle {
+  font-size: 14px;
+  color: var(--color-muted);
+  margin: var(--space-2) 0 0;
+}
+
+.dashboard__error {
+  background: var(--color-card);
+  border: 1px solid var(--color-danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  color: var(--color-text);
+  font-size: 14px;
+}
+
+/* ── Plan activo ── */
+.plan-card {
+  position: relative;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  animation: fadeUp 0.4s var(--ease-smooth) both;
+}
+
+.plan-card__accent {
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-celeste, #38BDF8));
+}
+
+.plan-card__body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.plan-card__label {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.plan-card__name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.plan-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 13px;
+  color: var(--color-muted);
+  margin-top: var(--space-1);
+}
+
+/* ── Días del plan (el alumno elige) ── */
+.days__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 var(--space-3);
+}
+
+.days__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.day-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 200ms var(--ease-smooth),
+              transform 150ms var(--ease-smooth);
+  animation: fadeUp 0.4s var(--ease-smooth) both;
+}
+
+.day-item:hover { border-color: var(--color-accent); }
+.day-item:active { transform: scale(0.985); }
+
+.day-item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.day-item__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.day-item__eyebrow {
+  font-size: 12px;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.day-item__name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-item__count {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.day-item__chevron {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-item { animation: none; transition: none; }
+}
+
+/* ── Estado vacío ── */
+.empty-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-4);
+  color: var(--color-muted);
+  font-size: 15px;
+}

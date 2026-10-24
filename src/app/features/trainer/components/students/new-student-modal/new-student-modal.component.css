@@ -1,0 +1,15 @@
+
+:host { display: block; }
+.edit-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #2A2A38;
+  margin-top: 4px;
+}

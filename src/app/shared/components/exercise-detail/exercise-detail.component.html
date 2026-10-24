@@ -1,0 +1,135 @@
+<!-- ExerciseDetailComponent — mismo markup que tenía ExerciseDetailPage,
+     sin el back-btn, el estado de carga/error ni las acciones de mutación
+     (esas partes son de cada pantalla que lo envuelve). -->
+@let ex = exercise();
+
+<!-- Imagen (si hay) -->
+@if (ex.imageUrl) {
+  <div class="detail-hero">
+    <img [src]="ex.imageUrl" [alt]="ex.name" loading="lazy" />
+  </div>
+}
+
+<!-- Header -->
+<div class="detail-header">
+  @if (!ex.imageUrl) {
+    <div class="detail-header-icon">
+      <gp-muscle-icon [muscleGroup]="ex.primaryMuscle" [size]="40" />
+    </div>
+  }
+  <div class="detail-header-text">
+    <h2 class="exercise-name">{{ ex.name }}</h2>
+    <div class="badge-row">
+      <gp-badge variant="flat">{{ muscleLabel(ex.primaryMuscle) }}</gp-badge>
+      @if (exerciseTypeLabelFor(ex); as typeLabel) {
+        <gp-badge variant="flat">{{ typeLabel }}</gp-badge>
+      }
+      @if (equipmentLabelFor(ex); as equipmentLbl) {
+        <gp-badge variant="flat">{{ equipmentLbl }}</gp-badge>
+      }
+      @if (lateralityLabelFor(ex); as lateralityLbl) {
+        <gp-badge variant="flat">{{ lateralityLbl }}</gp-badge>
+      }
+      @if (ex.global !== undefined) {
+        <gp-badge [variant]="statusBadge(ex).variant">{{ statusBadge(ex).text }}</gp-badge>
+      }
+    </div>
+    @if (ex.secondaryMuscles?.length) {
+      <p class="secondary-muscles">
+        También trabaja:
+        @for (mg of ex.secondaryMuscles; track mg; let last = $last) {
+          <span>{{ muscleLabel(mg) }}</span>@if (!last) {<span>, </span>}
+        }
+      </p>
+    }
+    @if (ex.parentExerciseName) {
+      <p class="parent-exercise">Variante de <strong>{{ ex.parentExerciseName }}</strong></p>
+    }
+  </div>
+</div>
+
+<!-- Aviso: ejercicio global (solo lectura) — Trainer únicamente:
+     Student nunca manda `global`, así que esto no se muestra -->
+@if (ex.global) {
+  <div class="global-notice" role="note">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>
+    <p>
+      Gestionado por el <strong>administrador de GymPlan</strong>. Solo lectura —
+      podés usarlo en plantillas o crear tu propia variante.
+    </p>
+  </div>
+}
+
+<!-- Stats sugeridos: series / reps / descanso (solo los que vengan) -->
+@if (stats(ex).length > 0) {
+  <section class="stats-grid" aria-label="Valores sugeridos">
+    @for (st of stats(ex); track st.label) {
+      <div class="stat">
+        <span class="stat-value">{{ st.value }}</span>
+        <span class="stat-label">{{ st.label }}</span>
+      </div>
+    }
+  </section>
+}
+
+<!-- Dificultad (solo si el backend la mandó) -->
+@if (ex.difficulty) {
+  <section class="difficulty-card">
+    <div class="difficulty-card-header">
+      <span class="difficulty-card-label">Dificultad</span>
+      <span class="difficulty-card-value">{{ difficultyLabelFor(ex) }} · {{ ex.difficulty }}/5</span>
+    </div>
+    <div class="difficulty-bar">
+      <div class="difficulty-bar-fill" [style.width.%]="ex.difficulty * 20"></div>
+    </div>
+  </section>
+}
+
+<!-- Descripción (solo si existe) -->
+@if (ex.description) {
+  <section class="detail-card">
+    <h3 class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <path d="M14 2v6h6"/>
+      </svg>
+      Descripción
+    </h3>
+    <p class="section-body">{{ ex.description }}</p>
+  </section>
+}
+
+<!-- Técnica recomendada (solo si existe) -->
+@if (techniqueSteps(ex).length > 0) {
+  <section class="detail-card">
+    <h3 class="section-title">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 11l3 3L22 4"/>
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+      </svg>
+      Técnica recomendada
+    </h3>
+    <ol class="technique-list">
+      @for (step of techniqueSteps(ex); track $index) {
+        <li>
+          <span class="technique-step-index">{{ $index + 1 }}</span>
+          <span>{{ step }}</span>
+        </li>
+      }
+    </ol>
+  </section>
+}
+
+<!-- Video (solo si existe) -->
+@if (ex.videoUrl) {
+  <a class="video-link" [href]="ex.videoUrl" target="_blank" rel="noopener noreferrer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polygon points="5 3 19 12 5 21 5 3"/>
+    </svg>
+    Ver video de la técnica
+  </a>
+}

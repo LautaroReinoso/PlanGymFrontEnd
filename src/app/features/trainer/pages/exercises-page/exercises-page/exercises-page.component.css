@@ -1,0 +1,108 @@
+.exercises-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-title {
+  font: 800 26px 'Syne', sans-serif;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font: 400 14px 'DM Sans', sans-serif;
+  color: var(--color-muted);
+  margin: 0;
+}
+
+.filters-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-select { min-width: 170px; flex: 1 1 170px; }
+
+.scope-tabs {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 4px;
+  padding: 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+.scope-tab {
+  border: 0;
+  background: transparent;
+  color: var(--color-muted-light);
+  font: 500 13px 'DM Sans', sans-serif;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
+}
+.scope-tab:hover { color: var(--color-text); }
+.scope-tab--active { background: var(--color-accent); color: #fff; }
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font: 500 13px 'DM Sans', sans-serif;
+  color: var(--color-muted-light);
+}
+
+.form-select {
+  appearance: none;
+  background: var(--color-surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B6B80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+    no-repeat right 12px center;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 36px 12px 14px;
+  color: var(--color-text);
+  font: 400 14px 'DM Sans', sans-serif;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.page-empty, .page-error {
+  font: 400 14px 'DM Sans', sans-serif;
+  color: var(--color-muted);
+  text-align: center;
+  padding: 32px 0;
+}
+
+.page-error { color: var(--color-danger); }

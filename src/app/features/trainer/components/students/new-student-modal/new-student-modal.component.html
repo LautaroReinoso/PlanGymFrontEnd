@@ -1,0 +1,21 @@
+<gp-modal [isOpen]="isOpen()" title="Crear Student" size="sm" (closed)="onClose()">
+  <div class="edit-body">
+
+    <!-- Nombre -->
+    <gp-input  label="Ingresa DNI"
+  type="text"
+  [ngModel]="dni()"
+  (ngModelChange)="dni.set($event)"
+  [errorMsg]="dniError()"
+  placeholder="ej: 32974955"/>
+    <!-- Acciones -->
+    <div class="edit-actions">
+      <gp-button variant="ghost" size="md" (click)="onClose()">
+        Cancelar
+      </gp-button>
+      <gp-button variant="primary" size="md" [disabled]="!canSave()" [loading]="isSaving()" (click)="onSave()">
+        Guardar
+      </gp-button>
+    </div>  
+</div>
+</gp-modal>

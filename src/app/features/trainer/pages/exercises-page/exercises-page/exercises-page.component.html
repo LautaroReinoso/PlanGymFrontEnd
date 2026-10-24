@@ -1,1 +1,124 @@
-<p>exercises-page works!</p>
+<section class="exercises-page">
+
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Ejercicios</h1>
+      <p class="page-subtitle">Tu catálogo de ejercicios personales y globales.</p>
+    </div>
+    <gp-button variant="primary" (click)="onOpenCreate()">
+      + Nuevo ejercicio
+    </gp-button>
+  </header>
+
+  <!-- Alcance: Todos / Globales / Míos -->
+  <div class="scope-tabs" role="tablist" aria-label="Alcance">
+    @for (opt of scopeOptions; track opt.value) {
+      <button
+        type="button"
+        role="tab"
+        class="scope-tab"
+        [class.scope-tab--active]="scope() === opt.value"
+        [attr.aria-selected]="scope() === opt.value"
+        (click)="scope.set(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    }
+  </div>
+
+  <div class="filters-row">
+    <gp-input
+      label="Buscar ejercicio"
+      type="search"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+
+    <div class="form-field filter-select">
+      <label class="form-label" for="primaryMuscleFilter">Músculo</label>
+      <select
+        id="primaryMuscleFilter"
+        class="form-select"
+        [ngModel]="primaryMuscle()"
+        (ngModelChange)="primaryMuscle.set($event)"
+      >
+        <option value="">Todos</option>
+        @for (opt of muscleGroupOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field filter-select">
+      <label class="form-label" for="equipmentFilter">Equipamiento</label>
+      <select
+        id="equipmentFilter"
+        class="form-select"
+        [ngModel]="equipment()"
+        (ngModelChange)="equipment.set($event)"
+      >
+        <option value="">Todos</option>
+        @for (opt of equipmentOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field filter-select">
+      <label class="form-label" for="typeFilter">Tipo</label>
+      <select
+        id="typeFilter"
+        class="form-select"
+        [ngModel]="exerciseType()"
+        (ngModelChange)="exerciseType.set($event)"
+      >
+        <option value="">Todos</option>
+        @for (opt of exerciseTypeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    @if (hasActiveFilters()) {
+      <gp-button variant="ghost" size="sm" (click)="clearFilters()">Limpiar filtros</gp-button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="skeleton-list">
+      @for (i of [1,2,3,4]; track i) {
+        <gp-skeleton shape="rect" height="56px" radius="10px" />
+      }
+    </div>
+  } @else if (error()) {
+    <p class="page-error">{{ error() }}</p>
+  } @else if (exercises().length === 0) {
+    <p class="page-empty">No encontramos ejercicios con esos filtros.</p>
+  } @else {
+    <ul class="exercise-list">
+      @for (ex of exercises(); track ex.id) {
+        <app-exercise-item
+          [name]="ex.name"
+          [muscleGroup]="ex.primaryMuscle"
+          [detail]="detailFor(ex)"
+          [badge]="badgeFor(ex)"
+          [clickable]="true"
+          [showEdit]="!ex.global"
+          [showDelete]="!ex.global"
+          (itemClick)="openDetail(ex)"
+          (edit)="onEdit(ex)"
+          (delete)="onDelete(ex)"
+        />
+      }
+    </ul>
+  }
+
+</section>
+
+<app-exercise-form-modal
+  [isOpen]="isModalOpen()"
+  [editingExercise]="editingExercise()"
+  [submitting]="isSaving()"
+  (closed)="onModalClosed()"
+  (save)="onSaveExercise($event)"
+/>

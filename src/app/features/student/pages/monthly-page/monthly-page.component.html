@@ -1,0 +1,100 @@
+<div class="month">
+
+  <header class="month__header">
+    <h1 class="month__title">Tu historial</h1>
+    <div class="month__nav">
+      <button type="button" class="nav-btn" (click)="prevMonth()" aria-label="Mes anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+      </button>
+      <span class="month__name">{{ title() }}</span>
+      <button type="button" class="nav-btn" (click)="nextMonth()" [disabled]="isCurrentMonth()" aria-label="Mes siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="card card--error">
+      <p>{{ error() }}</p>
+      <gp-button size="sm" variant="secondary" (click)="load()">Reintentar</gp-button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <gp-skeleton shape="card" height="76px" />
+    <gp-skeleton shape="card" height="300px" />
+  } @else if (!error()) {
+
+    <!-- Stats -->
+    <section class="stats">
+      <div class="stat">
+        <span class="stat__value">{{ trainedThisMonth() }}</span>
+        <span class="stat__label">{{ trainedThisMonth() === 1 ? 'día entrenado' : 'días entrenados' }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat__value">{{ streak() }}</span>
+        <span class="stat__label">{{ streak() === 1 ? 'semana seguida' : 'semanas seguidas' }}</span>
+      </div>
+      @if (adherence() !== null) {
+        <div class="stat">
+          <span class="stat__value">{{ adherence() }}%</span>
+          <span class="stat__label">adherencia</span>
+        </div>
+      }
+    </section>
+
+    <!-- Calendario -->
+    <section class="calendar" aria-label="Calendario de entrenamientos">
+      @for (w of weekdays; track w) {
+        <span class="calendar__weekday">{{ w.charAt(0) }}</span>
+      }
+      @for (c of cells(); track c.iso) {
+        <button
+          type="button"
+          class="calendar__cell"
+          [class.calendar__cell--out]="!c.inMonth"
+          [class.calendar__cell--trained]="c.trained && c.inMonth"
+          [class.calendar__cell--today]="c.isToday"
+          [class.calendar__cell--selected]="selectedIso() === c.iso"
+          [disabled]="!c.inMonth || c.isFuture"
+          [attr.aria-label]="c.day + (c.trained ? ', entrenaste' : '')"
+          (click)="select(c)"
+        >
+          {{ c.day }}
+        </button>
+      }
+    </section>
+
+    <!-- Detalle del día elegido -->
+    @if (selectedIso()) {
+      <section class="card">
+        <h3 class="card__title">{{ selectedLabel() }}</h3>
+        @if (selectedLogs().length > 0) {
+          <ul class="logs">
+            @for (log of selectedLogs(); track log.id) {
+              <li class="log">
+                <span class="log__dot"></span>
+                <span>
+                  <span class="log__name">{{ log.workoutDayName }}</span>
+                  <span class="log__meta">{{ log.workoutTemplateName }}</span>
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="muted">Ese día no registraste entrenamiento.</p>
+        }
+      </section>
+    } @else if (trainedThisMonth() === 0) {
+      <p class="muted center">
+        @if (isCurrentMonth()) {
+          Todavía no registraste entrenamientos este mes. Al terminar un día, tocá “Marcar como hecho”.
+        } @else {
+          No hay entrenamientos registrados en este mes.
+        }
+      </p>
+    } @else {
+      <p class="muted center">Tocá un día para ver qué entrenaste.</p>
+    }
+  }
+</div>

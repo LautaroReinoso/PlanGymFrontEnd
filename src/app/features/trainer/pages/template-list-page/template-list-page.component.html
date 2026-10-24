@@ -1,74 +1,68 @@
 <!-- TemplatesListPage -->
 <div class="templates-page">
 
+
   <!-- ── Header ── -->
   <div class="page-header">
     <div>
       <h1 class="page-title">Plantillas</h1>
       <p class="page-subtitle">
         @if (!isLoading()) {
-          {{ templates().length }} {{ templates().length === 1 ? 'plantilla' : 'plantillas' }}
-        } @else {
-          Cargando…
-        }
-      </p>
+        {{ templates().length }} {{ templates().length === 1 ? 'plantilla' : 'plantillas' }}
+        } 
     </div>
 
     @if (!isLoading() && !isEmpty()) {
-      <gp-button variant="primary" size="md" (click)="goToCreate()">
-        + Nueva plantilla
-      </gp-button>
+    <gp-button variant="primary" size="md" (click)="goToCreate()">
+      + Nueva plantilla
+    </gp-button>
     }
   </div>
 
   <!-- ── Error ── -->
   @if (error()) {
-    <div class="error-banner" role="alert">
-      {{ error() }}
-      <button class="error-retry" (click)="loadTemplates()">Reintentar</button>
-    </div>
+  <div class="error-banner" role="alert">
+    {{ error() }}
+    <button class="error-retry" (click)="loadTemplates()">Reintentar</button>
+  </div>
+  }
+      <!-- ── Skeleton ── -->
+  @if (isLoading()) {
+  <div class="profile-skeleton">
+    <app-gym-loader class="profile-skeleton" [size]="48" />
+
+  </div>
   }
 
-  <!-- ── Skeleton ── -->
-  @if (isLoading()) {
-    <div class="templates-grid">
-      @for (s of skeletons; track $index) {
-        <gp-skeleton shape="card" width="100%" height="110px" />
-      }
-    </div>
-  }
+
 
   <!-- ── Contenido ── -->
+
   @if (!isLoading() && !error()) {
 
-    @if (isEmpty()) {
-    
-      <div class="empty-state">
-        <div class="empty-icon" aria-hidden="true">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="1.5">
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-            <path d="M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
-          </svg>
-        </div>
-        <h3 class="empty-title">Sin plantillas todavía</h3>
-        <p class="empty-sub">Creá tu primera plantilla para empezar a armar planes.</p>
-        <gp-button variant="primary" size="md" (click)="goToCreate()">
-          Crear plantilla
-        </gp-button>
-      </div>
+  @if (isEmpty()) {
+
+  <div class="empty-state">
+    <div class="empty-icon" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+        <path d="M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2" />
+      </svg>
+    </div>
+    <h3 class="empty-title">Sin plantillas todavía</h3>
+    <p class="empty-sub">Creá tu primera plantilla para empezar a armar planes.</p>
+    <gp-button variant="primary" size="md" (click)="goToCreate()">
+      Crear plantilla
+    </gp-button>
+  </div>
+  }
+  @else {
+  <div class="templates-grid">
+    @for (t of templates(); track t.id) {
+    <app-template-card [template]="t" (cardClick)="openTemplate(t.id)" />
     }
-     @else {
-      <div class="templates-grid">
-        @for (t of templates(); track t.id) {
-          <app-template-card
-            [template]="t"
-            (cardClick)="openTemplate(t.id)"
-    
-          />
-        }
-      </div>
-    }
+  </div>
+  }
   }
 
 </div>

@@ -14,18 +14,12 @@
   <div class="error-banner" role="alert">{{ error() }}</div>
   }
 
-  <!-- ── Skeleton ── -->
+      <!-- ── Skeleton ── -->
   @if (isLoading()) {
-  <div class="skeleton-header">
-    <gp-skeleton shape="line" width="40%" height="26px" />
-    <gp-skeleton shape="line" width="20%" />
+  <div class="profile-skeleton">
+    <app-gym-loader class="profile-skeleton" [size]="48" />
+
   </div>
-  <div class="skeleton-badges">
-    <gp-skeleton shape="rect" width="70px" height="32px" radius="999px" />
-    <gp-skeleton shape="rect" width="70px" height="32px" radius="999px" />
-    <gp-skeleton shape="rect" width="70px" height="32px" radius="999px" />
-  </div>
-  <gp-skeleton shape="card" width="100%" height="220px" />
   }
 
   <!-- ── Contenido ── -->
@@ -33,27 +27,36 @@
 
   <!-- Header -->
   <div class="template-header">
-    <span class="template-header-accent" aria-hidden="true"></span>
-    <div class="template-header-text">
-      <h1 class="template-name">{{ template()!.name }}</h1>
-      @if (template()!.description) {
-      <p class="template-desc">{{ template()!.description }}</p>
-      }
+    <div class="template-header-container">
+      <div class="template-header-text">
+        <h1 class="page-title">{{ template()!.name }}</h1>
+        @if (template()!.description) {
+        <p class="page-subtitle">{{ template()!.description }}</p>
+        }
+      </div>
+      <div class="template-header-actions">
+        <gp-icon-button icon="edit" [variant]="'primary'" (click)="openEditTemplateModal()"></gp-icon-button>
+        <gp-icon-button icon="delete" [variant]="'danger'" (click)="openDeleteConfirm()"></gp-icon-button>
+      </div>
     </div>
-    <div class="template-header-actions">
-      <button class="header-action-btn" (click)="openEditModal()" aria-label="Editar plantilla">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-        </svg>
-      </button>
-      <button class="header-action-btn header-action-btn--danger" (click)="openDeleteConfirm()"
-        aria-label="Eliminar plantilla">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z" />
-        </svg>
-      </button>
+    <div>
+      <gp-badge variant="default" size="sm">
+        {{template()!.days.length}} días ·
+      </gp-badge>
+
     </div>
   </div>
+
+  <!-- ── Resumen por grupo muscular ── -->
+  @if (muscleGroupSummary().length > 0) {
+  <div class="muscle-summary" aria-label="Resumen por grupo muscular">
+    @for (item of muscleGroupSummary(); track item.muscleGroup) {
+    <gp-badge variant="accent" size="sm">
+      {{ item.label }} · {{ item.count }} ejerc.
+    </gp-badge>
+    }
+  </div>
+  }
 
   <!-- ── Fila de badges + botón agregar día ── -->
   @if (sortedDays().length > 0) {
@@ -99,7 +102,8 @@
   @if (selectedDay()) {
   <div class="selected-day-panel" role="tabpanel">
     <app-template-day [day]="selectedDay()!" (addExercise)="openExerciseModal()" (editDay)="openEditModal()"
-      (removeExercise)="removeExercise($event)" (removeDay)="removeDay($event)" />
+      (removeExercise)="removeExercise($event)" (removeDay)="removeDay($event)"
+      (reorderExercises)="onReorderExercises($event)" />
   </div>
   }
 
@@ -120,7 +124,7 @@
       + Agregar primer día
     </gp-button>
   </div>
-  }
+    }
   }
 
   <!-- ── Modal: agregar ejercicio ── -->
@@ -129,18 +133,12 @@
     [exercisesLoading]="exercisesLoading()" [isSaving]="isAddingExercise()" (closed)="showExerciseModal.set(false)"
     (exerciseSelected)="onExerciseSelected($event)" (exerciseCreated)="onExerciseCreated($event)" />
 
-<app-edit-day-modal
-  [isOpen]="showEditDayModal()"
-  [day]="selectedDay()"
-  [isSaving]="isSavingDay()"
-  [errorMessage]="editDayError()"
-  (closed)="showEditDayModal.set(false)"
-  (saved)="onDaySaved($event)"
-/>
+  <app-edit-day-modal [isOpen]="showEditDayModal()" [day]="selectedDay()" [isSaving]="isSavingDay()"
+    [errorMessage]="editDayError()" (closed)="showEditDayModal.set(false)" (saved)="onDaySaved($event)" />
   <!-- ── Modal: editar info ── -->
-  <app-template-edit-modal [isOpen]="showEditModal()" [initialName]="template()?.name ?? ''"
+  <app-template-edit-modal [isOpen]="showEditTemplateModal()" [initialName]="template()?.name ?? ''"
     [initialDescription]="template()?.description ?? ''" [isSaving]="isSavingEdit()" [errorMessage]="editError()"
-    (closed)="showEditModal.set(false)" (saved)="confirmEdit($event)" />
+    (closed)="showEditTemplateModal.set(false)" (saved)="confirmEdit($event)" />
 
   <!-- FIX #8: modal de eliminación descomentado con gp-modal -->
   <gp-modal [isOpen]="showDeleteConfirm()" title="Eliminar plantilla" size="sm" (closed)="showDeleteConfirm.set(false)">

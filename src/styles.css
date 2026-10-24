@@ -4,8 +4,21 @@ html,
 body {
   min-height: 100%;
   height: 100%;
-    margin: 0;
+  margin: 0;
   padding: 0;
+}
+
+/* Base de la app: tema oscuro. Sin esto, cualquier texto sin color propio
+   (labels, legends, opciones de <select>) hereda el negro del navegador. */
+:root {
+  color-scheme: dark; /* controles nativos, scrollbars y desplegables en oscuro */
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -13,6 +26,24 @@ input,
 textarea,
 select {
   font: inherit;
+  color: inherit;
+}
+
+/* Desplegables nativos: opciones legibles sobre fondo oscuro */
+select option {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+
+label,
+legend {
+  color: var(--color-muted-light);
 }
 
 a {
@@ -47,5 +78,12 @@ ol {
 .page-subtitle {
   font-size: 14px;
   color: #6B6B80;
+}
+.profile-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  justify-content: center;
+  align-items: center;
 }
 

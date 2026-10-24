@@ -11,11 +11,11 @@ import {
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar/sidebar.component';
-
+import { IconButtonComponent } from '../../../../../shared/components/icon-button/icon-button.component';
 @Component({
   selector: 'app-trainer-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent],
+  imports: [RouterOutlet, SidebarComponent, IconButtonComponent],
   templateUrl: './trainer-layout.component.html',
   styleUrl: './trainer-layout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

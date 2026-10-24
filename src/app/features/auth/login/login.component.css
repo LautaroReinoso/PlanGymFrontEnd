@@ -239,3 +239,68 @@
 @media (max-width: 480px) {
   .login-panel { padding: 32px 24px; border-radius: 16px; }
 }
+
+/* ─────────────────────────────────────────────
+   Selector de modo (Entrenador / Alumno)
+   Mismos tokens que el resto del login.
+───────────────────────────────────────────── */
+
+/* Un poco menos de aire bajo el logo para que entre el selector */
+.login-header { margin-bottom: 28px; }
+
+.mode-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  margin-bottom: 28px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  animation: slideUp 0.6s var(--ease-spring) 0.25s both;
+}
+
+.mode-indicator {
+  position: absolute;
+  top: 4px; bottom: 4px; left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 9px;
+  background: var(--color-accent-glow);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  transition: transform 300ms var(--ease-spring);
+}
+
+.mode-switch.is-student .mode-indicator {
+  transform: translateX(100%);
+}
+
+.mode-tab {
+  position: relative;
+  z-index: 1;
+  padding: 10px 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-muted);
+  transition: color 200ms var(--ease-smooth);
+}
+
+.mode-tab:hover  { color: var(--color-text); }
+.mode-tab.active { color: var(--color-text); }
+
+.mode-tab:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 9px;
+}
+
+/* Al cambiar de modo el formulario aparece rápido (sin el delay de entrada) */
+.login-form.switched { animation: fadeIn 0.25s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mode-switch    { animation: fadeIn 0.3s ease both; }
+  .mode-indicator { transition: none; }
+}

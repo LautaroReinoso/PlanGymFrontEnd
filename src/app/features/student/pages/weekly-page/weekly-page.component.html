@@ -1,0 +1,95 @@
+<div class="week">
+
+  <header class="week__header">
+    <h1 class="week__title">Tu semana</h1>
+    <div class="week__nav">
+      <button type="button" class="nav-btn" (click)="prevWeek()" aria-label="Semana anterior">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+      </button>
+      <span class="week__range">{{ isCurrentWeek() ? 'Esta semana · ' : '' }}{{ rangeLabel() }}</span>
+      <button type="button" class="nav-btn" (click)="nextWeek()" [disabled]="isCurrentWeek()" aria-label="Semana siguiente">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
+      </button>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="card card--error">
+      <p>{{ error() }}</p>
+      <gp-button size="sm" variant="secondary" (click)="load()">Reintentar</gp-button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <gp-skeleton shape="card" height="84px" />
+    <gp-skeleton shape="card" height="96px" />
+    <gp-skeleton shape="card" height="64px" />
+  } @else if (!error()) {
+
+    <!-- Tira de 7 días -->
+    <section class="strip" aria-label="Días de la semana">
+      @for (c of cells(); track c.iso) {
+        <div class="strip__cell"
+             [class.strip__cell--today]="c.isToday"
+             [class.strip__cell--trained]="c.trained"
+             [class.strip__cell--future]="c.isFuture">
+          <span class="strip__label">{{ c.label }}</span>
+          <span class="strip__num">{{ c.dayNumber }}</span>
+          <span class="strip__dot" [attr.aria-label]="c.trained ? 'Entrenó' : null"></span>
+        </div>
+      }
+    </section>
+
+    @if (hasPlan()) {
+
+      <!-- Progreso de la semana -->
+      <section class="card">
+        <div class="progress__head">
+          <span class="progress__label">Días del plan completados</span>
+          <span class="progress__value">{{ doneCount() }} de {{ days().length }}</span>
+        </div>
+        <div class="progress__bar" role="progressbar" [attr.aria-valuenow]="percent()" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress__fill" [style.width.%]="percent()"></div>
+        </div>
+        @if (isCurrentWeek() && days().length > 0 && doneCount() === days().length) {
+          <p class="progress__done">¡Completaste todos los días de esta semana! 💪</p>
+        }
+      </section>
+
+      <!-- Siguiente sugerido (solo semana actual) -->
+      @if (nextDay(); as nd) {
+        <button type="button" class="next" (click)="openDay(nd)">
+          <span class="next__eyebrow">Te toca</span>
+          <span class="next__name">{{ nd.name }}</span>
+          <span class="next__meta">{{ nd.exercises.length }} ejercicios · Empezar</span>
+        </button>
+      }
+
+      <!-- Días del plan con su estado -->
+      <section>
+        <h3 class="section-title">Días del plan</h3>
+        <ul class="days">
+          @for (day of days(); track day.id) {
+            <li>
+              <button type="button" class="day" [class.day--done]="doneLabel(day)" (click)="openDay(day)">
+                <span class="day__check" aria-hidden="true">
+                  @if (doneLabel(day)) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                  }
+                </span>
+                <span class="day__text">
+                  <span class="day__name">{{ day.name }}</span>
+                  <span class="day__meta">{{ doneLabel(day) ?? (day.exercises.length + ' ejercicios') }}</span>
+                </span>
+                <svg class="day__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+
+    } @else {
+      <section class="card card--empty"><p>No tenés un plan activo todavía.</p></section>
+    }
+  }
+</div>

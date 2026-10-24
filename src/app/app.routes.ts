@@ -5,6 +5,22 @@ export const routes: Routes = [
    {
     path: 'login',
     canActivate: [loginGuard],
+    // Sin "mode": se abre el último modo usado (o entrenador por defecto)
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then(m => m.LoginComponent),
+  },
+  {
+    // Link para compartir con los alumnos
+    path: 'login/alumno',
+    canActivate: [loginGuard],
+    data: { mode: 'student' },
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then(m => m.LoginComponent),
+  },
+  {
+    path: 'login/entrenador',
+    canActivate: [loginGuard],
+    data: { mode: 'trainer' },
     loadComponent: () =>
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
@@ -17,6 +33,11 @@ export const routes: Routes = [
     path: 'trainer',
     loadChildren: () =>
       import('./features/trainer/trainer.routes').then(m => m.TRAINER_ROUTES),
+  },
+    {
+    path: 'student',
+    loadChildren: () =>
+      import('./features/student/student.routes').then(m => m.STUDENT_ROUTES),
   },
 /*      // Redirigir raíz → login (el loginGuard redirige si ya está autenticado)
   {

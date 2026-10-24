@@ -1,0 +1,72 @@
+.days-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* Badge de día */
+.day-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1.5px solid #2A2A38;
+  background: #1C1C26;
+  color: var(--color-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  gap: 6px;
+  display: flex;
+  align-items: center;
+  transition:
+    background  150ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    color       150ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform   150ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+css
+.day-badge-count {
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+.day-badge:focus-visible {
+  outline: 2px solid #4F6EF7;
+  outline-offset: 2px;
+}
+
+.day-badge-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.day-badge:hover:not(.day-badge--active) {
+  background: #232330;
+  border-color: #3A3A52;
+  color: #F0F0F5;
+}
+
+.day-badge--active {
+  background: rgba(79, 110, 247, 0.12);
+  border-color: rgba(79, 110, 247, 0.5);
+  color: #818CF8;
+  font-weight: 600;
+  transform: translateY(-1px);
+}
+.day-badge-index{
+  background: var(--color-surface);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.day-badge-index--active  {
+  color: var(--color-text);
+  background: #4F6EF7;
+}
+.day-badge-content {
+   display: flex;
+   flex-direction: column;
+  align-items: center;
+}

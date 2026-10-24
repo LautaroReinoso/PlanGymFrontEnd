@@ -11,9 +11,9 @@ import { Observable } from 'rxjs';
 import { ENVIRONMENT } from '../../../../environments/tokens/environment.token';
 import {
   Exercise,
-  CreateExerciseRequest,
-  UpdateExerciseRequest,
-  MuscleGroup,
+  ExerciseDetail,
+  ExerciseFilters,
+  ExerciseRequest,
 } from '../models/trainer.models';
 
 @Injectable({ providedIn: 'root' })
@@ -23,34 +23,41 @@ export class ExerciseService {
   private readonly api  = inject(ENVIRONMENT).apiUrl;
 
   /**
-   * Lista todos los ejercicios disponibles para el trainer:
-   * globales + los propios creados por él.
-   * Opcionalmente filtra por nombre o muscleGroup.
+   * Listado (globales + propios, sin archivados).
+   * Filtros opcionales: search, primaryMuscle, equipment, exerciseType, scope (default ALL).
    */
-  getAll(filters?: { search?: string; muscleGroup?: MuscleGroup }): Observable<Exercise[]> {
+  getAll(filters: ExerciseFilters = {}): Observable<Exercise[]> {
     let params = new HttpParams();
-    if (filters?.search)      params = params.set('search', filters.search);
-    if (filters?.muscleGroup) params = params.set('muscleGroup', filters.muscleGroup);
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== undefined && value !== null && value !== '') {
+        params = params.set(key, String(value));
+      }
+    }
     return this.http.get<Exercise[]>(`${this.api}/exercises`, { params });
   }
 
-  /** Detalle de un ejercicio */
-  getById(id: number): Observable<Exercise> {
-    return this.http.get<Exercise>(`${this.api}/api/v1/exercises/${id}`);
+  /** Detalle con canEdit / canCreateVariant calculados por el backend */
+  getById(id: number): Observable<ExerciseDetail> {
+    return this.http.get<ExerciseDetail>(`${this.api}/exercises/${id}`);
   }
 
-  /** Crear ejercicio propio (no global) */
-  create(dto: CreateExerciseRequest): Observable<Exercise> {
-    return this.http.post<Exercise>(`${this.api}/exercises`, dto);
+  /** Crear ejercicio propio */
+  create(dto: ExerciseRequest): Observable<ExerciseDetail> {
+    return this.http.post<ExerciseDetail>(`${this.api}/exercises`, dto);
   }
 
-  /** Editar ejercicio propio */
-  update(id: number, dto: UpdateExerciseRequest): Observable<Exercise> {
-    return this.http.put<Exercise>(`${this.api}/api/v1/exercises/${id}`, dto);
+  /** Editar ejercicio propio (PUT: reemplaza todos los campos) */
+  update(id: number, dto: ExerciseRequest): Observable<ExerciseDetail> {
+    return this.http.put<ExerciseDetail>(`${this.api}/exercises/${id}`, dto);
   }
 
-  /** Eliminar ejercicio propio (no se pueden eliminar los globales) */
+  /** "Crear variante": el backend clona el ejercicio como propio y devuelve el nuevo */
+  createVariant(id: number): Observable<ExerciseDetail> {
+    return this.http.post<ExerciseDetail>(`${this.api}/exercises/${id}/variants`, {});
+  }
+
+  /** Archiva (soft delete) un ejercicio propio */
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/api/v1/exercises/${id}`);
+    return this.http.delete<void>(`${this.api}/exercises/${id}`);
   }
 }

@@ -6,6 +6,7 @@
   <!-- ── Header ──────────────────────────────── -->
   <div class="sidebar-header">
     <div class="sidebar-logo">
+  
       <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
         <rect width="36" height="36" rx="10" fill="#4F6EF7"/>
         <rect x="6"  y="15" width="6"  height="6" rx="2" fill="white"/>
@@ -62,7 +63,7 @@
   <!-- ── Sección: usuario ─────────────────────── -->
   <div class="sidebar-section-label">Cuenta</div>
 
-  <div class="sidebar-user">
+  <a class="sidebar-user" routerLink="/trainer/profile">
     <div class="user-avatar" aria-hidden="true">
       {{ userInitials }}
     </div>
@@ -70,7 +71,7 @@
       <span class="user-mail">{{ userMail() }}</span>
       <span class="user-role">Entrenador</span>
     </div>
-  </div>
+  </a>
 
   <button
     class="logout-btn"
@@ -85,5 +86,4 @@
     </svg>
     Cerrar sesión
   </button>
-
 </aside>

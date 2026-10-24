@@ -14,13 +14,12 @@ import { CommonModule } from '@angular/common';
 
 import { WorkoutTemplateSummary } from '../../../models/trainer.models';
 import { BadgeComponent } from "../../../../../shared/components/badge-component/badge.component";
+import { IconButtonComponent } from "../../../../../shared/components/icon-button/icon-button.component";
 
 @Component({
   selector: 'app-template-card',
   standalone: true,
-  imports: [CommonModule, 
-  //  BadgeComponent
-  ],
+  imports: [CommonModule, IconButtonComponent],
   templateUrl: './template-card.component.html',
   styleUrl: './template-card.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

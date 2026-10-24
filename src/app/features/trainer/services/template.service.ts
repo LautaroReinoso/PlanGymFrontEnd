@@ -19,6 +19,7 @@ import {
   AddExerciseToDayRequest,
   UpdateDayRequest,
   WorkoutDayResponse,
+  StudentSummary,
 } from '../models/trainer.models';
 
 @Injectable({ providedIn: 'root' })
@@ -70,9 +71,9 @@ export class TemplateService {
       dto
     );
   }
-updateDay(workoutDayId: number, dto: UpdateDayRequest): Observable<WorkoutDayResponse> {
+updateDay( templateId: number, workoutDayId: number,dto: UpdateDayRequest): Observable<WorkoutDayResponse> {
   return this.http.put<WorkoutDayResponse>(
-    `${this.api}/api/v1/workout-days/${workoutDayId}`,
+    `${this.api}/workout-templates/${templateId}/days/${workoutDayId}`,
     dto
   );
 }
@@ -80,7 +81,19 @@ updateDay(workoutDayId: number, dto: UpdateDayRequest): Observable<WorkoutDayRes
     /** Eliminar un día */
     deleteDay(templateId: number, dayId: number): Observable < void> {
       return this.http.delete<void>(
-        `${this.api}//${templateId}/days/${dayId}`
+        `${this.api}/workout-templates/${templateId}/days/${dayId}`
+      );
+    }
+
+    /**
+     * Reordena los ejercicios de un día (una sola transacción en el backend).
+     * @param workoutDayId  WorkoutDay.id (NO el id de WorkoutTemplateDay)
+     * @param exerciseIds   DayExercise.id en el orden nuevo; el índice (base 1) se deriva de la posición
+     */
+    reorderExercises(workoutDayId: number, exerciseIds: number[]): Observable<void> {
+      return this.http.patch<void>(
+        `${this.api}/workout-days/${workoutDayId}/exercises/reorder`,
+        { exercises: exerciseIds.map((id, i) => ({ id, orderIndex: i + 1 })) }
       );
     }
 
@@ -89,8 +102,11 @@ updateDay(workoutDayId: number, dto: UpdateDayRequest): Observable<WorkoutDayRes
       dayId: number,
       exerciseId: number
     ): Observable < void> {
+      console.log(`Removing exercise ${exerciseId} from day ${dayId}`);
       return this.http.delete<void>(
         `${this.api}/day-exercises/days/${dayId}/exercises/${exerciseId}`
       );
     }
+
+    
   }

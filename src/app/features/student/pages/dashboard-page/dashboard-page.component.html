@@ -1,0 +1,97 @@
+<div class="dashboard">
+
+
+
+@if (needsProfile()) {
+<a routerLink="/student/profile" class="header-profile" aria-label="Mi perfil">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+  </svg>
+</a>
+
+}
+  <!-- Header -->
+  <header class="dashboard__header">
+    <h1 class="dashboard__title">Hola{{ firstName() ? ', ' + firstName() : '' }}</h1>
+    <p class="dashboard__subtitle">
+      @if (isLoading()) {
+        Cargando tu entrenamiento…
+      } @else if (hasActivePlan()) {
+        Elegí el día que vas a entrenar.
+      } @else {
+        Este es tu espacio de entrenamiento.
+      }
+    </p>
+  </header>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="dashboard__error">
+      <p>{{ error() }}</p>
+      <gp-button size="sm" variant="secondary" (click)="load()">Reintentar</gp-button>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <gp-skeleton shape="card" height="110px" />
+    <gp-skeleton shape="card" height="72px" />
+    <gp-skeleton shape="card" height="72px" />
+  }
+
+  <!-- Contenido -->
+  @if (!isLoading() && !error()) {
+
+    @if (hasActivePlan() && activeWorkout(); as aw) {
+
+      <!-- Plan activo -->
+      <section class="plan-card">
+        <div class="plan-card__accent"></div>
+        <div class="plan-card__body">
+          <span class="plan-card__label">Plan activo</span>
+          <h2 class="plan-card__name">{{ aw.templateName }}</h2>
+          <div class="plan-card__meta">
+            <span>{{ aw.dayCount }} días</span>
+            @if (adherencePercent() !== null) {
+              <gp-badge variant="accent" size="sm">{{ adherencePercent() }}% adherencia</gp-badge>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Días del plan: el alumno elige -->
+      @if (days().length > 0) {
+        <section class="days">
+          <h3 class="days__title">Tus días de entrenamiento</h3>
+          <ul class="days__list">
+            @for (day of days(); track day.id) {
+              <li>
+                <button type="button" class="day-item" (click)="openDay(day)">
+                  <span class="day-item__text">
+                    <span class="day-item__eyebrow">Día {{ $index + 1 }}</span>
+                    <span class="day-item__name">{{ day.name }}</span>
+                    <span class="day-item__count">{{ day.exercises.length }} ejercicios</span>
+                  </span>
+                  <svg class="day-item__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+      } @else {
+        <section class="empty-state">
+          <p>Tu plan todavía no tiene días cargados.</p>
+        </section>
+      }
+
+    } @else {
+      <!-- Estado vacío -->
+      <section class="empty-state">
+        <p>No tenés un plan activo todavía.</p>
+      </section>
+    }
+  }
+
+</div>

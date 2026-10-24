@@ -16,9 +16,11 @@ import {
   AuthResponse,
   JwtPayload,
   LoginRequest,
+  LoginMode,
   RoleType,
+  StudentAuthResponse,
 } from '../../models/auth/auth.models';
-import { StorageService, STORAGE_KEYS } from '../services/storage.service';
+import { StorageService, STORAGE_KEYS, LOGIN_MODE_KEY } from '../services/storage.service';
 import { ENVIRONMENT } from '../../../../environments/tokens/environment.token';
 
 @Injectable({ providedIn: 'root' })
@@ -66,11 +68,24 @@ export class AuthService {
       );
   }
 
+  // ── Login de alumno (solo DNI) ────────────────
+  loginStudent(dni: string): Observable<StudentAuthResponse> {
+    return this.http
+      .post<StudentAuthResponse>(`${this.API_URL}/auth/student/login`, { dni })
+      .pipe(
+        tap(response => this.handleAuthSuccess(response)),
+        catchError(err => this.handleStudentAuthError(err))
+      );
+  }
+
   // ── Logout ────────────────────────────────────
   logout(): void {
+    // El alumno vuelve a SU pantalla de login (antes de limpiar la sesión)
+    const wasStudentOnly = this.isStudent() && !this.isTrainer();
+
     this._session.set(null);
     this.storage.clearAll();
-    this.router.navigate(['/login']);
+    this.router.navigate(wasStudentOnly ? ['/login', 'alumno'] : ['/login']);
   }
 
   // ── Token ─────────────────────────────────────
@@ -114,7 +129,22 @@ export class AuthService {
     this.storage.setLocal(STORAGE_KEYS.AUTH_ROLES,   session.roles);
     this.storage.setLocal(STORAGE_KEYS.AUTH_EXPIRES, session.expiresAt.getTime());
 
+    this.rememberLoginMode(session.roles);
     this.redirectAfterLogin(session.roles);
+  }
+
+  // Recuerda el último modo para mostrar la pantalla correcta
+  // cuando la sesión vence o el usuario cierra sesión.
+  private rememberLoginMode(roles: RoleType[]): void {
+    const mode: LoginMode =
+      roles.includes('ROLE_STUDENT') && !roles.includes('ROLE_TRAINER')
+        ? 'student'
+        : 'trainer';
+    try {
+      localStorage.setItem(LOGIN_MODE_KEY, mode);
+    } catch {
+      /* storage no disponible: se ignora */
+    }
   }
 
   private redirectAfterLogin(roles: RoleType[]): void {
@@ -169,6 +199,18 @@ export class AuthService {
     } catch {
       throw new Error('[AuthService] JWT malformado — no se pudo decodificar el payload');
     }
+  }
+
+  // El backend manda el mensaje listo para mostrar (ApiErrorResponse.message)
+  private handleStudentAuthError(error: HttpErrorResponse): Observable<never> {
+    let message = 'Error inesperado. Intentá de nuevo.';
+    if (error.status === 0) {
+      message = 'No se pudo conectar con el servidor.';
+    } else if ([400, 401, 403].includes(error.status)) {
+      message = error.error?.message
+        ?? 'No pudimos ingresar con ese DNI. Consultá con tu entrenador.';
+    }
+    return throwError(() => new Error(message));
   }
 
   private handleAuthError(error: HttpErrorResponse): Observable<never> {

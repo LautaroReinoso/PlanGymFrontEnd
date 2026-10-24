@@ -76,38 +76,25 @@
             <p>No hay ejercicios que coincidan.</p>
           </div>
         } @else {
-          <div class="exercise-list">
+          <ul class="exercise-list">
             @for (ex of filteredExercises(); track ex.id) {
-              <button
-                class="exercise-item"
-                [class.exercise-item--selected]="selectedExerciseId() === ex.id"
-                (click)="selectExercise(ex.id)"
-                type="button"
-              >
-                <div class="exercise-item-info">
-                  <span class="exercise-item-name">{{ ex.name }}</span>
-                  <span class="exercise-item-muscle">
-                    {{ getMuscleLabel(ex.muscleGroup) }}
-                  </span>
-                </div>
-                @if (ex.isGlobal) {
-                  <span class="global-badge">Global</span>
-                }
-                @if (selectedExerciseId() === ex.id) {
-                  <svg class="check-icon" width="15" height="15" viewBox="0 0 24 24"
-                       fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M20 6 9 17l-5-5"/>
-                  </svg>
-                }
-              </button>
+              <app-exercise-item
+                [name]="ex.name"
+                [muscleGroup]="ex.primaryMuscle"
+                [detail]="getMuscleLabel(ex.primaryMuscle)"
+                [badge]="badgeFor(ex)"
+                [clickable]="true"
+                [selected]="selectedExerciseId() === ex.id"
+                (itemClick)="selectExercise(ex.id)"
+              />
             }
-          </div>
+          </ul>
         }
 
         <!-- Parámetros — solo aparecen al seleccionar un ejercicio -->
         @if (selectedExerciseId()) {
           <div class="params-section">
-            <p class="params-label">Configurar series</p>
+            <p class="params-label">Configurar series @if (loadingDefaults()) { <span class="params-hint">· cargando sugeridos…</span> }</p>
             <div class="params-grid">
               <div class="param-field">
                 <label>Series</label>
@@ -123,6 +110,15 @@
                   type="number" min="1" max="100"
                   [value]="reps()"
                   (input)="reps.set(+$any($event.target).value)"
+                />
+              </div>
+              <div class="param-field">
+                <label>Reps máx</label>
+                <input
+                  type="number" min="1" max="100"
+                  placeholder="—"
+                  [value]="repsMax() ?? ''"
+                  (input)="repsMax.set($any($event.target).value ? +$any($event.target).value : null)"
                 />
               </div>
               <div class="param-field">
@@ -174,66 +170,17 @@
 
     <!-- ══════════════════════════════════════════
          TAB 2 — Crear ejercicio nuevo
+         Reutiliza ExerciseFormComponent (mismo form que
+         ExercisesPageComponent usa para crear/editar) en
+         vez de duplicar campos y validación acá.
     ══════════════════════════════════════════ -->
     @if (activeTab() === 'create') {
       <div class="tab-panel" role="tabpanel">
-
-        <gp-input
-          label="Nombre del ejercicio"
-          type="text"
-          [ngModel]="newName()"
-          (ngModelChange)="newName.set($event)"
-          [errorMsg]="nameError()"
-          placeholder="ej: Press banca con barra"
+        <app-exercise-form
+          [submitting]="isSaving()"
+          (save)="onCreateFormSave($event)"
+          (cancel)="onClose()"
         />
-
-        <!-- Select de grupo muscular -->
-        <div class="select-field" [class.select-field--error]="!!muscleGroupError()">
-          <label class="select-label">Grupo muscular</label>
-          <div class="select-wrapper">
-            <select
-              class="select-input"
-              [value]="newMuscleGroup()"
-              (change)="newMuscleGroup.set($any($event.target).value)"
-            >
-              <option value="" disabled>Seleccioná un grupo…</option>
-              @for (opt of muscleGroupOptions; track opt[0]) {
-                <option [value]="opt[0]">{{ opt[1] }}</option>
-              }
-            </select>
-            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24"
-                 fill="none" stroke="currentColor" stroke-width="2">
-              <path d="m6 9 6 6 6-6"/>
-            </svg>
-          </div>
-          @if (muscleGroupError()) {
-            <p class="select-error">{{ muscleGroupError() }}</p>
-          }
-        </div>
-
-        <gp-input
-          label="Descripción (opcional)"
-          type="text"
-          [ngModel]="newDescription()"
-          (ngModelChange)="newDescription.set($event)"
-          placeholder="ej: Empuje horizontal con barra"
-        />
-
-        <!-- Acciones tab 2 -->
-        <div class="modal-actions">
-          <gp-button variant="ghost" size="md" (click)="onClose()">
-            Cancelar
-          </gp-button>
-          <gp-button
-            variant="primary" size="md"
-            [disabled]="!canCreate()"
-            [loading]="isSaving()"
-            (click)="confirmCreate()"
-          >
-            Crear y agregar
-          </gp-button>
-        </div>
-
       </div>
     }
 

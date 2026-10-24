@@ -1,0 +1,101 @@
+<div class="day">
+
+  <!-- Volver al plan (sin bottom nav en esta versión) -->
+  <button type="button" class="day__back" (click)="goBack()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+    Mi plan
+  </button>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="day__error">
+      <p>{{ error() }}</p>
+      <gp-button size="sm" variant="secondary" (click)="load()">Reintentar</gp-button>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (isLoading()) {
+    <gp-skeleton shape="card" height="90px" />
+    <gp-skeleton shape="card" height="64px" />
+    <gp-skeleton shape="card" height="64px" />
+    <gp-skeleton shape="card" height="64px" />
+  }
+
+  @if (!isLoading() && !error()) {
+
+    @if (data(); as d) {
+
+      <!-- Header -->
+      <header class="day__header">
+        <span class="day__eyebrow">Día {{ d.position }} de {{ d.dayCount }}</span>
+        <h1 class="day__name">{{ d.day.name }}</h1>
+        <span class="day__meta">{{ d.templateName }} · {{ d.day.exercises.length }} ejercicios</span>
+        @if (d.day.description) {
+          <p class="day__desc">{{ d.day.description }}</p>
+        }
+      </header>
+
+      <!-- Lista de ejercicios: mismo app-exercise-item que usa Trainer -->
+      @if (d.day.exercises.length > 0) {
+        <ul class="day__exercises">
+          @for (ex of d.day.exercises; track ex.id; let i = $index) {
+            <app-exercise-item
+              [index]="i + 1"
+              [name]="ex.exerciseName"
+              [muscleGroup]="ex.primaryMuscle"
+              [detail]="detailText(ex)"
+              [clickable]="true"
+              (itemClick)="openDetail(ex)"
+            />
+          }
+        </ul>
+      } @else {
+        <section class="day__empty">
+          <p>Este día todavía no tiene ejercicios cargados.</p>
+        </section>
+      }
+
+      <!-- Registrar el día -->
+      @if (d.day.exercises.length > 0) {
+        <section class="day__finish">
+          @if (doneToday()) {
+            <div class="day__done" role="status">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+              ¡Listo! Registraste este día hoy.
+            </div>
+          } @else {
+            <gp-button variant="primary" size="lg" [loading]="isMarking()" (click)="markAsDone()">
+              Marcar como hecho
+            </gp-button>
+          }
+          @if (markError()) {
+            <p class="day__mark-error">{{ markError() }}</p>
+          }
+        </section>
+      }
+
+    } @else if (notFound()) {
+      <!-- El día no existe en su plan -->
+      <section class="day__empty">
+        <p>No encontramos ese día en tu plan.</p>
+        <gp-button size="sm" variant="secondary" (click)="goBack()">Volver a mi plan</gp-button>
+      </section>
+    }
+  }
+
+</div>
+
+<!-- Detalle del ejercicio: mismo ExerciseDetail que usa Trainer -->
+<gp-modal
+  [isOpen]="selectedExercise() !== null"
+  [title]="selectedExercise()?.exerciseName ?? ''"
+  size="md"
+  (closed)="closeDetail()"
+>
+  @if (selectedExercise(); as ex) {
+    <app-exercise-detail [exercise]="toDetailView(ex)" />
+  }
+</gp-modal>

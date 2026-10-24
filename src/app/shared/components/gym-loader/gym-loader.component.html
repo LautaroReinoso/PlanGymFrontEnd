@@ -1,0 +1,36 @@
+<svg
+  class="gym-loader"
+  [ngStyle]="svgStyle()"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke-width="1.8"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  role="status"
+  aria-label="Cargando"
+>
+  <!-- Barra + discos + antebrazos: se mueven juntos en línea recta (sin rotar) -->
+  <g class="bar-group">
+    <line class="weight-part" x1="4" y1="6" x2="20" y2="6" />
+    <line class="weight-part" x1="3" y1="4.5" x2="3" y2="7.5" />
+    <line class="weight-part" x1="5" y1="4" x2="5" y2="8" />
+    <line class="weight-part" x1="19" y1="4" x2="19" y2="8" />
+    <line class="weight-part" x1="21" y1="4.5" x2="21" y2="7.5" />
+    <path class="body-part" d="M7.3 9.3 L6.5 6" />
+    <path class="body-part" d="M16.7 9.3 L17.5 6" />
+  </g>
+
+  <!-- Brazos superiores: rotan desde el hombro (fijo). El codo es la articulación que se mueve. -->
+  <path class="body-part upper-arm-left" d="M9.4 11.4 L7.3 9.3" />
+  <path class="body-part upper-arm-right" d="M14.6 11.4 L16.7 9.3" />
+
+  <!-- Cabeza -->
+  <circle class="body-part" cx="12" cy="9" r="1.2" stroke-width="2.6"/>
+
+  <!-- Torso -->
+  <path class="body-part" d="M12 10.4 V16" />
+
+  <!-- Piernas: quietas -->
+  <path class="body-part" d="M12 16 L9.6 18 L9.5 21" />
+  <path class="body-part" d="M12 16 L14.4 18 L14.3 21" />
+</svg>

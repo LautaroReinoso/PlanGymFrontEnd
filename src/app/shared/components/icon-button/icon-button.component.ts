@@ -31,7 +31,11 @@ export type IconButtonIcon =
   | 'arrow-left'
   | 'arrow-right'
   | 'settings'
-  | 'more';
+  | 'more'
+  | 'lines'
+  | 'pesa'
+  |  'day'
+  | 'person';
 
 @Component({
   selector: 'gp-icon-button',
@@ -55,11 +59,13 @@ export class IconButtonComponent {
 
   readonly clicked = output<void>();
 
+  readonly bordered = input(true);
+
   readonly hostClasses = computed(() => [
-    'icon-button',
-    `icon-button--${this.variant()}`,
-    `icon-button--${this.size()}`,
-    this.disabled() ? 'icon-button--disabled' : '',
+    'icon-btn',
+    `icon-btn--${this.variant()}`,
+    `icon-btn--${this.size()}`,
+    this.disabled() ? 'icon-btn--disabled' : '',
   ].filter(Boolean).join(' '));
 
   onClick(): void {

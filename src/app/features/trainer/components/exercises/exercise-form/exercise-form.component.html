@@ -1,1 +1,157 @@
-<p>exercise-form works!</p>
+<form class="exercise-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+
+  <gp-input
+    label="Nombre del ejercicio"
+    formControlName="name"
+    [errorMsg]="hasError('name') ? 'Ingresá un nombre válido' : null"
+  />
+
+  <!-- ── Músculos ── -->
+  <div class="form-field">
+    <label class="form-label" for="primaryMuscle">Músculo principal</label>
+    <select id="primaryMuscle" class="form-select" formControlName="primaryMuscle" (change)="onPrimaryChange()">
+      <option value="" disabled>Seleccioná un músculo</option>
+      @for (opt of muscleGroupOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    @if (hasError('primaryMuscle')) {
+      <span class="form-error">Seleccioná el músculo principal</span>
+    }
+  </div>
+
+  <div class="form-field">
+    <span class="form-label">Músculos secundarios (opcional)</span>
+    <div class="chip-picker" role="group" aria-label="Músculos secundarios">
+      @for (opt of muscleGroupOptions; track opt.value) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--active]="isSecondary(opt.value)"
+          [disabled]="isPrimary(opt.value)"
+          [attr.aria-pressed]="isSecondary(opt.value)"
+          (click)="toggleSecondary(opt.value)"
+        >
+          {{ opt.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- ── Clasificación ── -->
+  <div class="form-row form-row--3">
+    <div class="form-field">
+      <label class="form-label" for="exerciseType">Tipo</label>
+      <select id="exerciseType" class="form-select" formControlName="exerciseType">
+        <option value="">Sin especificar</option>
+        @for (opt of exerciseTypeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="equipment">Equipamiento</label>
+      <select id="equipment" class="form-select" formControlName="equipment">
+        <option value="">Sin especificar</option>
+        @for (opt of equipmentOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label class="form-label" for="laterality">Lateralidad</label>
+      <select id="laterality" class="form-select" formControlName="laterality">
+        <option value="">Sin especificar</option>
+        @for (opt of lateralityOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Dificultad (requerida) ── -->
+  <div class="form-field">
+    <span class="form-label">Dificultad</span>
+    <div class="difficulty-picker" role="radiogroup" aria-label="Dificultad">
+      @for (opt of difficultyOptions; track opt.value) {
+        <button
+          type="button"
+          class="difficulty-btn"
+          [class.difficulty-btn--active]="form.get('difficulty')?.value === opt.value"
+          (click)="selectDifficulty(opt.value)"
+          [attr.aria-pressed]="form.get('difficulty')?.value === opt.value"
+        >
+          {{ opt.value }}
+        </button>
+      }
+      @if (form.get('difficulty')?.value) {
+        <span class="difficulty-picker-label">{{ currentDifficultyLabel }}</span>
+      }
+    </div>
+    @if (hasError('difficulty')) {
+      <span class="form-error">Seleccioná un nivel de dificultad</span>
+    }
+  </div>
+
+  <!-- ── Valores por defecto (prellenan la plantilla) ── -->
+  <fieldset class="form-fieldset">
+    <legend class="form-label">Valores sugeridos (opcional)</legend>
+    <div class="form-row form-row--4">
+      <div class="form-field">
+        <label class="form-label form-label--sm" for="defaultSets">Series</label>
+        <input id="defaultSets" class="form-input" type="number" min="1" inputmode="numeric" formControlName="defaultSets" />
+      </div>
+      <div class="form-field">
+        <label class="form-label form-label--sm" for="defaultRepsMin">Reps mín</label>
+        <input id="defaultRepsMin" class="form-input" type="number" min="1" inputmode="numeric" formControlName="defaultRepsMin" />
+      </div>
+      <div class="form-field">
+        <label class="form-label form-label--sm" for="defaultRepsMax">Reps máx</label>
+        <input id="defaultRepsMax" class="form-input" type="number" min="1" inputmode="numeric" formControlName="defaultRepsMax" />
+      </div>
+      <div class="form-field">
+        <label class="form-label form-label--sm" for="defaultRestSeconds">Descanso (s)</label>
+        <input id="defaultRestSeconds" class="form-input" type="number" min="0" step="5" inputmode="numeric" formControlName="defaultRestSeconds" />
+      </div>
+    </div>
+    @if (repsRangeError) {
+      <span class="form-error">Las reps mínimas no pueden superar a las máximas</span>
+    }
+    @if (hasError('defaultSets') || hasError('defaultRepsMin') || hasError('defaultRepsMax') || hasError('defaultRestSeconds')) {
+      <span class="form-error">Series y reps deben ser al menos 1; el descanso no puede ser negativo</span>
+    }
+  </fieldset>
+
+  <!-- ── Técnica ── -->
+  <div class="form-field">
+    <label class="form-label" for="techniqueText">Técnica (opcional · un paso por línea)</label>
+    <textarea
+      id="techniqueText"
+      class="form-textarea"
+      formControlName="techniqueText"
+      rows="4"
+      placeholder="Espalda recta, rodillas semiflexionadas
+Llevá la barra hacia el ombligo
+Bajá controlando"
+    ></textarea>
+  </div>
+
+  <gp-input label="Descripción (opcional)" formControlName="description" />
+
+  <div class="form-row">
+    <gp-input label="URL de imagen (opcional)" formControlName="imageUrl" placeholder="https://…" />
+    <gp-input label="URL de video (opcional)" formControlName="videoUrl" placeholder="https://youtube.com/…" />
+  </div>
+
+  <div class="form-actions">
+    <gp-button variant="ghost" type="button" (click)="onCancel()">
+      Cancelar
+    </gp-button>
+    <gp-button variant="primary" type="submit" [loading]="submitting()">
+      {{ isEditMode ? 'Guardar cambios' : 'Crear ejercicio' }}
+    </gp-button>
+  </div>
+
+</form>

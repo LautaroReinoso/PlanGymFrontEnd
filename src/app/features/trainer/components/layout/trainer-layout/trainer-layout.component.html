@@ -24,18 +24,8 @@
 
     <!-- Top bar mobile -->
     <header class="topbar">
-      <button
-        class="topbar-menu-btn"
-        (click)="toggleSidebar()"
-        aria-label="Abrir menú"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="6"  x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
+          <gp-icon-button [icon]="'lines'" [variant]="'ghost'"  (click)="toggleSidebar()"  aria-label="Abrir menú"      [bordered]="false"  class="topbar-menu-btn"></gp-icon-button>
+
 
       <div class="topbar-logo">
         <svg width="22" height="22" viewBox="0 0 36 36" fill="none">

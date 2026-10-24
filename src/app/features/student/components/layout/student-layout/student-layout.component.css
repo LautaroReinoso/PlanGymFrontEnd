@@ -1,0 +1,16 @@
+.student-shell {
+  min-height: 100dvh;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.student-content {
+  flex: 1;
+  /* abajo: alto del bottom-nav (64px) + aire + safe area del celular */
+  padding: var(--space-5) var(--space-4) calc(64px + var(--space-8) + env(safe-area-inset-bottom, 0px));
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}

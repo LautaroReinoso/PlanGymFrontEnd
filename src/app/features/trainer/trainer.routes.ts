@@ -51,6 +51,14 @@ export const TRAINER_ROUTES: Routes = [
           ),
         title: 'Ejercicios — GymPlan',
       },
+      {
+        path: 'exercises/:id',
+        loadComponent: () =>
+          import('./pages/exercise-detail-page/exercise-detail-page/exercise-detail-page.component').then(
+            m => m.ExerciseDetailPageComponent
+          ),
+        title: 'Ejercicio — GymPlan',
+      },
 
       // ── Templates ────────────────────────────
       {
@@ -61,7 +69,7 @@ export const TRAINER_ROUTES: Routes = [
           ),
         title: 'Plantillas — GymPlan',
       },
-            {
+      {
         path: 'templates/new',
         loadComponent: () =>
           import('./pages/template-create-page/template-create-page.component').then(
@@ -76,6 +84,12 @@ export const TRAINER_ROUTES: Routes = [
             m => m.TemplateDetailPageComponent
           ),
         title: 'Editor de plantilla — GymPlan',
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/profile-page/profile-page.component').then((m) => m.TrainerProfilePageComponent),
+      title: 'Mi Perfil — GymPlan'
       },
 
     ],

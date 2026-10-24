@@ -21,11 +21,12 @@ import { FormsModule } from '@angular/forms';
 import { UpdateTemplateRequest } from '../../../models/trainer.models';
 import { ButtonComponent } from '../../../../../shared/components/button-component/button-component.component';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
+import { InputFieldComponent } from '../../../../../shared/components/input-field/input-field.component';
 
 @Component({
   selector: 'app-template-edit-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, ModalComponent],
+  imports: [CommonModule, FormsModule, ButtonComponent, ModalComponent, InputFieldComponent],
   templateUrl: './template-edit-modal.component.html',
   styleUrl: './template-edit-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

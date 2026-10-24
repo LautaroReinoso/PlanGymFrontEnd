@@ -23,8 +23,8 @@ export class AssignmentService {
   /** Asignar template a un alumno */
   assign(dto: AssignWorkoutRequest): Observable<StudentWorkout> {
     return this.http.post<StudentWorkout>(
-      `${this.api}/api/v1/workout-templates/${dto.workoutTemplateId}/assign/${dto.studentId}`,
-      {}
+      `${this.api}/student-workouts/assign`,
+      dto
     );
   }
 
@@ -35,6 +35,6 @@ export class AssignmentService {
 
   /** Desasignar / eliminar asignación */
   unassign(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.api}/api/v1/student-workouts/${id}`);
+    return this.http.delete<void>(`${this.api}/student-workouts/${id}`);
   }
 }

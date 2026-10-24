@@ -1,0 +1,68 @@
+<section class="profile">
+  <header class="profile__header">
+    <a routerLink="/student/dashboard" class="profile__back" aria-label="Volver al inicio">←</a>
+    <h1 class="profile__title">Mi perfil</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="skeleton-list" aria-busy="true">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <div class="skeleton"></div>
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="state">
+      <p>No pudimos cargar tu perfil.</p>
+      <button type="button" class="btn btn--ghost" (click)="load()">Reintentar</button>
+    </div>
+  } @else if (profile(); as p) {
+    <div class="dni-row">
+      <span class="dni-row__label">DNI</span>
+      <span class="dni-row__value">{{ p.dni }}</span>
+    </div>
+
+    <form class="profile__form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="field">
+        <app-input-field label="Nombre" formControlName="nombre" />
+        @if (showError('nombre')) { <small class="field__error">Ingresá tu nombre</small> }
+      </div>
+
+      <div class="field">
+        <app-input-field label="Apellido" formControlName="apellido" />
+        @if (showError('apellido')) { <small class="field__error">Ingresá tu apellido</small> }
+      </div>
+
+      <div class="field">
+        <app-input-field label="Fecha de nacimiento" type="date" formControlName="fechaNacimiento" />
+      </div>
+
+      <div class="field">
+        <app-input-field label="Celular" type="tel" formControlName="cel" />
+      </div>
+
+      <div class="field">
+        <app-input-field label="Dirección" formControlName="direccion" />
+      </div>
+
+      <div class="field">
+        <app-input-field label="Ciudad / Provincia" formControlName="ciudadProvincia" />
+      </div>
+
+      <div class="field">
+        <app-input-field label="Mail (opcional)" type="email" formControlName="mail" />
+        @if (mailTaken()) {
+          <small class="field__error">Ese mail ya está en uso</small>
+        } @else if (showError('mail')) {
+          <small class="field__error">Ingresá un mail válido</small>
+        }
+      </div>
+
+      @if (saveError(); as msg) { <p class="field__error" role="alert">{{ msg }}</p> }
+      @if (saved()) { <p class="profile__saved" role="status">Cambios guardados ✓</p> }
+
+      <button type="submit" class="btn btn--primary" [disabled]="!dirty() || saving()">
+        {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+      </button>
+    </form>
+  }
+</section>

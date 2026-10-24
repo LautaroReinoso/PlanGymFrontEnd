@@ -9,11 +9,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes itemIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
 /* ── Card ────────────────────────────────────── */
 
 .day-card {
@@ -71,59 +66,33 @@ align-items:center;
   gap: 6px;
 }
 
-.exercise-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  background: #13131A;
-  border: 1px solid #232330;
+/* ── Drag & drop (CDK) ───────────────────────── */
+
+.exercise-row { display: block; }
+
+.exercise-row:not(.cdk-drag-disabled) { cursor: grab; }
+
+/* Clon que sigue al puntero */
+.exercise-row.cdk-drag-preview {
+  cursor: grabbing;
   border-radius: 10px;
-  animation: itemIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+  background: var(--color-card, #1C1C26);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--color-accent, #4F6EF7);
 }
 
-.exercise-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
+/* Hueco que queda en la lista */
+.exercise-row.cdk-drag-placeholder { opacity: 0.35; }
 
-.exercise-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #F0F0F5;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.exercise-detail {
-  font-size: 12px;
-  color: #6B6B80;
-}
-
-.exercise-remove-btn {
-  display: grid;
-  place-items: center;
-  background: none;
-  border: none;
-  padding: 5px;
-  border-radius: 6px;
-  color: #6B6B80;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 150ms, color 150ms;
-}
-
-.exercise-remove-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
+/* Animación al soltar y al correrse los vecinos */
+.exercise-row.cdk-drag-animating,
+.exercise-list.cdk-drop-list-dragging .exercise-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
 /* ── Reduced motion ──────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .day-card, .exercise-item { animation: none; }
+  .day-card { animation: none; }
+  .exercise-row.cdk-drag-animating,
+  .exercise-list.cdk-drop-list-dragging .exercise-row:not(.cdk-drag-placeholder) { transition: none; }
 }

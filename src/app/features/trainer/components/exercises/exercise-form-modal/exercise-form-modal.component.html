@@ -1,0 +1,14 @@
+<gp-modal
+  [isOpen]="isOpen()"
+  [title]="title"
+  size="md"
+  (closed)="closed.emit()"
+>
+  <app-exercise-form
+    [initialValue]="editingExercise()"
+    [submitting]="submitting()"
+    [forceCreate]="forceCreate()"
+    (save)="onSave($event)"
+    (cancel)="closed.emit()"
+  />
+</gp-modal>

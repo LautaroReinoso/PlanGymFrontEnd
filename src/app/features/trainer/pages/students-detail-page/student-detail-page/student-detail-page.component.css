@@ -47,24 +47,7 @@
 
 /* ── Skeleton ────────────────────────────────── */
 
-.profile-skeleton {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
 
-.skeleton-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.skeleton-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
 
 /* ── Profile header ──────────────────────────── */
 
@@ -193,6 +176,23 @@
 .workout-actions {
   border-top: 1px solid rgba(79, 110, 247, 0.15);
   padding-top: 14px;
+}
+
+.days-nav {
+  margin-top: 20px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none; 
+  -webkit-overflow-scrolling: touch;
+}
+.days-nav::-webkit-scrollbar {
+  display: none; 
+}
+
+.days-badges {
+  display: flex;
+  gap: 12px;
+  padding-bottom: 4px;
 }
 
 /* ── Sin plan ────────────────────────────────── */

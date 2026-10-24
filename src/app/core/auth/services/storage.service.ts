@@ -12,6 +12,12 @@ export const STORAGE_KEYS = {
   LAST_ROUTE:   'gp_last_route',
 } as const;
  
+// Último modo de login usado ('trainer' | 'student').
+// Va FUERA de STORAGE_KEYS a propósito: clearAll() (logout / token vencido)
+// borra todo STORAGE_KEYS, y este dato tiene que sobrevivir para que el
+// alumno vuelva a ver su pantalla de login.
+export const LOGIN_MODE_KEY = 'gp_login_mode';
+
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];
  
 // ─────────────────────────────────────────────

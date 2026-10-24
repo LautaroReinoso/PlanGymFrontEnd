@@ -1,16 +1,9 @@
-<span [class]="hostClasses">
+<span [class]="classes()">
+
   @if (dot()) {
-    <span class="card--default"></span>
-  }
-    @if (dot()) {
-    <span class="card--elevated"></span>
-  }
-    @if (dot()) {
-    <span class="card--flat"></span>
-  }
-    @if (dot()) {
-    <span class="card--accent"></span>
+    <span class="badge__dot"></span>
   }
 
   <ng-content></ng-content>
+
 </span>

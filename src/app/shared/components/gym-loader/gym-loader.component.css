@@ -1,0 +1,77 @@
+:host {
+  display: inline-flex;
+}
+
+.gym-loader {
+  display: block;
+}
+
+.body-part {
+  stroke: var(--gym-loader-body-color, #e8e9ed);
+}
+
+.weight-part {
+  stroke: var(--gym-loader-accent-color, #4f6ef7);
+}
+
+/* Barra + discos + antebrazos: bajan y suben juntos, en línea recta (sin rotar) */
+.bar-group {
+  transform-box: view-box;
+  transform-origin: 12px 6px;
+  animation: lift-bar 0.7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes lift-bar {
+  0%,
+  100% {
+    transform: translateY(1.4px);
+  }
+  50% {
+    transform: translateY(-1.4px);
+  }
+}
+
+/* Brazos superiores: rotan desde el hombro (pivote fijo).
+   El codo es la articulación que realmente se mueve. */
+.upper-arm-left {
+  transform-box: view-box;
+  transform-origin: 14.4px 10px;
+  animation: swing-left 0.7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.upper-arm-right {
+  transform-box: view-box;
+  transform-origin: 9.4px 10px;
+  animation: swing-right 0.7s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes swing-left {
+  0%,
+  100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes swing-right {
+  0%,
+  100% {
+    transform: rotate(10deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+}
+
+/* Piernas: quietas, sin animación */
+
+/* Accesibilidad: respeta la preferencia de reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .bar-group,
+  .upper-arm-left,
+  .upper-arm-right {
+    animation: none;
+  }
+}

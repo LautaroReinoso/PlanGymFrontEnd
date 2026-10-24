@@ -1,57 +1,53 @@
 <!-- TemplateDay -->
 <section class="day-card">
 
-  <!-- Header del día -->
+  <!-- ── Header del día ── -->
   <header class="day-header">
     <div class="day-title-group">
-      <h2>{{ day().dayNumber }}</h2>
+      <span class="day-number">{{ day().dayNumber }}</span>
       <h3 class="day-name">{{ day().name }}</h3>
     </div>
-    <div class="day-icon">
-      <gp-icon-button  icon="edit" [variant]="'ghost'"   (click)="onEditDay()">
-      
-      </gp-icon-button>
-      <gp-icon-button icon="delete" [variant]="'ghost'" (click)="onRemoveDay()">
-  
-      </gp-icon-button>
-    </div>
 
-   
-
+    @if (!readonly()) {
+      <div class="day-actions">
+        <gp-icon-button icon="edit"   variant="ghost" (click)="onEditDay()"/>
+        <gp-icon-button icon="delete" variant="ghost" (click)="onRemoveDay()"/>
+      </div>
+    }
   </header>
-   
-  <!-- Lista de ejercicios -->
+
+  <!-- ── Lista de ejercicios ── -->
   @if (day().exercises.length === 0) {
     <p class="day-empty">Sin ejercicios todavía.</p>
   } @else {
-    <ul class="exercise-list">
-      @for (de of day().exercises; track de.id) {
-        <li class="exercise-item">
-          <div class="exercise-main">
-            <span class="exercise-name">{{ de.exerciseName }}</span>
-            <span class="exercise-detail">
-              {{ de.sets }} × {{ de.reps }} · {{ de.restSeconds }}s descanso
-            </span>
-          </div>
-          <button
-            class="exercise-remove-btn"
-            (click)="onRemoveExercise(de.id)"
-            aria-label="Quitar ejercicio"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </li>
+    <ul
+      class="exercise-list"
+      cdkDropList
+      [cdkDropListDisabled]="readonly()"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      @for (de of day().exercises; track de.id; let i = $index) {
+        <app-exercise-item
+          class="exercise-row"
+          cdkDrag
+          [cdkDragDisabled]="readonly()"
+          [cdkDragStartDelay]="{ mouse: 0, touch: 200 }"
+          [index]="i + 1"
+          [name]="de.exerciseName"
+          [muscleGroup]="de.primaryMuscle"
+          [detail]="summary(de)"
+          [showRemove]="!readonly()"
+          (remove)="onRemoveExercise(de.id)"
+        />
       }
     </ul>
   }
 
-  <!-- Agregar ejercicio -->
-  <gp-button variant="ghost" size="sm" [fullWidth]="true" (click)="onAddExercise()">
-    + Agregar ejercicio
-  </gp-button>
+  <!-- ── Agregar ejercicio — solo editable ── -->
+  @if (!readonly()) {
+    <gp-button variant="ghost" size="sm" [fullWidth]="true" (click)="onAddExercise()">
+      + Agregar ejercicio
+    </gp-button>
+  }
 
 </section>

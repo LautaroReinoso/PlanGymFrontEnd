@@ -3,169 +3,164 @@
 
   <!-- ── Back ── -->
   <button class="back-btn" (click)="goBack()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2">
-      <path d="M15 18l-6-6 6-6"/>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M15 18l-6-6 6-6" />
     </svg>
     Mis alumnos
   </button>
 
   <!-- ── Error ── -->
   @if (error()) {
-    <div class="error-banner" role="alert">{{ error() }}</div>
+  <div class="error-banner" role="alert">{{ error() }}</div>
   }
 
   <!-- ── Skeleton ── -->
   @if (isLoading()) {
-    <div class="profile-skeleton">
-      <div class="skeleton-header">
-        <gp-skeleton shape="circle" width="72px" height="72px"/>
-        <div class="skeleton-info">
-          <gp-skeleton shape="line" width="50%"/>
-          <gp-skeleton shape="line" width="70%"/>
-          <gp-skeleton shape="rect" width="80px" height="24px" radius="999px"/>
-        </div>
-      </div>
-      <gp-skeleton shape="card" width="100%" height="140px"/>
-    </div>
+  <div class="profile-skeleton">
+
+       <app-gym-loader class="profile-skeleton" [size]="48" />
+       
+  
+  </div>
   }
+
 
   <!-- ── Contenido ── -->
   @if (!isLoading() && student()) {
-    <!-- Perfil -->
-    <div class="profile-header">
-      <div class="profile-avatar"
-           [class.profile-avatar--active]="!!student()!.activeWorkout">
-        {{ initials() }}
-      </div>
-      <div class="profile-info">
-        <h1 class="profile-name">{{ displayName() }}</h1>
-        <p class="profile-mail">{{ student()!.mail }}</p>
-        @if (student()!.activeWorkout) {
-          <gp-badge variant="elevated" >Plan activo</gp-badge>
-        } @else {
-          <gp-badge variant="default">Sin plan</gp-badge>
-        }
-      </div>
+  <!-- Perfil -->
+  <div class="profile-header">
+
+    <!-- Implementación del Avatar Reutilizable -->
+    <div class="avatar-wrapper">
+      <app-avatar [initials]="initials()" [identifier]="student()!.id" [isPending]="!student()!.activeWorkout" />
     </div>
 
-    <!-- Workout activo -->
-    <section class="section">
-      <h2 class="section-title">Plan actual</h2>
-
+    <div class="profile-info">
+      <h1 class="profile-name">{{ displayName() }}</h1>
+      <p class="profile-mail">{{ student()!.dni }}</p>
       @if (student()!.activeWorkout) {
-        <div class="workout-card">
-          <span class="card-accent-line" aria-hidden="true"></span>
-          <div class="workout-card-header">
-            <div class="workout-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                   stroke="currentColor" stroke-width="1.8">
-                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2"/>
-              </svg>
-            </div>
-            <div>
-              <div class="workout-name">
-                {{ student()!.activeWorkout!.templateName }}
-              </div>
-              <div class="workout-since">
-                Desde {{ student()!.activeWorkout!.startDate | date:'dd/MM/yyyy' }}
-              </div>
-            </div>
-            <gp-badge variant="elevated" class="workout-badge"></gp-badge>
-          </div>
-          <div class="workout-actions">
-            <gp-button variant="ghost" size="sm" (click)="openAssignModal()">
-              Cambiar plan
-            </gp-button>
-          </div>
-        </div>
+      <gp-badge variant="elevated">Plan activo</gp-badge>
       } @else {
-        <div class="no-workout">
-          <p class="no-workout-text">Este alumno no tiene un plan asignado.</p>
-          <gp-button variant="primary" size="md" (click)="openAssignModal()">
-            Asignar plan
-          </gp-button>
-        </div>
+      <gp-badge variant="default">Sin plan</gp-badge>
       }
-    </section>
+    </div>
+  </div>
 
-    <!-- Adherencia -->
-    @if (student()!.adherencePercent !== undefined) {
-      <section class="section">
-        <h2 class="section-title">Adherencia</h2>
-        <div class="adherence-card">
-          <div class="adherence-value">{{ student()!.adherencePercent }}%</div>
-          <div class="adherence-bar-track">
-            <div
-              class="adherence-bar-fill"
-              [style.width.%]="student()!.adherencePercent"
-            ></div>
+  <!-- Workout activo -->
+  <section class="section">
+    <h2 class="section-title">Plan actual</h2>
+
+    @if (student()!.activeWorkout) {
+    <div class="workout-card">
+      <span class="card-accent-line" aria-hidden="true"></span>
+      <div class="workout-card-header">
+        <div>
+          <div class="workout-name">
+            {{ student()!.activeWorkout!.templateName }}
           </div>
+          <div class="workout-since">
+            Desde {{ student()!.activeWorkout!.startDate | date:'dd/MM/yyyy' }}
+          </div>
+          <gp-badge variant="default" size="sm">
+            {{student()!.activeWorkout!.dayCount}} días ·
+          </gp-badge>
         </div>
-      </section>
-    }
-  }
+      </div>
+      <div class="days-nav">
+        <div class="days-badges" role="tablist" aria-label="Días del plan">
+          @for (day of student()!.activeTemplate!.days; track day.id; let i = $index) {
+          <app-day-badge [name]="day.name" [index]="day.orderIndex" [exerciseCount]="day.exercises.length"
+            [isActive]="selectedDayIndex() === i" (badgeClick)="selectedDayIndex.set(i)" />
+          }
+        </div>
+      </div>
+ @if (selectedDay()) {
+  <app-template-day
+    [day]="selectedDay()!"
+   [readonly]="true"
+  />
+}
 
-  <!-- ── Modal asignar plan ── -->
-<!--   <app-modal
-    [isOpen]="showAssignModal()"
-    title="Asignar plan"
-    size="md"
-    (closed)="showAssignModal.set(false)"
-  >
+
+      <div class="workout-actions">
+        <gp-button variant="ghost" size="sm" (click)="openAssignModal()">
+          Cambiar plan
+        </gp-button>
+      </div>
+    </div>
+    } @else {
+    <div class="no-workout">
+      <p class="no-workout-text">Este alumno no tiene un plan asignado.</p>
+      <gp-button variant="primary" size="md" (click)="openAssignModal()">
+        Asignar plan
+      </gp-button>
+    </div>
+    }
+  </section>
+
+  <!-- Adherencia -->
+  @if (student()!.adherencePercent !== undefined) {
+  <section class="section">
+    <h2 class="section-title">Adherencia</h2>
+    <div class="adherence-card">
+      <div class="adherence-value" [style.color]="adherenceColor()">
+        {{ student()!.adherencePercent }}%
+      </div>
+      <div class="adherence-bar-track">
+        <div class="adherence-bar-fill" [style.width.%]="student()!.adherencePercent"></div>
+      </div>
+    </div>
+  </section>
+  }
+  } 
+
+  <!-- ── Modal asignar plan (Descomentado y migrado) ── -->
+  <gp-modal [isOpen]="showAssignModal()" title="Asignar plan" size="md" (closed)="showAssignModal.set(false)">
     <div class="assign-modal-body">
       <p class="assign-modal-sub">
         Seleccioná un plan para <strong>{{ displayName() }}</strong>
       </p>
 
       @if (templates().length === 0) {
-        <div class="assign-loading">
-          <gp-skeleton shape="rect" width="100%" height="52px" radius="10px"/>
-          <gp-skeleton shape="rect" width="100%" height="52px" radius="10px"/>
-          <gp-skeleton shape="rect" width="100%" height="52px" radius="10px"/>
-        </div>
+      <div class="assign-loading">
+        <gp-skeleton shape="rect" width="100%" height="52px" radius="10px" />
+        <gp-skeleton shape="rect" width="100%" height="52px" radius="10px" />
+        <gp-skeleton shape="rect" width="100%" height="52px" radius="10px" />
+      </div>
       } @else {
-        <div class="template-list">
-          @for (t of templates(); track t.id) {
-            <button
-              class="template-option"
-              [class.template-option--selected]="selectedTemplate() === t.id"
-              (click)="selectTemplate(t.id)"
-            >
-              <div class="template-option-name">{{ t.name }}</div>
-              @if (t.description) {
-                <div class="template-option-desc">{{ t.description }}</div>
-              }
-              @if (selectedTemplate() === t.id) {
-                <svg class="template-check" width="16" height="16" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2.5">
-                  <path d="M20 6 9 17l-5-5"/>
-                </svg>
-              }
-            </button>
+      <div class="template-list">
+        @for (t of templates(); track t.id) {
+        <button class="template-option" [class.template-option--selected]="selectedTemplate() === t.id"
+          (click)="selectTemplate(t.id)">
+          <div class="template-option-name">{{ t.name }}</div>
+          @if (t.description) {
+          <div class="template-option-desc">{{ t.description }}</div>
           }
-        </div>
+          @if (selectedTemplate() === t.id) {
+          <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2.5">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          }
+        </button>
+        }
+      </div>
       }
 
       @if (assignError()) {
-        <div class="assign-error" role="alert">{{ assignError() }}</div>
+      <div class="assign-error" role="alert">{{ assignError() }}</div>
       }
 
       <div class="assign-modal-actions">
-        <gp-button variant="ghost" size="md"
-                   (click)="showAssignModal.set(false)">
+        <gp-button variant="ghost" size="md" (click)="showAssignModal.set(false)">
           Cancelar
         </gp-button>
-        <gp-button
-          variant="primary" size="md"
-          [disabled]="!selectedTemplate()"
-          [loading]="isAssigning()"
-          (click)="confirmAssign()"
-        >
+        <gp-button variant="primary" size="md" [disabled]="!selectedTemplate()" [loading]="isAssigning()"
+          (click)="confirmAssign()">
           Confirmar
         </gp-button>
       </div>
     </div>
-  </app-modal> -->
+  </gp-modal>
 
 </div>

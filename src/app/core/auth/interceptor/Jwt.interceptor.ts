@@ -12,7 +12,7 @@ import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 // Rutas públicas que NO llevan token
-const PUBLIC_URLS = ['/auth/login', '/auth/register'];
+const PUBLIC_URLS = ['/auth/login', '/auth/register', '/auth/student/login'];
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);

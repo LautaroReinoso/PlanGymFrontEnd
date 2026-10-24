@@ -1,0 +1,15 @@
+<button 
+      class="day-badge" 
+      [class.day-badge--active]="isActive()" 
+      (click)="onClick()"
+      role="tab" 
+      [attr.aria-selected]="isActive()"
+    >
+      <div class="day-badge-index" [class.day-badge-index--active]="isActive()">
+        {{ index() }}
+      </div>
+      <div class="day-badge-content">
+        <span class="day-badge-name">{{ name() }}</span>
+        <span class="day-badge-count">{{ exerciseCount() }} ejerc.</span>
+      </div>
+    </button>
