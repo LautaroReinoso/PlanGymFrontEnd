@@ -153,7 +153,7 @@ export class AuthService {
     } else if (roles.includes('ROLE_STUDENT')) {
       this.router.navigate(['/student/dashboard']);
     } else if (roles.includes('ROLE_GLOBAL_ADMIN') || roles.includes('ROLE_GYM_ADMIN')) {
-      this.router.navigate(['/admin/dashboard']);
+      this.router.navigate(['/admin/trainers']);
     } else {
       this.router.navigate(['/login']);
     }

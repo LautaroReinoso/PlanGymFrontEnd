@@ -79,6 +79,16 @@ export type Equipment =
   | 'BODYWEIGHT'
   | 'KETTLEBELL'
   | 'BAND'
+  | 'BENCH'
+  | 'BOX'
+  | 'PULL_UP_BAR'
+  | 'TRX'
+  | 'MEDICINE_BALL'
+  | 'JUMP_ROPE'
+  | 'ROWING_MACHINE'
+  | 'AIR_BIKE'
+  | 'BATTLE_ROPE'
+  | 'SLED'
   | 'OTHER';
 
 /** Filtro de alcance del listado: globales, propios o todos */

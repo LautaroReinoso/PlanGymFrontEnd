@@ -25,6 +25,19 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
   {
+    // Páginas legales (públicas)
+    path: 'privacidad',
+    loadComponent: () =>
+      import('./features/legal/privacy-page/privacy-page.component').then(m => m.PrivacyPageComponent),
+    title: 'Política de privacidad — PlanGym',
+  },
+  {
+    path: 'terminos',
+    loadComponent: () =>
+      import('./features/legal/terms-page/terms-page.component').then(m => m.TermsPageComponent),
+    title: 'Términos y condiciones — PlanGym',
+  },
+  {
     // Recuperación de contraseña (solo entrenadores)
     path: 'recuperar-contrasena',
     canActivate: [loginGuard],
@@ -48,6 +61,11 @@ export const routes: Routes = [
     path: 'trainer',
     loadChildren: () =>
       import('./features/trainer/trainer.routes').then(m => m.TRAINER_ROUTES),
+  },
+    {
+    path: 'admin',
+    loadChildren: () =>
+      import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
   },
     {
     path: 'student',

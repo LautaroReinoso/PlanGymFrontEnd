@@ -1,92 +1,29 @@
-  <svg
-      [style.width.px]="size()"
-      [style.height.px]="size() * 1.42"
-      viewBox="0 0 24 34"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <!-- Silueta base (siempre blanca) -->
-      <g class="silhouette">
-        <circle cx="12" cy="3" r="2.6" />
-        <circle cx="5.9" cy="6.6" r="1.9" />
-        <circle cx="18.1" cy="6.6" r="1.9" />
-        <rect x="8.4" y="6" width="7.2" height="4" rx="2" />
-        <rect x="8.4" y="10" width="7.2" height="4" rx="1.5" />
-        <rect x="8.6" y="13.6" width="6.8" height="3.6" rx="1.8" />
-        <rect x="4.6" y="6.6" width="2.6" height="6.4" rx="1.3" />
-        <rect x="16.8" y="6.6" width="2.6" height="6.4" rx="1.3" />
-        <rect x="3.8" y="12.6" width="2.4" height="6" rx="1.2" />
-        <rect x="17.8" y="12.6" width="2.4" height="6" rx="1.2" />
-        <rect x="8.6" y="17" width="3" height="8" rx="1.5" />
-        <rect x="12.4" y="17" width="3" height="8" rx="1.5" />
-        <rect x="8.8" y="24.6" width="2.6" height="7.4" rx="1.3" />
-        <rect x="12.6" y="24.6" width="2.6" height="7.4" rx="1.3" />
-      </g>
- 
-      <!-- Resalte del grupo muscular activo (siempre azul) -->
-      <g class="highlight">
-        @switch (muscleGroup()) {
-          @case ('CHEST') {
-            <rect x="8.4" y="6" width="7.2" height="4" rx="2" />
-          }
-          @case ('BACK') {
-            <rect x="8.4" y="6" width="7.2" height="4" rx="2" />
-            <rect x="8.4" y="10" width="7.2" height="4" rx="1.5" />
-            <circle cx="5.9" cy="6.6" r="1.9" />
-            <circle cx="18.1" cy="6.6" r="1.9" />
-          }
-          @case ('SHOULDERS') {
-            <circle cx="5.9" cy="6.6" r="1.9" />
-            <circle cx="18.1" cy="6.6" r="1.9" />
-          }
-          @case ('BICEPS') {
-            <rect x="4.6" y="6.6" width="2.6" height="6.4" rx="1.3" />
-            <rect x="16.8" y="6.6" width="2.6" height="6.4" rx="1.3" />
-          }
-          @case ('TRICEPS') {
-            <rect x="4.6" y="6.6" width="2.6" height="6.4" rx="1.3" />
-            <rect x="16.8" y="6.6" width="2.6" height="6.4" rx="1.3" />
-          }
+<svg
+  [attr.width]="width()"
+  [attr.height]="height()"
+  [attr.viewBox]="viewBox()"
+  role="img"
+  [attr.aria-label]="label()"
+>
+  @for (layer of layers(); track layer.view) {
+    <g [attr.transform]="'translate(' + layer.dx + ',0)'">
+      <!-- Silueta -->
+      <ellipse class="s" cx="50" cy="14.5" rx="8.5" ry="10.5" />
+      <path class="s" d="M45,23 L55,23 L56.5,32 L43.5,32 Z" />
+      <path class="s" [attr.d]="silhouette" />
+      <path class="s" [attr.d]="silhouette" [attr.transform]="mirror" />
 
-          @case ('FOREARMS') {
-            <rect x="3.8" y="12.6" width="2.4" height="6" rx="1.2" />
-            <rect x="17.8" y="12.6" width="2.4" height="6" rx="1.2" />
-          }
-          @case ('QUADRICEPS') {
-            <rect x="8.6" y="17" width="3" height="8" rx="1.5" />
-            <rect x="12.4" y="17" width="3" height="8" rx="1.5" />
-          }
-          @case ('HAMSTRINGS') {
-            <rect x="8.6" y="17" width="3" height="8" rx="1.5" />
-            <rect x="12.4" y="17" width="3" height="8" rx="1.5" />
-          }
-          @case ('CALVES') {
-            <rect x="8.8" y="24.6" width="2.6" height="7.4" rx="1.3" />
-            <rect x="12.6" y="24.6" width="2.6" height="7.4" rx="1.3" />
-          }
-          @case ('CORE') {
-            <rect x="8.4" y="10" width="7.2" height="4" rx="1.5" />
-          }
-          @case ('GLUTES') {
-            <rect x="8.6" y="13.6" width="6.8" height="3.6" rx="1.8" />
-          }
+      <!-- Zonas sin grupo propio -->
+      @for (d of layer.neutral; track $index) {
+        <path class="n" [attr.d]="d" />
+        <path class="n" [attr.d]="d" [attr.transform]="mirror" />
+      }
 
-          @case ('FULL_BODY') {
-            <circle cx="12" cy="3" r="2.6" />
-            <circle cx="5.9" cy="6.6" r="1.9" />
-            <circle cx="18.1" cy="6.6" r="1.9" />
-            <rect x="8.4" y="6" width="7.2" height="4" rx="2" />
-            <rect x="8.4" y="10" width="7.2" height="4" rx="1.5" />
-            <rect x="8.6" y="13.6" width="6.8" height="3.6" rx="1.8" />
-            <rect x="4.6" y="6.6" width="2.6" height="6.4" rx="1.3" />
-            <rect x="16.8" y="6.6" width="2.6" height="6.4" rx="1.3" />
-            <rect x="3.8" y="12.6" width="2.4" height="6" rx="1.2" />
-            <rect x="17.8" y="12.6" width="2.4" height="6" rx="1.2" />
-            <rect x="8.6" y="17" width="3" height="8" rx="1.5" />
-            <rect x="12.4" y="17" width="3" height="8" rx="1.5" />
-            <rect x="8.8" y="24.6" width="2.6" height="7.4" rx="1.3" />
-            <rect x="12.6" y="24.6" width="2.6" height="7.4" rx="1.3" />
-          }
-        }
-      </g>
-    </svg>
+      <!-- Músculos -->
+      @for (r of layer.regions; track $index) {
+        <path [attr.class]="r.cls" [attr.d]="r.d" />
+        <path [attr.class]="r.cls" [attr.d]="r.d" [attr.transform]="mirror" />
+      }
+    </g>
+  }
+</svg>

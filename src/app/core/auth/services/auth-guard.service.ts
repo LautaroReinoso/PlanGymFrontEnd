@@ -68,6 +68,6 @@ export const loginGuard: CanActivateFn = () => {
 function getDefaultRoute(auth: AuthService): string {
   if (auth.isTrainer() || auth.isAdmin())       return '/trainer/students';
   if (auth.isStudent())                          return '/student/dashboard';
-  if (auth.isGlobalAdmin() || auth.isGymAdmin()) return '/admin/dashboard';
+  if (auth.isGlobalAdmin() || auth.isGymAdmin()) return '/admin/trainers';
   return '/login';
 }

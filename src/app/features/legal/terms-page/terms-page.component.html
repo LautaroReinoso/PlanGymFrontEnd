@@ -1,0 +1,152 @@
+<app-legal-layout title="Términos y condiciones de uso" [sections]="sections">
+
+  <p>
+    Estos términos regulan el uso de {{ legal.appName }} ({{ legal.site }}), operado por
+    <strong>{{ legal.owner }}</strong>, CUIT {{ legal.taxId }}, con domicilio en {{ legal.address }}.
+    Leelos con atención: al usar el servicio los aceptás.
+  </p>
+
+  <h2 id="aceptacion">1. Aceptación</h2>
+  <p>
+    Al crear una cuenta, al ingresar con el acceso que te dio tu entrenador o al usar
+    {{ legal.appName }} de cualquier forma, aceptás estos términos y la
+    <a routerLink="/privacidad">Política de privacidad</a>. Si no estás de acuerdo, no uses el servicio.
+  </p>
+
+  <h2 id="servicio">2. Qué es {{ legal.appName }}</h2>
+  <p>
+    {{ legal.appName }} es una aplicación web para que entrenadores personales y gimnasios armen planes de
+    entrenamiento, los asignen a sus alumnos y sigan su progreso, y para que los alumnos consulten su plan
+    y registren los días que entrenaron.
+  </p>
+  <p>
+    {{ legal.appName }} es una herramienta de gestión: <strong>no presta servicios de entrenamiento,
+    medicina, kinesiología ni nutrición</strong>, ni es parte de la relación entre el entrenador y sus
+    alumnos.
+  </p>
+
+  <h2 id="cuentas">3. Cuentas y acceso</h2>
+  <ul>
+    <li>Los entrenadores se registran con su mail y una contraseña, y deben ser mayores de 18 años.</li>
+    <li>Los alumnos son dados de alta por su entrenador e ingresan con su DNI.</li>
+    <li>Tenés que brindar datos verdaderos y mantenerlos actualizados.</li>
+    <li>Sos responsable de cuidar tus credenciales y de lo que se haga desde tu cuenta. Si sospechás un uso
+      no autorizado, cambiá tu contraseña y avisanos.</li>
+  </ul>
+
+  <h2 id="entrenador">4. Responsabilidades del entrenador</h2>
+  <p>Si usás {{ legal.appName }} como entrenador, sos responsable de:</p>
+  <ul>
+    <li>El contenido de los planes, ejercicios, cargas, indicaciones y notas que asignás.</li>
+    <li>Contar con la formación y habilitaciones necesarias para prescribir actividad física.</li>
+    <li>Evaluar a cada alumno y verificar que esté en condiciones de realizar la actividad (por ejemplo,
+      con su apto médico).</li>
+    <li>Los datos de tus alumnos que cargás: tener su consentimiento (o el de sus padres, si son menores),
+      usarlos solo para el entrenamiento y respetar la Ley 25.326, como se explica en la
+      <a routerLink="/privacidad">Política de privacidad</a>.</li>
+    <li>No cargar datos de salud de los alumnos sin su consentimiento expreso.</li>
+  </ul>
+
+  <h2 id="salud">5. Salud y actividad física</h2>
+  <div class="callout callout--warn">
+    La actividad física implica riesgos. Antes de empezar o cambiar un plan de entrenamiento, consultá con
+    un médico. Si durante un ejercicio sentís dolor, mareos o malestar, detenete y buscá atención médica.
+  </div>
+  <p>
+    La información de {{ legal.appName }} (ejercicios, técnica, valores sugeridos) es orientativa y no
+    reemplaza la evaluación ni la supervisión de un profesional. Los planes que ves los arma tu
+    entrenador, que es quien responde por ellos.
+  </p>
+
+  <h2 id="uso">6. Uso aceptable</h2>
+  <p>No está permitido:</p>
+  <ul>
+    <li>Acceder o intentar acceder a cuentas o datos de otras personas.</li>
+    <li>Cargar contenido ilegal, ofensivo o que infrinja derechos de terceros.</li>
+    <li>Interferir con el funcionamiento del servicio, probar sus vulnerabilidades sin autorización o
+      extraer datos de forma automatizada.</li>
+    <li>Revender o sublicenciar el acceso sin nuestro acuerdo por escrito.</li>
+  </ul>
+  <p>Si no se respetan estas reglas podemos suspender o cancelar la cuenta.</p>
+
+  <h2 id="contenido">7. Contenido y propiedad intelectual</h2>
+  <ul>
+    <li>
+      <strong>Tu contenido es tuyo.</strong> Los planes, ejercicios propios y notas que cargás siguen
+      siendo de tu propiedad. Nos das permiso para almacenarlos y mostrarlos solo con el fin de prestarte
+      el servicio.
+    </li>
+    <li>
+      La aplicación, su diseño, la marca {{ legal.appName }}, el catálogo de ejercicios globales y sus
+      ilustraciones pertenecen a {{ legal.owner }}. Podés usarlos dentro del servicio, pero no copiarlos
+      ni distribuirlos fuera de él.
+    </li>
+  </ul>
+
+  <h2 id="precio">8. Precio y pagos</h2>
+  <p>
+    Durante la etapa inicial el servicio puede ofrecerse sin costo o en forma de prueba. Si en el futuro
+    se cobra una suscripción, vamos a informar el precio, el período de facturación y las condiciones
+    <strong>antes</strong> de cualquier cobro, y solo se cobrará si lo aceptás expresamente.
+  </p>
+  <p>
+    Si sos consumidor, tenés derecho a revocar la contratación dentro de los 10 días corridos desde que la
+    hiciste, sin costo ni necesidad de explicar el motivo (art. 34 de la Ley 24.240 de Defensa del
+    Consumidor). Cuando haya planes pagos, vas a poder hacerlo desde el <strong>botón de
+    arrepentimiento</strong> del sitio, y también vas a poder dar de baja la suscripción por el mismo medio
+    por el que la contrataste.
+  </p>
+
+  <h2 id="disponibilidad">9. Disponibilidad del servicio</h2>
+  <p>
+    {{ legal.appName }} está en su primera versión. Trabajamos para que esté disponible y funcione bien,
+    pero puede haber interrupciones por mantenimiento, actualizaciones o fallas de proveedores. Podemos
+    agregar, cambiar o quitar funciones; si un cambio afecta de forma importante cómo usás el servicio, te
+    lo vamos a avisar con anticipación.
+  </p>
+
+  <h2 id="responsabilidad">10. Limitación de responsabilidad</h2>
+  <p>En la medida en que lo permita la ley, {{ legal.appName }} no responde por:</p>
+  <ul>
+    <li>Lesiones o daños derivados de realizar los planes de entrenamiento, cuyo contenido y supervisión
+      son responsabilidad del entrenador.</li>
+    <li>El contenido que cargan los usuarios ni la relación entre entrenadores y alumnos.</li>
+    <li>Interrupciones o pérdidas de datos causadas por fallas ajenas a nuestro control razonable.</li>
+  </ul>
+  <p>
+    Nada de lo anterior limita los derechos que te reconoce la Ley 24.240 de Defensa del Consumidor ni
+    nuestra responsabilidad en los casos en que la ley no permite limitarla.
+  </p>
+
+  <h2 id="baja">11. Baja y suspensión</h2>
+  <ul>
+    <li>Podés dejar de usar el servicio y pedir la baja de tu cuenta cuando quieras, escribiéndonos.</li>
+    <li>Si sos alumno, tu entrenador puede quitarte de su lista; también podés pedirnos la baja directamente.</li>
+    <li>Podemos suspender o cancelar cuentas que incumplan estos términos, avisando cuando sea posible.</li>
+    <li>Al dar de baja una cuenta, tratamos los datos como se indica en la
+      <a routerLink="/privacidad">Política de privacidad</a>. Si sos entrenador, antes de la baja podés
+      pedirnos una copia de tus planes.</li>
+  </ul>
+
+  <h2 id="cambios">12. Cambios en los términos</h2>
+  <p>
+    Podemos modificar estos términos. La fecha de la última actualización figura arriba. Si los cambios
+    son importantes, te avisaremos dentro de la aplicación o por mail antes de que entren en vigencia.
+    Seguir usando el servicio después de esa fecha implica que aceptás los nuevos términos.
+  </p>
+
+  <h2 id="ley">13. Ley aplicable y jurisdicción</h2>
+  <p>
+    Estos términos se rigen por las leyes de la República Argentina. Ante cualquier controversia,
+    intentaremos primero resolverla de buena fe escribiéndonos. Si sos consumidor, serán competentes los
+    tribunales que correspondan según la Ley 24.240 (incluidos los de tu domicilio); en los demás casos,
+    los tribunales ordinarios de la ciudad de Córdoba, Argentina.
+  </p>
+
+  <h2 id="contacto">14. Contacto</h2>
+  <p>
+    {{ legal.owner }} · {{ legal.address }}<br />
+    <a [href]="'mailto:' + legal.contactEmail">{{ legal.contactEmail }}</a>
+  </p>
+
+</app-legal-layout>

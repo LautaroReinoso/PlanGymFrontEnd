@@ -272,3 +272,6 @@
 @media (max-width: 480px) {
   .register-panel { padding: 32px 24px; border-radius: 16px; }
 }
+.legal-note { margin: 14px 0 0; font-size: 12px; line-height: 1.5; color: var(--color-muted); text-align: center; }
+.legal-note a { color: var(--color-muted-light); text-decoration: underline; text-underline-offset: 2px; }
+.legal-note a:hover { color: var(--color-accent); }

@@ -1,0 +1,74 @@
+<section class="page">
+  <header class="page__head">
+    <div>
+      <h1 class="page__title">Entrenadores</h1>
+      <p class="page__sub">Habilitá o deshabilitá el acceso. Deshabilitar no borra datos.</p>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <app-page-loader message="Cargando entrenadores…" />
+  } @else {
+
+    <!-- Resumen -->
+    <div class="stats">
+      <button type="button" class="stat" [class.stat--on]="status() === 'ALL'" (click)="status.set('ALL')">
+        <span class="stat__value">{{ trainers().length }}</span><span class="stat__label">Total</span>
+      </button>
+      <button type="button" class="stat" [class.stat--on]="status() === 'ENABLED'" (click)="status.set('ENABLED')">
+        <span class="stat__value stat__value--ok">{{ enabledCount() }}</span><span class="stat__label">Habilitados</span>
+      </button>
+      <button type="button" class="stat" [class.stat--on]="status() === 'DISABLED'" (click)="status.set('DISABLED')">
+        <span class="stat__value stat__value--off">{{ disabledCount() }}</span><span class="stat__label">Deshabilitados</span>
+      </button>
+    </div>
+
+    <input
+      class="search"
+      type="search"
+      placeholder="Buscar por nombre o mail…"
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+      aria-label="Buscar entrenador"
+    />
+
+    @if (error()) {
+      <div class="error" role="alert">
+        {{ error() }}
+        <button type="button" class="link" (click)="load()">Reintentar</button>
+      </div>
+    }
+
+    @if (filtered().length === 0) {
+      <p class="empty">
+        @if (trainers().length === 0) { Todavía no hay entrenadores registrados. } @else { No hay entrenadores con esos filtros. }
+      </p>
+    } @else {
+      <ul class="list">
+        @for (t of filtered(); track t.id) {
+          <li class="row" [class.row--off]="!t.enabled">
+            <div class="avatar" aria-hidden="true">{{ initials(t) }}</div>
+            <div class="info">
+              <span class="name">{{ fullName(t) }}</span>
+              <span class="mail">{{ t.mail }}</span>
+              <span class="meta">
+                {{ t.studentCount }} {{ t.studentCount === 1 ? 'alumno' : 'alumnos' }}
+                @if (t.createdAt) { · Alta {{ t.createdAt | date: 'dd/MM/yyyy' }} }
+              </span>
+            </div>
+            <span class="badge" [class.badge--on]="t.enabled">{{ t.enabled ? 'Habilitado' : 'Deshabilitado' }}</span>
+            <button
+              type="button"
+              class="action"
+              [class.action--danger]="t.enabled"
+              [disabled]="pendingId() === t.id"
+              (click)="toggle(t)"
+            >
+              {{ pendingId() === t.id ? 'Guardando…' : (t.enabled ? 'Deshabilitar' : 'Habilitar') }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

@@ -315,3 +315,8 @@
   transition: color 150ms;
 }
 .forgot-link:hover { color: var(--color-accent); }
+
+/* ── Links legales ── */
+.legal-links { display: flex; justify-content: center; gap: 8px; margin-top: 20px; font-size: 12px; color: var(--color-muted); }
+.legal-links a { color: var(--color-muted); text-decoration: none; }
+.legal-links a:hover { color: var(--color-muted-light); }

@@ -1,14 +1,21 @@
-  :host {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
- 
-    .silhouette {
-      fill: #ffffff;
-      opacity: 0.28;
-    }
- 
-    .highlight {
-      fill: #4F6EF7;
-    }
+:host {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+/* Colores configurables desde el padre si hace falta */
+svg {
+  --mi-body: #2F2F40;
+  --mi-neutral: #3A3A4E;
+  --mi-muscle: #4E4E68;
+  --mi-primary: var(--color-accent, #4F6EF7);
+}
+
+.s { fill: var(--mi-body); }
+.n { fill: var(--mi-neutral); stroke: var(--mi-body); stroke-width: 0.6; }
+.m { fill: var(--mi-muscle); stroke: var(--mi-body); stroke-width: 0.7; stroke-linejoin: round; }
+.m.on  { fill: var(--mi-primary); }
+.m.sec { fill: var(--mi-primary); fill-opacity: 0.42; }

@@ -1,0 +1,48 @@
+<div class="legal">
+  <header class="legal__top">
+    <button type="button" class="legal__back" (click)="back()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6" /></svg>
+      Volver
+    </button>
+    <a routerLink="/login" class="legal__brand" aria-label="PlanGym — inicio">
+      <svg width="26" height="26" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+        <rect width="36" height="36" rx="10" fill="var(--color-accent)"/>
+        <rect x="6"  y="15" width="6"  height="6" rx="2" fill="white"/>
+        <rect x="24" y="15" width="6"  height="6" rx="2" fill="white"/>
+        <rect x="11" y="17" width="14" height="2" rx="1" fill="white"/>
+      </svg>
+      <span>{{ legal.appName }}</span>
+    </a>
+  </header>
+
+  <main class="legal__main">
+    <div class="legal__head">
+      <h1 class="legal__title">{{ title() }}</h1>
+      <p class="legal__date">Última actualización: {{ legal.lastUpdated }}</p>
+      <nav class="legal__switch" aria-label="Documentos legales">
+        <a routerLink="/privacidad" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Privacidad</a>
+        <a routerLink="/terminos" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">Términos</a>
+      </nav>
+    </div>
+
+    @if (sections().length > 0) {
+      <nav class="legal__toc" aria-label="Contenido">
+        <p class="legal__toc-title">Contenido</p>
+        <ol>
+          @for (s of sections(); track s.id) {
+            <li><a [href]="'#' + s.id" (click)="scrollTo(s.id, $event)">{{ s.title }}</a></li>
+          }
+        </ol>
+      </nav>
+    }
+
+    <article class="legal__body">
+      <ng-content />
+    </article>
+
+    <footer class="legal__foot">
+      <p>¿Dudas? Escribinos a <a [href]="'mailto:' + legal.contactEmail">{{ legal.contactEmail }}</a></p>
+      <p>© 2026 {{ legal.appName }} · {{ legal.site }}</p>
+    </footer>
+  </main>
+</div>

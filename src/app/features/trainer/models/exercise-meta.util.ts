@@ -51,6 +51,16 @@ export const EQUIPMENT_LABELS: Record<Equipment, string> = {
   BODYWEIGHT: 'Peso corporal',
   KETTLEBELL: 'Pesa rusa',
   BAND:       'Banda elástica',
+  BENCH:          'Banco',
+  BOX:            'Cajón',
+  PULL_UP_BAR:    'Barra de dominadas',
+  TRX:            'TRX',
+  MEDICINE_BALL:  'Balón medicinal',
+  JUMP_ROPE:      'Soga',
+  ROWING_MACHINE: 'Remo ergómetro',
+  AIR_BIKE:       'Air bike',
+  BATTLE_ROPE:    'Cuerdas de batalla',
+  SLED:           'Trineo',
   OTHER:      'Otro',
 };
 

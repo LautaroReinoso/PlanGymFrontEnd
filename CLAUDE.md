@@ -1,4 +1,7 @@
-# GymPlan — Frontend Context (Angular 19)
+# PlanGym — Frontend Context (Angular 19)
+
+> **Marca: PlanGym** (antes "GymPlan"; los comentarios de cabecera de algunos archivos todavía dicen GymPlan).
+> Dominio de producción: **plangympro.com**
 
 ## Stack
 - **Framework:** Angular 19, Standalone Components, Signals
@@ -6,9 +9,14 @@
 - **Estado:** Signals (`signal`, `computed`, `effect`)
 - **HTTP:** `HttpClient` con interceptor JWT funcional
 - **Routing:** Lazy loading por feature con `loadChildren`
-- **IDE:** NetBeans
+- **IDE:** IntelliJ / VS Code
 - **Backend:** Spring Boot + MySQL en `http://localhost:8080`
-- **Producción:** Railway
+- **Producción:** front en **HostGator** (`https://plangympro.com`), backend en **Railway**
+  (`https://api.plangympro.com`). Paso a paso en `DEPLOY.md` (raíz del backend).
+  - `environment.production.ts` → `apiUrl: 'https://api.plangympro.com/api'`, `appName: 'PlanGym'`
+  - `public/.htaccess` (se copia al build): todas las rutas → `index.html` (si no, el link del mail
+    y el F5 dan 404 en Apache), fuerza HTTPS, `index.html` sin caché.
+  - Favicon: `public/favicon.svg` + `favicon.ico` + `apple-touch-icon.png` (logo PlanGym), enlazados en `index.html`.
 
 ---
 
@@ -215,12 +223,30 @@ src/app/
 />
 ```
 
-### `gp-muscle-icon`
+### `app-page-loader` (shared) — estado de carga estándar
 ```html
-<gp-muscle-icon [muscleGroup]="ex.primaryMuscle" [size]="24" />
+@if (isLoading()) { <app-page-loader message="Cargando tu semana…" /> }
+<app-page-loader [size]="40" [compact]="true" message="Cargando planes…" />   <!-- modales/tarjetas -->
 ```
-Silueta blanca + músculo en azul. Tiene caso para los 12 `MuscleGroup` (FOREARMS = antebrazos,
-QUADRICEPS/HAMSTRINGS = muslos, CALVES = gemelos).
+Envuelve `<app-gym-loader>` (persona levantando la barra) centrado + texto. **Usarlo para toda carga de
+página o sección**; reemplazó a los skeletons en Inicio/Día/Semana/Mes/Perfil del alumno y en Alumnos,
+Ejercicios, Perfil y el modal de asignar del trainer. Los botones mantienen su spinner propio (`[loading]`).
+
+### `gp-muscle-icon` — silueta anatómica (frente/espalda)
+```html
+<gp-muscle-icon [muscleGroup]="ex.primaryMuscle" [size]="28" />                       <!-- zoom (default), listas -->
+<gp-muscle-icon [muscleGroup]="d.primaryMuscle" [secondary]="d.secondaryMuscles"
+                mode="both" [size]="220" />                                          <!-- detalle -->
+```
+- `mode`: `zoom` (default; encuadra torso o piernas en la vista del músculo, cuadrado) · `single`
+  (cuerpo entero, una vista) · `both` (frente + espalda). `size` = ancho en px.
+- `[secondary]`: secundarios en azul suave (fill-opacity .42). Principal en `--color-accent`.
+- Dibujos en `muscle-body.paths.ts` (lienzo 100×196, solo lado izquierdo; el derecho se espeja).
+  Para ajustar un músculo, editar sus paths ahí. Vista por músculo: espalda para BACK, TRICEPS,
+  GLUTES, HAMSTRINGS, CALVES; frente para el resto.
+- Colores por variables CSS en el `svg`: `--mi-body`, `--mi-neutral`, `--mi-muscle`, `--mi-primary`.
+- Usos: filas de ejercicio (28px), tarjeta del alumno (26px), header del detalle (48px) y mapa muscular
+  `both` 220px en `app-exercise-detail`.
 
 ### `app-exercise-item` (NUEVO)
 Fila reutilizable de ejercicio. Usada en `TemplateDayComponent` (contexto día: número de orden + sets/reps/rest + quitar), en `ExercisesPageComponent` (contexto catálogo: badge Global/Personal + click → detalle + editar/eliminar) y en `AddExercisesModalComponent` (contexto selección: `selected` con check icon).
@@ -609,6 +635,8 @@ readonly isDeleting = signal(false);  // acción de eliminar
 ```
 /login                          → LoginComponent (loginGuard)
 /register                       → RegisterComponent (loginGuard)
+/recuperar-contrasena           → ForgotPasswordComponent (loginGuard) — solo trainers
+/reset-password?token=…         → ResetPasswordComponent (link del mail)
 
 /trainer                        → TrainerLayoutComponent
 /trainer/students               → StudentsPageComponent
@@ -697,6 +725,12 @@ alumno"). La bottom-nav existía pero no estaba montada en el layout: ya lo est�
 Al extraer `planGym-app-cambios.zip` desaparecieron los archivos que traía. Se restauraron
 escribiéndolos directo. Preferir escritura directa al proyecto antes que zips.
 
+### 18. Recuperación de contraseña (trainers)
+"¿Olvidaste tu contraseña?" en el login de entrenador → `/recuperar-contrasena` (pide mail; respuesta
+siempre igual, exista o no) → mail con link → `/reset-password?token=…` (mín. 8 caracteres, repetir) →
+login. `core/auth/services/password-reset.service.ts` → `POST /api/auth/password/forgot` y `/reset`.
+Ambas páginas reutilizan `login.component.css`. Alumnos: fuera del MVP (se resuelve a mano).
+
 ---
 
 ## Pendiente de implementar
@@ -732,7 +766,10 @@ escribiéndolos directo. Preferir escritura directa al proyecto antes que zips.
 - [ ] "Semana N de M": agregar `durationWeeks` a `WorkoutTemplate` (V9) + campo en el form de plantilla
 - [ ] Registro de pesos/reps reales por ejercicio (tabla `workout_log_sets` colgada del log)
 
-### Shared
+### Shared / UI
+- [x] **Íconos de músculos**: silueta anatómica frente/espalda, modos zoom/single/both, secundarios
+- [x] `app-page-loader` con el gym-loader en toda la app
+- [x] Marca unificada PlanGym + favicon propio
 - [ ] `ToastService` — feedback de éxito/error global
 
 ### Backend pendiente

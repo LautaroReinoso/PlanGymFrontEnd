@@ -14,7 +14,7 @@
 <div class="detail-header">
   @if (!ex.imageUrl) {
     <div class="detail-header-icon">
-      <gp-muscle-icon [muscleGroup]="ex.primaryMuscle" [size]="40" />
+      <gp-muscle-icon [muscleGroup]="ex.primaryMuscle" [size]="48" />
     </div>
   }
   <div class="detail-header-text">
@@ -63,6 +63,22 @@
     </p>
   </div>
 }
+
+<!-- Mapa muscular: frente y espalda, principal + secundarios -->
+<section class="muscle-map" aria-label="Músculos que trabaja">
+  <gp-muscle-icon
+    [muscleGroup]="ex.primaryMuscle"
+    [secondary]="ex.secondaryMuscles ?? []"
+    mode="both"
+    [size]="220"
+  />
+  <div class="muscle-map__legend">
+    <span><span class="muscle-map__dot muscle-map__dot--on"></span>Principal</span>
+    @if (ex.secondaryMuscles?.length) {
+      <span><span class="muscle-map__dot muscle-map__dot--sec"></span>Secundarios</span>
+    }
+  </div>
+</section>
 
 <!-- Stats sugeridos: series / reps / descanso (solo los que vengan) -->
 @if (stats(ex).length > 0) {
