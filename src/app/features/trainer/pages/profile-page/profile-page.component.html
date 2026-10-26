@@ -2,11 +2,7 @@
   <h1 class="profile__title">Mi perfil</h1>
 
   @if (loading()) {
-    <div class="skeleton-list" aria-busy="true">
-      @for (i of [1, 2, 3, 4, 5]; track i) {
-        <div class="skeleton"></div>
-      }
-    </div>
+    <app-page-loader message="Cargando tu perfil…" />
   } @else if (loadError()) {
     <div class="state">
       <p>No pudimos cargar tu perfil.</p>

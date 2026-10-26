@@ -101,3 +101,32 @@ export interface StudentProfile {
 }
 
 export type UpdateStudentProfileRequest = Omit<StudentProfile, 'id' | 'dni'>;
+// ══════════════════════════════════════════════
+//  SEMANA — GET /api/student-workouts/my-workout/week?date=
+//  POST/DELETE /api/workout-logs/my/{workoutDayId}?date=
+//  Se calcula en el backend a partir de los WorkoutLog (no se guarda).
+// ══════════════════════════════════════════════
+
+export interface WeekDayStatus {
+  workoutDayId: number;
+  name: string;
+  orderIndex: number;
+  exerciseCount: number;
+  done: boolean;
+  completedAt: string | null;   // "YYYY-MM-DD", última vez en la semana
+  timesDone: number;
+}
+
+export interface WeekStatus {
+  studentWorkoutId: number;
+  templateName: string;
+  today: string;                // "hoy" según el backend (Argentina)
+  weekStart: string;            // lunes
+  weekEnd: string;              // domingo
+  currentWeek: boolean;
+  weekNumber: number | null;
+  durationWeeks: number | null;
+  doneCount: number;
+  totalDays: number;
+  days: WeekDayStatus[];
+}

@@ -25,6 +25,21 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
   {
+    // Recuperación de contraseña (solo entrenadores)
+    path: 'recuperar-contrasena',
+    canActivate: [loginGuard],
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    title: 'Recuperar contraseña — PlanGym',
+  },
+  {
+    // Link del mail: /reset-password?token=…
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    title: 'Nueva contraseña — PlanGym',
+  },
+  {
     path: 'register',
     loadComponent: () =>
       import('./features/auth/register/register.component').then(m => m.RegisterComponent),

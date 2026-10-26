@@ -86,3 +86,4 @@
 .day__meta { font-size: 12px; color: var(--color-muted); }
 .day--done .day__meta { color: var(--color-success); }
 .day__chevron { width: 18px; height: 18px; color: var(--color-muted); }
+.week__number { display: block; font-size: 12px; color: var(--color-celeste); margin-top: 2px; }

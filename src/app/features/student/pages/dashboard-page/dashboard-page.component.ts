@@ -14,19 +14,19 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { StudentWorkoutService } from '../../services/student-workout.service';
 import { StudentWorkoutDetail } from '../../models/student.models';
 import { WorkoutTemplateDay } from '../../../trainer/models/trainer.models';
-import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { BadgeComponent } from '../../../../shared/components/badge-component/badge.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
+import { PageLoaderComponent } from '../../../../shared/components/page-loader/page-loader.component';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, SkeletonComponent, BadgeComponent, ButtonComponent],
+  imports: [PageLoaderComponent, CommonModule, RouterLink, BadgeComponent, ButtonComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

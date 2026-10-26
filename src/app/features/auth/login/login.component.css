@@ -304,3 +304,14 @@
   .mode-switch    { animation: fadeIn 0.3s ease both; }
   .mode-indicator { transition: none; }
 }
+
+/* ── ¿Olvidaste tu contraseña? ── */
+.forgot-link {
+  align-self: flex-end;
+  margin-top: -6px;
+  font-size: 13px;
+  color: var(--color-muted-light);
+  text-decoration: none;
+  transition: color 150ms;
+}
+.forgot-link:hover { color: var(--color-accent); }

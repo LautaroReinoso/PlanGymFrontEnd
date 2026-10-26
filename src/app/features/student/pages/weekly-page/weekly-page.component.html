@@ -6,7 +6,10 @@
       <button type="button" class="nav-btn" (click)="prevWeek()" aria-label="Semana anterior">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6" /></svg>
       </button>
-      <span class="week__range">{{ isCurrentWeek() ? 'Esta semana · ' : '' }}{{ rangeLabel() }}</span>
+      <span class="week__range">
+        {{ isCurrentWeek() ? 'Esta semana · ' : '' }}{{ rangeLabel() }}
+        @if (weekLabel(); as wl) { <span class="week__number">{{ wl }}</span> }
+      </span>
       <button type="button" class="nav-btn" (click)="nextWeek()" [disabled]="isCurrentWeek()" aria-label="Semana siguiente">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6" /></svg>
       </button>
@@ -20,10 +23,8 @@
     </div>
   }
 
-  @if (isLoading()) {
-    <gp-skeleton shape="card" height="84px" />
-    <gp-skeleton shape="card" height="96px" />
-    <gp-skeleton shape="card" height="64px" />
+  @if (isLoading() && !week()) {
+    <app-page-loader message="Cargando tu semana…" />
   } @else if (!error()) {
 
     <!-- Tira de 7 días -->
@@ -40,18 +41,18 @@
       }
     </section>
 
-    @if (hasPlan()) {
+    @if (!noPlan() && week()) {
 
       <!-- Progreso de la semana -->
       <section class="card">
         <div class="progress__head">
           <span class="progress__label">Días del plan completados</span>
-          <span class="progress__value">{{ doneCount() }} de {{ days().length }}</span>
+          <span class="progress__value">{{ week()!.doneCount }} de {{ week()!.totalDays }}</span>
         </div>
         <div class="progress__bar" role="progressbar" [attr.aria-valuenow]="percent()" aria-valuemin="0" aria-valuemax="100">
           <div class="progress__fill" [style.width.%]="percent()"></div>
         </div>
-        @if (isCurrentWeek() && days().length > 0 && doneCount() === days().length) {
+        @if (isCurrentWeek() && week()!.totalDays > 0 && week()!.doneCount === week()!.totalDays) {
           <p class="progress__done">¡Completaste todos los días de esta semana! 💪</p>
         }
       </section>
@@ -61,7 +62,7 @@
         <button type="button" class="next" (click)="openDay(nd)">
           <span class="next__eyebrow">Te toca</span>
           <span class="next__name">{{ nd.name }}</span>
-          <span class="next__meta">{{ nd.exercises.length }} ejercicios · Empezar</span>
+          <span class="next__meta">{{ nd.exerciseCount }} ejercicios · Empezar</span>
         </button>
       }
 
@@ -69,17 +70,17 @@
       <section>
         <h3 class="section-title">Días del plan</h3>
         <ul class="days">
-          @for (day of days(); track day.id) {
+          @for (day of days(); track day.workoutDayId) {
             <li>
-              <button type="button" class="day" [class.day--done]="doneLabel(day)" (click)="openDay(day)">
+              <button type="button" class="day" [class.day--done]="day.done" (click)="openDay(day)">
                 <span class="day__check" aria-hidden="true">
-                  @if (doneLabel(day)) {
+                  @if (day.done) {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
                   }
                 </span>
                 <span class="day__text">
                   <span class="day__name">{{ day.name }}</span>
-                  <span class="day__meta">{{ doneLabel(day) ?? (day.exercises.length + ' ejercicios') }}</span>
+                  <span class="day__meta">{{ doneLabel(day) ?? (day.exerciseCount + ' ejercicios') }}</span>
                 </span>
                 <svg class="day__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
               </button>

@@ -111,3 +111,10 @@
 }
 .day__done svg { width: 18px; height: 18px; }
 .day__mark-error { margin: 0; font-size: 13px; color: var(--color-danger); text-align: center; }
+.day__unmark {
+  align-self: center; background: none; border: 0; padding: var(--space-2);
+  font: 500 13px var(--font-body); color: var(--color-muted); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.day__unmark:hover:not(:disabled) { color: var(--color-text); }
+.day__unmark:disabled { opacity: .5; cursor: default; }

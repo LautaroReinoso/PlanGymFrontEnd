@@ -50,24 +50,7 @@
 
   <!-- ── Skeleton loader ── -->
   @if (isLoading()) {
-  <div class="students-grid">
-    @for (s of skeletons; track $index) {
-    <div class="skeleton-card">
-      <div class="skeleton-card-header">
-        <gp-skeleton shape="circle" width="44px" height="44px" />
-        <div class="skeleton-lines">
-          <gp-skeleton shape="line" width="60%" />
-          <gp-skeleton shape="line" width="80%" />
-        </div>
-      </div>
-      <gp-skeleton shape="line" width="40%" />
-      <div class="skeleton-footer">
-        <gp-skeleton shape="rect" width="70px" height="24px" radius="999px" />
-        <gp-skeleton shape="line" width="30%" />
-      </div>
-    </div>
-    }
-  </div>
+  <app-page-loader message="Cargando alumnos…" />
   }
 
   <!-- ── Lista de alumnos ── -->

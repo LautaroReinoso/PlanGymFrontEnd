@@ -19,20 +19,19 @@ import { FormsModule } from '@angular/forms';
 import { StudentService } from '../../../services/student.service';
 import { StudentSummary } from '../../../models/trainer.models';
 import { StudentCardComponent } from '../../../components/students/student-card/student-card.component';
-import { SkeletonComponent } from '../../../../../shared/components/skeleton/skeleton.component';
 import { ButtonComponent } from '../../../../../shared/components/button-component/button-component.component';
 import { NewStudentModalComponent } from "../../../components/students/new-student-modal/new-student-modal.component";
 import { CreateStudentRequest } from '../../../models/student.models';
+import { PageLoaderComponent } from '../../../../../shared/components/page-loader/page-loader.component';
 
 @Component({
   selector: 'app-students-page',
   standalone: true,
-  imports: [
+  imports: [PageLoaderComponent, 
     CommonModule,
     RouterLink,
     FormsModule,
     StudentCardComponent,
-    SkeletonComponent,
     ButtonComponent,
     NewStudentModalComponent
 ],

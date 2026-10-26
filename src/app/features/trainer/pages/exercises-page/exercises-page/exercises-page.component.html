@@ -85,11 +85,7 @@
   </div>
 
   @if (isLoading()) {
-    <div class="skeleton-list">
-      @for (i of [1,2,3,4]; track i) {
-        <gp-skeleton shape="rect" height="56px" radius="10px" />
-      }
-    </div>
+    <app-page-loader message="Cargando ejercicios…" />
   } @else if (error()) {
     <p class="page-error">{{ error() }}</p>
   } @else if (exercises().length === 0) {

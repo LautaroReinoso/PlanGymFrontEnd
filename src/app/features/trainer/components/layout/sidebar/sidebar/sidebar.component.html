@@ -1,5 +1,5 @@
 <!-- ─────────────────────────────────────────────
-     GymPlan — Sidebar Template
+     PlanGym — Sidebar Template
 ───────────────────────────────────────────── -->
 <aside class="sidebar" [class.sidebar--open]="isOpen()">
 
@@ -13,7 +13,7 @@
         <rect x="24" y="15" width="6"  height="6" rx="2" fill="white"/>
         <rect x="11" y="17" width="14" height="2" rx="1" fill="white"/>
       </svg>
-      <span class="sidebar-logo-name">GymPlan</span>
+      <span class="sidebar-logo-name">PlanGym</span>
     </div>
 
     <!-- Botón cerrar en mobile -->
@@ -63,27 +63,31 @@
   <!-- ── Sección: usuario ─────────────────────── -->
   <div class="sidebar-section-label">Cuenta</div>
 
-  <a class="sidebar-user" routerLink="/trainer/profile">
-    <div class="user-avatar" aria-hidden="true">
-      {{ userInitials }}
-    </div>
-    <div class="user-info">
-      <span class="user-mail">{{ userMail() }}</span>
-      <span class="user-role">Entrenador</span>
-    </div>
-  </a>
+  <!-- Tarjeta de usuario: perfil (link) + cerrar sesión en la misma fila -->
+  <div class="sidebar-user">
+    <a class="sidebar-user-link" routerLink="/trainer/profile" (click)="onClose()" title="Mi perfil">
+      <div class="user-avatar" aria-hidden="true">
+        {{ userInitials }}
+      </div>
+      <div class="user-info">
+        <span class="user-mail">{{ userMail() }}</span>
+        <span class="user-role">Entrenador</span>
+      </div>
+    </a>
 
-  <button
-    class="logout-btn"
-    (click)="onLogout()"
-    aria-label="Cerrar sesión"
-  >
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-         stroke="currentColor" stroke-width="2">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-      <polyline points="16 17 21 12 16 7"/>
-      <line x1="21" y1="12" x2="9" y2="12"/>
-    </svg>
-    Cerrar sesión
-  </button>
+    <button
+      type="button"
+      class="logout-btn"
+      (click)="onLogout()"
+      aria-label="Cerrar sesión"
+      title="Cerrar sesión"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+  </div>
 </aside>

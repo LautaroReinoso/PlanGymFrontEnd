@@ -123,20 +123,26 @@ src/app/
 │   │           └── exercise-form-modal.component  → soporta `forceCreate`
 │   │
 │   └── student/
-│       ├── student.routes.ts
-│       ├── models/
-│       │   └── student.models.ts
+│       ├── student.routes.ts            → incluye guard `todayRedirect` ("Hoy")
+│       ├── models/student.models.ts     → + WeekStatus / WeekDayStatus
+│       ├── utils/progress.util.ts       → fechas locales, semana lun–dom, racha (usado por Mes)
 │       ├── services/
-│       │   └── student-workout.service.ts
+│       │   ├── student-workout.service.ts
+│       │   ├── workout-log.service.ts         → my-history (Mes)
+│       │   ├── week-status.service.ts         → FUENTE ÚNICA del estado de la semana (signals)
+│       │   ├── student-progress.service.ts    → plan + historial juntos (Mes)
+│       │   └── student-profile.service.ts
 │       ├── components/
+│       │   ├── exercise-card/
 │       │   └── layout/
-│       │       ├── student-layout.component
-│       │       └── bottom-nav/
+│       │       ├── student-layout.component   → incluye <app-bottom-nav />
+│       │       └── bottom-nav/                → Inicio · Hoy · Semana · Mes · Perfil
 │       └── pages/
-│           ├── dashboard-page/       → PENDIENTE
-│           ├── daily-page/           → PENDIENTE
-│           ├── weekly-page/          → PENDIENTE
-│           └── monthly-page/         → PENDIENTE
+│           ├── dashboard-page/
+│           ├── day-page/          → ejercicios + "Marcar como hecho" / "Me equivoqué, desmarcar"
+│           ├── weekly-page/
+│           ├── monthly-page/
+│           └── profile-page/      → datos + "Cerrar sesión"
 ```
 
 ---
@@ -497,10 +503,42 @@ PUT    /api/v1/workout-days/:workoutDayId → WorkoutDayResponse
 ```
 ⚠️ Usa `workoutDayId` (campo `WorkoutTemplateDay.workoutDayId`), no el `id` del día.
 
-### StudentWorkoutService (student feature)
+### Student — servicios y endpoints
 ```
-GET    /api/v1/student/workout        → StudentWorkout activo del alumno logueado
+GET    /api/student-workouts/my-workout                → resumen del plan activo
+GET    /api/student-workouts/my-workout/days           → árbol días/ejercicios
+GET    /api/student-workouts/my-workout/days/:dayId    → un día (404 si no es de su plan)
+GET    /api/student-workouts/my-workout/week?date=     → WeekStatus de la semana que contiene `date` (default hoy)
+POST   /api/workout-logs/my/:workoutDayId?date=        → marca hecho (default hoy) → WeekStatus
+DELETE /api/workout-logs/my/:workoutDayId?date=        → desmarca (default hoy) → WeekStatus
+GET    /api/workout-logs/my-history                    → todos los logs (lo usa Mes)
+GET/PUT /api/student/profile (StudentProfileService)
 ```
+
+### Semana del alumno — cómo funciona
+El plan (A, B, C…) es un **molde** que se repite cada semana: nunca se marca como completado.
+Cada sesión es un `WorkoutLog` con fecha. "Hecho esta semana" = existe un log de ese día entre
+lunes y domingo. **No se guarda estado**: al cambiar de semana todo vuelve a pendiente solo.
+"Hoy" lo define el backend en horario de Argentina (`WeekStatus.today`), no el celular.
+
+```typescript
+interface WeekStatus {
+  studentWorkoutId; templateName
+  today; weekStart; weekEnd           // "YYYY-MM-DD"; semana lun–dom
+  currentWeek: boolean
+  weekNumber: number | null           // 1 = semana del startDate de la asignación
+  durationWeeks: number | null        // hoy siempre null (WorkoutTemplate no tiene duración)
+  doneCount; totalDays
+  days: { workoutDayId; name; orderIndex; exerciseCount; done; completedAt; timesDone }[]
+}
+```
+`WeekStatusService` (root) guarda la última respuesta en un signal `week` y expone `days`,
+`percent`, `nextDay` y `doneToday(id)`. `markDone` / `unmark` reemplazan el signal con la
+respuesta del backend → **las páginas no guardan estado propio**.
+- **Semana**: lee el servicio; flechas = `load(lunes ± 7)`.
+- **Día**: siempre llama `load()` al entrar (evita datos de otro alumno en el mismo navegador).
+- **Hoy** (`/student/daily`): guard que redirige al primer día pendiente o a Semana.
+- **Mes**: calendario armado desde `my-history` (`progress.util.ts`), con racha en semanas.
 
 ---
 
@@ -581,11 +619,13 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /trainer/exercises              → ExercisesPageComponent (COMPLETADO)
 /trainer/exercises/:id          → ExerciseDetailPageComponent (NUEVO)
 
-/student                        → StudentLayoutComponent
-/student/dashboard              → DashboardPageComponent (PENDIENTE)
-/student/daily                  → DailyPageComponent (PENDIENTE)
-/student/weekly                 → WeeklyPageComponent (PENDIENTE)
-/student/monthly                → MonthlyPageComponent (PENDIENTE)
+/student                        → StudentLayoutComponent (+ bottom-nav)
+/student/dashboard              → DashboardPageComponent
+/student/daily                  → guard todayRedirect → /student/day/:id o /student/weekly
+/student/day/:workoutDayId      → DayPageComponent
+/student/weekly                 → WeeklyPageComponent
+/student/monthly                → MonthlyPageComponent
+/student/profile                → ProfilePageComponent
 ```
 ⚠️ `templates/new` debe ir ANTES que `templates/:id` en el array de rutas.
 
@@ -639,6 +679,24 @@ Corregido en modelo, modal y vistas. El peso por defecto del modal pasó de 5 a 
 `--color-muted-light` se usaba pero no estaba definida y `body` no tenía color → labels en negro.
 Corregido en `token.css` + base global en `styles.css`.
 
+### 14. Sidebar del trainer desbordaba
+`.sidebar` medía `100dvh` + 48px de padding (faltaba `box-sizing: border-box`) → usuario y
+"Cerrar sesión" quedaban fuera de pantalla. Corregido; "Cerrar sesión" ahora es un ícono en la
+misma fila que el usuario.
+
+### 15. Perfil del alumno nunca había funcionado
+No tenía ruta, usaba un selector inexistente (`app-input-field` en vez de `gp-input`), un `@else if
+(...; as p)` inválido, y el link del dashboard no importaba `RouterLink`. Corregido + ruta
+`/student/profile` + pestaña en bottom-nav + "Cerrar sesión".
+
+### 16. El alumno no podía registrar entrenamientos
+Nada llamaba a `workout-logs`. Ahora "Marcar como hecho" / "desmarcar" en el Día (ver "Semana del
+alumno"). La bottom-nav existía pero no estaba montada en el layout: ya lo está.
+
+### 17. Archivos perdidos al descomprimir un zip (oct-2026)
+Al extraer `planGym-app-cambios.zip` desaparecieron los archivos que traía. Se restauraron
+escribiéndolos directo. Preferir escritura directa al proyecto antes que zips.
+
 ---
 
 ## Pendiente de implementar
@@ -663,17 +721,22 @@ Corregido en `token.css` + base global en `styles.css`.
 - [x] `MUSCLE_GROUP_LABELS` — fuente única en `muscle-group.util.ts`
 - [ ] Sin tests nuevos para lo agregado (`.spec.ts` del proyecto son boilerplate default de Angular CLI, sin adaptar)
 
-### Student (toda la feature)
-- [ ] `DashboardPage` — resumen del plan activo
-- [ ] `DailyPage` — ejercicios del día + logueo de sets (mock local)
-- [ ] `WeeklyPage` — vista de los 7 días
-- [ ] `MonthlyPage` — calendario de adherencia (placeholder)
+### Student
+- [x] `DashboardPage` — plan activo + lista de días (el alumno elige)
+- [x] `DayPage` — ejercicios del día + detalle + marcar/desmarcar
+- [x] `WeeklyPage` — estado de la semana calculado en backend (WeekStatus)
+- [x] `MonthlyPage` — calendario con días entrenados, racha y adherencia
+- [x] `ProfilePage` + cerrar sesión
+- [ ] Detalle rico de ejercicio para el alumno (técnica, secundarios, video): requiere habilitar
+      `GET /api/exercises/:id` para STUDENT solo con ejercicios de su plan activo
+- [ ] "Semana N de M": agregar `durationWeeks` a `WorkoutTemplate` (V9) + campo en el form de plantilla
+- [ ] Registro de pesos/reps reales por ejercicio (tabla `workout_log_sets` colgada del log)
 
 ### Shared
 - [ ] `ToastService` — feedback de éxito/error global
 
 ### Backend pendiente
 - [ ] `exerciseCount` y `assignedStudents` en `WorkoutTemplateSummary`
-- [ ] `WorkoutLog` entity para persistir series completadas
+- [x] `WorkoutLog` + estado semanal calculado (V8, `WeekStatusService`)
 - [ ] Endpoint de adherencia calculado en backend
 - [ ] Si se decide construir "Usar en plantilla" como flujo propio: endpoint que permita agregar un ejercicio a un día sin pasar por el detalle completo de la plantilla

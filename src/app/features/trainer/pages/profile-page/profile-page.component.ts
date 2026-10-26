@@ -5,6 +5,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { InputFieldComponent } from '../../../../shared/components/input-field/input-field.component';
 import { TrainerProfile, UpdateTrainerProfileRequest } from '../../models/trainer.models';
 import { TrainerProfileService } from '../../services/trainer-profile.service';
+import { PageLoaderComponent } from '../../../../shared/components/page-loader/page-loader.component';
 
 // Validador simple: newPassword !== confirmPassword
 function passwordsMatch(group: import('@angular/forms').AbstractControl) {
@@ -17,7 +18,7 @@ function passwordsMatch(group: import('@angular/forms').AbstractControl) {
   selector: 'app-trainer-profile-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule],
+  imports: [PageLoaderComponent, ReactiveFormsModule],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.css',
 })

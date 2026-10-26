@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  GymPlan — Trainer Routes
+//  PlanGym — Trainer Routes
 //  Lazy loading por página.
 //  Protegidas por authGuard + roleGuard.
 // ─────────────────────────────────────────────
@@ -31,7 +31,7 @@ export const TRAINER_ROUTES: Routes = [
           import('././pages/students-page/students-page/students-page.component').then(
             m => m.StudentsPageComponent
           ),
-        title: 'Mis alumnos — GymPlan',
+        title: 'Mis alumnos — PlanGym',
       },
       {
         path: 'students/:id',
@@ -39,7 +39,7 @@ export const TRAINER_ROUTES: Routes = [
           import('././pages/students-detail-page/student-detail-page/student-detail-page.component').then(
             m => m.StudentDetailPageComponent
           ),
-        title: 'Alumno — GymPlan',
+        title: 'Alumno — PlanGym',
       },
 
       // ── Exercises ────────────────────────────
@@ -49,7 +49,7 @@ export const TRAINER_ROUTES: Routes = [
           import('././pages/exercises-page/exercises-page/exercises-page.component').then(
             m => m.ExercisesPageComponent
           ),
-        title: 'Ejercicios — GymPlan',
+        title: 'Ejercicios — PlanGym',
       },
       {
         path: 'exercises/:id',
@@ -57,7 +57,7 @@ export const TRAINER_ROUTES: Routes = [
           import('./pages/exercise-detail-page/exercise-detail-page/exercise-detail-page.component').then(
             m => m.ExerciseDetailPageComponent
           ),
-        title: 'Ejercicio — GymPlan',
+        title: 'Ejercicio — PlanGym',
       },
 
       // ── Templates ────────────────────────────
@@ -67,7 +67,7 @@ export const TRAINER_ROUTES: Routes = [
           import('./pages/template-list-page/template-list-page.component').then(
             m => m.TemplatesListPageComponent
           ),
-        title: 'Plantillas — GymPlan',
+        title: 'Plantillas — PlanGym',
       },
       {
         path: 'templates/new',
@@ -75,7 +75,7 @@ export const TRAINER_ROUTES: Routes = [
           import('./pages/template-create-page/template-create-page.component').then(
             m => m.TemplateCreatePageComponent
           ),
-        title: 'Nueva plantilla — GymPlan',
+        title: 'Nueva plantilla — PlanGym',
       },
       {
         path: 'templates/:id',
@@ -83,13 +83,13 @@ export const TRAINER_ROUTES: Routes = [
           import('./pages/template-detail-page/template-detail-page.component').then(
             m => m.TemplateDetailPageComponent
           ),
-        title: 'Editor de plantilla — GymPlan',
+        title: 'Editor de plantilla — PlanGym',
       },
       {
         path: 'profile',
         loadComponent: () =>
           import('./pages/profile-page/profile-page.component').then((m) => m.TrainerProfilePageComponent),
-      title: 'Mi Perfil — GymPlan'
+      title: 'Mi Perfil — PlanGym'
       },
 
     ],

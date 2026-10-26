@@ -26,21 +26,20 @@ import {
 } from '../../../models/trainer.models';
 import {  StudentDetail } from '../../../models/student.models';
 import { ButtonComponent }   from '../../../../../shared/components/button-component/button-component.component';
-import { SkeletonComponent } from '../../../../../shared/components/skeleton/skeleton.component';
 import { ModalComponent }    from '../../../../../shared/components/modal/modal.component';
 import { BadgeComponent }    from '../../../../../shared/components/badge-component/badge.component';
 import { AvatarComponent }  from '../../../../../shared/components/avatar/avatar.component';
 import { DayBadgeComponent } from '../../../../../shared/components/day-badge/day-badge.component';
 import { TemplateDayComponent } from "../../../components/templates/template-day/template-day.component";
 import { GymLoaderComponent } from '../../../../../shared/components/gym-loader/gym-loader.component';
+import { PageLoaderComponent } from '../../../../../shared/components/page-loader/page-loader.component';
 @Component({
   selector: 'app-student-detail-page',
   standalone: true,
-  imports: [
+  imports: [PageLoaderComponent, 
     CommonModule,
     BadgeComponent,
     ButtonComponent,
-    SkeletonComponent,
     ModalComponent,
     AvatarComponent,
     DayBadgeComponent,

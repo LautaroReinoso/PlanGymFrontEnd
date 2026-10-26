@@ -4,7 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 interface NavItem {
   label: string;
   path: string;
-  icon: 'home' | 'today' | 'week' | 'month';
+  icon: 'home' | 'today' | 'week' | 'month' | 'profile';
 }
 
 @Component({
@@ -21,5 +21,6 @@ export class BottomNavComponent {
     { label: 'Hoy',    path: '/student/daily',     icon: 'today' },
     { label: 'Semana', path: '/student/weekly',    icon: 'week' },
     { label: 'Mes',    path: '/student/monthly',   icon: 'month' },
+    { label: 'Perfil', path: '/student/profile',   icon: 'profile' },
   ];
 }

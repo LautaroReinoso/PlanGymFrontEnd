@@ -18,10 +18,7 @@
 
   <!-- Loading -->
   @if (isLoading()) {
-    <gp-skeleton shape="card" height="90px" />
-    <gp-skeleton shape="card" height="64px" />
-    <gp-skeleton shape="card" height="64px" />
-    <gp-skeleton shape="card" height="64px" />
+    <app-page-loader message="Cargando el día…" />
   }
 
   @if (!isLoading() && !error()) {
@@ -66,6 +63,9 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
               ¡Listo! Registraste este día hoy.
             </div>
+            <button type="button" class="day__unmark" [disabled]="isMarking()" (click)="unmark()">
+              Me equivoqué, desmarcar
+            </button>
           } @else {
             <gp-button variant="primary" size="lg" [loading]="isMarking()" (click)="markAsDone()">
               Marcar como hecho

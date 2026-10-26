@@ -14,6 +14,7 @@ import {
   Component,
   inject,
   signal,
+  computed,
   OnInit,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -22,13 +23,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { StudentWorkoutService } from '../../services/student-workout.service';
-import { WorkoutLogService } from '../../services/workout-log.service';
-import { todayIso } from '../../utils/progress.util';
-import { switchMap } from 'rxjs';
+import { WeekStatusService } from '../../services/week-status.service';
 import { StudentDayResponse } from '../../models/student.models';
 import { DayExercise } from '../../../trainer/models/trainer.models';
 
-import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ExerciseItemComponent } from '../../../../shared/components/exercise-item/exercise-item.component';
@@ -36,13 +34,13 @@ import {
   ExerciseDetailComponent,
   ExerciseDetailViewModel,
 } from '../../../../shared/components/exercise-detail/exercise-detail.component';
+import { PageLoaderComponent } from '../../../../shared/components/page-loader/page-loader.component';
 
 @Component({
   selector: 'app-day-page',
   standalone: true,
-  imports: [
+  imports: [PageLoaderComponent, 
     CommonModule,
-    SkeletonComponent,
     ButtonComponent,
     ModalComponent,
     ExerciseItemComponent,
@@ -57,7 +55,7 @@ export class DayPageComponent implements OnInit {
   private readonly workoutService = inject(StudentWorkoutService);
   private readonly route          = inject(ActivatedRoute);
   private readonly router         = inject(Router);
-  private readonly logService     = inject(WorkoutLogService);
+  private readonly weekService    = inject(WeekStatusService);
 
   // ── Estado ────────────────────────────────────
   readonly data      = signal<StudentDayResponse | null>(null);
@@ -65,12 +63,14 @@ export class DayPageComponent implements OnInit {
   readonly error     = signal<string | null>(null);
   readonly notFound  = signal(false);
 
-  // Registro del día ("Marcar como hecho")
-  readonly doneToday  = signal(false);
-  readonly isMarking  = signal(false);
-  readonly markError  = signal<string | null>(null);
-  /** Id de la ruta (= WorkoutTemplateDay.workoutDayId), el mismo que espera WorkoutLog */
-  private currentDayId = 0;
+  // Registro del día: el estado vive en WeekStatusService (calculado por el backend)
+  private readonly dayId = signal(0);
+  readonly doneToday = computed(() => {
+    this.weekService.week();                       // dependencia del signal
+    return this.weekService.doneToday(this.dayId());
+  });
+  readonly isMarking = computed(() => this.weekService.pendingDayId() === this.dayId());
+  readonly markError = signal<string | null>(null);
 
   // Ejercicio elegido: abre el detalle en un modal (mismo
   // ExerciseDetail que usa Trainer, sin salir del día)
@@ -92,8 +92,10 @@ export class DayPageComponent implements OnInit {
     this.error.set(null);
     this.notFound.set(false);
 
-    this.currentDayId = workoutDayId;
-    this.checkDoneToday(workoutDayId);
+    this.dayId.set(workoutDayId);
+    // Siempre se pide la semana actual: es liviano y evita mostrar datos viejos
+    // (p. ej. otro alumno que usó el mismo navegador antes).
+    this.weekService.load().subscribe({ error: () => { /* el botón queda en "Marcar" */ } });
 
     this.workoutService.getMyWorkoutDay(workoutDayId).subscribe({
       next: res => {
@@ -117,40 +119,21 @@ export class DayPageComponent implements OnInit {
     return dayExerciseSummary(ex);
   }
 
-  /** ¿Ya registró este día hoy? (si el historial falla, se asume que no) */
-  private checkDoneToday(workoutDayId: number): void {
-    const today = todayIso();
-    this.logService.getMyHistory().subscribe({
-      next: logs => this.doneToday.set(
-        logs.some(l => l.completed && l.workoutDayId === workoutDayId && l.completedAt.slice(0, 10) === today),
-      ),
-      error: () => this.doneToday.set(false),
+  /** Marca el día como hecho hoy. El backend devuelve la semana recalculada. */
+  markAsDone(): void {
+    if (this.doneToday() || this.isMarking()) return;
+    this.markError.set(null);
+    this.weekService.markDone(this.dayId()).subscribe({
+      error: () => this.markError.set('No pudimos registrar el entrenamiento. Probá de nuevo.'),
     });
   }
 
-  /** Registra el día como completado hoy (WorkoutLog a nivel día) */
-  markAsDone(): void {
-    const d = this.data();
-    if (!d || this.doneToday() || this.isMarking()) return;
-
-    this.isMarking.set(true);
+  /** Se equivocó: borra el registro de hoy de este día. */
+  unmark(): void {
+    if (!this.doneToday() || this.isMarking()) return;
     this.markError.set(null);
-    this.workoutService.getMyWorkout().pipe(
-      switchMap(summary => this.logService.register({
-        studentId:    summary.studentId,
-        workoutDayId: this.currentDayId,
-        completedAt:  todayIso(),
-        completed:    true,
-      })),
-    ).subscribe({
-      next: () => {
-        this.doneToday.set(true);
-        this.isMarking.set(false);
-      },
-      error: () => {
-        this.markError.set('No pudimos registrar el entrenamiento. Probá de nuevo.');
-        this.isMarking.set(false);
-      },
+    this.weekService.unmark(this.dayId()).subscribe({
+      error: () => this.markError.set('No pudimos desmarcar el día. Probá de nuevo.'),
     });
   }
 

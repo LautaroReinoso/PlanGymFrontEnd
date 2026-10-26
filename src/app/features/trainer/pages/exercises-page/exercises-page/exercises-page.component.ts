@@ -25,20 +25,19 @@ import {
 } from '../../../models/exercise-meta.util';
 import { InputFieldComponent } from '../../../../../shared/components/input-field/input-field.component';
 import { ButtonComponent } from '../../../../../shared/components/button-component/button-component.component';
-import { SkeletonComponent } from '../../../../../shared/components/skeleton/skeleton.component';
 import { ExerciseFormModalComponent } from '../../../components/exercises/exercise-form-modal/exercise-form-modal.component';
 import { ExerciseFormValue } from '../../../components/exercises/exercise-form/exercise-form.component';
 import { ExerciseItemBadge, ExerciseItemComponent } from '../../../../../shared/components/exercise-item/exercise-item.component';
+import { PageLoaderComponent } from '../../../../../shared/components/page-loader/page-loader.component';
 
 @Component({
   selector: 'app-exercises-page',
   standalone: true,
-  imports: [
+  imports: [PageLoaderComponent, 
     CommonModule,
     FormsModule,
     InputFieldComponent,
     ButtonComponent,
-    SkeletonComponent,
     ExerciseItemComponent,
     ExerciseFormModalComponent,
   ],

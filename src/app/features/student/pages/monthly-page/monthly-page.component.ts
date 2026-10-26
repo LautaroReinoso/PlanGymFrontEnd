@@ -18,8 +18,8 @@ import {
   todayIso,
   weekStreak,
 } from '../../utils/progress.util';
-import { SkeletonComponent } from '../../../../shared/components/skeleton/skeleton.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
+import { PageLoaderComponent } from '../../../../shared/components/page-loader/page-loader.component';
 
 interface CalendarCell {
   iso: string;
@@ -33,7 +33,7 @@ interface CalendarCell {
 @Component({
   selector: 'app-monthly-page',
   standalone: true,
-  imports: [CommonModule, SkeletonComponent, ButtonComponent],
+  imports: [PageLoaderComponent, CommonModule, ButtonComponent],
   templateUrl: './monthly-page.component.html',
   styleUrl: './monthly-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

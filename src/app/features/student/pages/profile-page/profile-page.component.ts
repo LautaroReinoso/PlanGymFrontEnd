@@ -6,18 +6,21 @@ import { RouterLink } from '@angular/router';
 import { InputFieldComponent } from '../../../../shared/components/input-field/input-field.component';
 import { StudentProfile, UpdateStudentProfileRequest } from '../../models/student.models';
 import { StudentProfileService } from '../../services/student-profile.service';
+import { AuthService } from '../../../../core/auth/services/auth.service';
+import { PageLoaderComponent } from '../../../../shared/components/page-loader/page-loader.component';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [PageLoaderComponent, ReactiveFormsModule, RouterLink, InputFieldComponent],
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.css',
 })
 export class ProfilePageComponent {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly service = inject(StudentProfileService);
+  private readonly auth = inject(AuthService);
 
   readonly profile = signal<StudentProfile | null>(null);
   readonly loading = signal(true);
@@ -122,5 +125,10 @@ export class ProfilePageComponent {
       cel: opt(v.cel),
       mail: opt(v.mail),
     };
+  }
+
+  logout(): void {
+    if (!confirm('¿Cerrar sesión?')) return;
+    this.auth.logout();
   }
 }

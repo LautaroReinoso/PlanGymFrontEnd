@@ -21,8 +21,7 @@
   }
 
   @if (isLoading()) {
-    <gp-skeleton shape="card" height="76px" />
-    <gp-skeleton shape="card" height="300px" />
+    <app-page-loader message="Cargando tu historial…" />
   } @else if (!error()) {
 
     <!-- Stats -->
