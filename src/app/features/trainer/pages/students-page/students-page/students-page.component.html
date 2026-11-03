@@ -1,6 +1,9 @@
 <!-- StudentsPage -->
 <div class="students-page">
 
+  <!-- ── Aviso de suscripción ── -->
+  <app-subscription-banner />
+
   <!-- ── Header ── -->
   <div class="page-header">
     <div class="page-header-text">
@@ -13,7 +16,7 @@
         }
       </p>
     </div>
-    <gp-button variant="primary" size="md" (click)="showCreateStudentModal.set( true)">
+    <gp-button variant="primary" size="md" (click)="openCreateModal()">
       + Nuevo alumno
     </gp-button>
   </div>
@@ -89,7 +92,7 @@
   }
   }
 
-    <app-new-student-modal [isOpen]="showCreateStudentModal()" (closed)="showCreateStudentModal.set(false)"   (saved)="createStudent($event)" />
+    <app-new-student-modal [isOpen]="showCreateStudentModal()" [isSaving]="isCreating()" [errorMessage]="createError()" [showPlansLink]="createErrorIsLimit()" (closed)="showCreateStudentModal.set(false)"   (saved)="createStudent($event)" />
 
 
 </div>

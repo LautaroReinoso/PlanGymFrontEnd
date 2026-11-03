@@ -8,6 +8,14 @@
   (ngModelChange)="dni.set($event)"
   [errorMsg]="dniError()"
   placeholder="ej: 32974955"/>
+    @if (errorMessage()) {
+      <p class="form-error" role="alert">
+        {{ errorMessage() }}
+        @if (showPlansLink()) {
+          <a routerLink="/trainer/suscripcion/planes" (click)="onClose()">Ver planes</a>
+        }
+      </p>
+    }
     <!-- Acciones -->
     <div class="edit-actions">
       <gp-button variant="ghost" size="md" (click)="onClose()">

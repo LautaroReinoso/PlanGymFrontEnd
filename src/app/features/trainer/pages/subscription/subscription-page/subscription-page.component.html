@@ -1,0 +1,93 @@
+<div class="subscription-page">
+
+  <div class="page-header">
+    <h1 class="page-title">Mi suscripción</h1>
+    <p class="page-subtitle">Tu suscripción a PlanGym habilita el acceso de tus alumnos.</p>
+  </div>
+
+  @if (isLoading()) {
+    <app-page-loader message="Cargando tu suscripción…" />
+  } @else if (isConfirming()) {
+    <div class="card card--center">
+      <app-page-loader [size]="40" [compact]="true" message="Confirmando tu pago…" />
+      <p class="muted">Mercado Pago puede tardar unos segundos en avisarnos.</p>
+    </div>
+  } @else if (loadError()) {
+    <div class="notice notice--error" role="alert">
+      {{ loadError() }}
+      <gp-button variant="secondary" size="sm" (click)="load()">Reintentar</gp-button>
+    </div>
+  } @else {
+
+    @if (stillPending()) {
+      <div class="notice" role="status">
+        Todavía no recibimos la confirmación del pago. Si ya pagaste, en unos minutos se va a actualizar.
+        <gp-button variant="secondary" size="sm" (click)="load()">Actualizar</gp-button>
+      </div>
+    }
+
+    <section class="card">
+      <div class="card__row card__row--head">
+        <span class="label">Estado</span>
+        <gp-badge [variant]="statusUi().variant" [dot]="true">{{ statusUi().label }}</gp-badge>
+      </div>
+
+      @if (subscription(); as sub) {
+        <dl class="details">
+          <div>
+            <dt>Plan</dt>
+            <dd>{{ sub.plan.name }}</dd>
+          </div>
+          <div>
+            <dt>Precio</dt>
+            <dd>{{ sub.plan.price | currency: sub.plan.currency : 'symbol-narrow' : '1.0-0' : 'es-AR' }} /mes</dd>
+          </div>
+          <div>
+            <dt>Alumnos</dt>
+            <dd>{{ studentsLabel(sub.plan.maxStudents) }}</dd>
+          </div>
+          <div>
+            <dt>Fecha de alta</dt>
+            <dd>{{ sub.createdAt | date: 'd MMM y' : undefined : 'es-AR' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="muted">Todavía no te suscribiste. Elegí un plan para que tus alumnos puedan ingresar.</p>
+      }
+
+      <div class="actions">
+        @switch (status()) {
+          @case ('PENDING') {
+            <gp-button variant="ghost" size="md" (click)="openCancel()">Cancelar</gp-button>
+            <a routerLink="/trainer/suscripcion/planes">
+              <gp-button variant="secondary" size="md">Elegir otro plan / reintentar</gp-button>
+            </a>
+            @if (subscription()?.initPoint) {
+              <gp-button variant="primary" size="md" (click)="continuePayment()">Continuar con el pago</gp-button>
+            }
+          }
+          @case ('AUTHORIZED') {
+            <a routerLink="/trainer/suscripcion/planes" class="link">Ver planes</a>
+            <gp-button variant="danger" size="md" (click)="openCancel()">Cancelar suscripción</gp-button>
+          }
+          @case ('PAUSED') {
+            <p class="muted">Tu suscripción está pausada en Mercado Pago. Revisá el medio de pago desde tu cuenta de Mercado Pago.</p>
+          }
+          @default {
+            <a routerLink="/trainer/suscripcion/planes">
+              <gp-button variant="primary" size="md">Ver planes</gp-button>
+            </a>
+          }
+        }
+      </div>
+    </section>
+  }
+
+  <app-cancel-subscription-modal
+    [isOpen]="showCancelModal()"
+    [isCancelling]="isCancelling()"
+    [errorMessage]="cancelError()"
+    (closed)="showCancelModal.set(false)"
+    (confirmed)="confirmCancel()"
+  />
+</div>

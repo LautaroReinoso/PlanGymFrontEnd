@@ -181,6 +181,12 @@ export const routes: Routes = [
     path: '**',
     redirectTo: 'login',
   }, */
+  {
+    // back_url de Mercado Pago: /suscripcion?preapproval_id=…
+    // Redirige conservando la query (la usa la página para el polling)
+    path: 'suscripcion',
+    redirectTo: 'trainer/suscripcion',
+  },
     {
     path: '**',
     redirectTo: 'login',

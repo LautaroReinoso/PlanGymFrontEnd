@@ -13,7 +13,8 @@
 - **Backend:** Spring Boot + MySQL en `http://localhost:8080`
 - **Producción:** front en **HostGator** (`https://plangympro.com`), backend en **Railway**
   (`https://api.plangympro.com`). Paso a paso en `DEPLOY.md` (raíz del backend).
-  - `environment.production.ts` → `apiUrl: 'https://api.plangympro.com/api'`, `appName: 'PlanGym'`
+  - `environment.production.ts` → `apiUrl: 'https://api.plangympro.com/api'`, `appName: 'PlanGym'`,
+    `billingEnabled: false` (ver "Suscripciones del entrenador")
   - `public/.htaccess` (se copia al build): todas las rutas → `index.html` (si no, el link del mail
     y el F5 dan 404 en Apache), fuerza HTTPS, `index.html` sin caché.
   - Favicon: `public/favicon.svg` + `favicon.ico` + `apple-touch-icon.png` (logo PlanGym), enlazados en `index.html`.
@@ -100,8 +101,12 @@ src/app/
 │   ├── trainer/
 │   │   ├── trainer.routes.ts
 │   │   ├── models/
-│   │   │   └── trainer.models.ts
+│   │   │   ├── trainer.models.ts
+│   │   │   └── billing.models.ts         → BillingPlan, Subscription, SubscriptionStatus
+│   │   ├── guards/
+│   │   │   └── billing-enabled.guard.ts  → bloquea /suscripcion si billingEnabled = false
 │   │   ├── services/
+│   │   │   ├── billing.service.ts        → suscripción (signal compartida mySubscription)
 │   │   │   ├── student.service.ts
 │   │   │   ├── template.service.ts
 │   │   │   ├── exercise.service.ts       → COMPLETADO (CRUD full)
@@ -113,13 +118,20 @@ src/app/
 │   │   │   ├── template-detail-page/
 │   │   │   ├── template-create-page/
 │   │   │   ├── exercises-page/       → COMPLETADO (fila clickable → abre detalle)
-│   │   │   └── exercise-detail-page/ → NUEVO — detalle de ejercicio (catálogo)
+│   │   │   ├── exercise-detail-page/ → NUEVO — detalle de ejercicio (catálogo)
+│   │   │   └── subscription/
+│   │   │       ├── subscription-page/        → "Mi suscripción" + vuelta de Mercado Pago (polling)
+│   │   │       └── subscription-plans-page/  → tarjetas de planes
 │   │   └── components/
 │   │       ├── layout/
 │   │       │   ├── trainer-layout.component
 │   │       │   └── sidebar/
 │   │       ├── students/
-│   │       │   └── student-card.component
+│   │       │   ├── student-card.component
+│   │       │   └── new-student-modal.component  → muestra errorMessage del backend (+ link a planes)
+│   │       ├── subscription/
+│   │       │   ├── subscription-banner.component         → aviso en "Mis alumnos"
+│   │       │   └── cancel-subscription-modal.component   → confirmación (sobre gp-modal)
 │   │       ├── templates/
 │   │       │   ├── template-card.component
 │   │       │   ├── template-day.component     → limpieza: CSS muerto y console.log sacados
@@ -529,6 +541,19 @@ PUT    /api/v1/workout-days/:workoutDayId → WorkoutDayResponse
 ```
 ⚠️ Usa `workoutDayId` (campo `WorkoutTemplateDay.workoutDayId`), no el `id` del día.
 
+### BillingService (suscripción del entrenador)
+```
+GET    /api/billing/plans                     → BillingPlan[]   (público; maxStudents null = ilimitado)
+POST   /api/billing/subscriptions             → Subscription    body { planCode } → redirigir a initPoint
+GET    /api/billing/subscriptions/me          → Subscription | 204 (→ null, nunca se suscribió)
+POST   /api/billing/subscriptions/me/cancel   → Subscription (CANCELLED)
+```
+- Estados: `PENDING | AUTHORIZED | PAUSED | CANCELLED`. `initPoint` solo viene en PENDING.
+- `mySubscription` (signal): `undefined` = no consultado, `null` = sin suscripción. `isActive` = AUTHORIZED.
+- Helpers en el mismo archivo: `apiErrorMessage(err, fallback)` (saca `message` de los 400) e
+  `isStudentLimitError(msg)`.
+- Planes y precios siempre del backend, nunca fijos en el front. Nada de MP se guarda en el front.
+
 ### Student — servicios y endpoints
 ```
 GET    /api/student-workouts/my-workout                → resumen del plan activo
@@ -646,6 +671,9 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /trainer/templates/:id          → TemplateDetailPageComponent
 /trainer/exercises              → ExercisesPageComponent (COMPLETADO)
 /trainer/exercises/:id          → ExerciseDetailPageComponent (NUEVO)
+/trainer/suscripcion            → SubscriptionPageComponent (billingEnabledGuard + roleGuard('ROLE_TRAINER'))
+/trainer/suscripcion/planes     → SubscriptionPlansPageComponent (idem)
+/suscripcion                    → redirect a /trainer/suscripcion conservando la query (back_url de MP)
 
 /student                        → StudentLayoutComponent (+ bottom-nav)
 /student/dashboard              → DashboardPageComponent
@@ -656,6 +684,8 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /student/profile                → ProfilePageComponent
 ```
 ⚠️ `templates/new` debe ir ANTES que `templates/:id` en el array de rutas.
+⚠️ El guard de `/trainer` deja pasar ADMIN y GYM_ADMIN; las rutas de suscripción suman
+`roleGuard('ROLE_TRAINER')` porque el billing es solo del entrenador.
 
 ---
 
@@ -731,6 +761,34 @@ siempre igual, exista o no) → mail con link → `/reset-password?token=…` (m
 login. `core/auth/services/password-reset.service.ts` → `POST /api/auth/password/forgot` y `/reset`.
 Ambas páginas reutilizan `login.component.css`. Alumnos: fuera del MVP (se resuelve a mano).
 
+### 19. El error al crear alumno nunca se mostraba
+`StudentsPage` cargaba `createError` pero no se lo pasaba al modal, y el HTML de `new-student-modal`
+no mostraba `errorMessage`. Además el botón "+ Nuevo alumno" no limpiaba el error anterior.
+Ahora: `[errorMessage]`, `[isSaving]` y `[showPlansLink]` al modal, el botón usa `openCreateModal()` y
+el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite del plan).
+
+---
+
+## Suscripciones del entrenador (nov-2026)
+Quien paga es el TRAINER: suscripción mensual a la plataforma con Mercado Pago (preapproval).
+Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backend).
+
+- **Flujo:** planes → "Suscribirme" → `POST /subscriptions` → `window.location.href = initPoint` →
+  MP vuelve a `/suscripcion?preapproval_id=…` → redirect a `/trainer/suscripcion`.
+- **Polling:** si vuelve con `preapproval_id` y sigue PENDING (el webhook tarda), consulta
+  `/subscriptions/me` cada 3 s, hasta 5 reintentos, con "Confirmando tu pago…". Al terminar limpia la
+  query (`replaceUrl`). Si sigue pendiente, aviso + botón "Actualizar".
+- **Mi suscripción:** badge Activa / Pendiente de pago / Pausada / Cancelada / Sin suscripción.
+  PENDING → "Continuar con el pago"; AUTHORIZED → "Cancelar suscripción" (modal propio);
+  sin suscripción o CANCELLED → "Ver planes". Para cambiar de plan primero se cancela.
+- **Banner** (`app-subscription-banner`) solo en "Mis alumnos", no en el layout.
+- **Moneda/fechas:** `registerLocaleData(localeEsAR, 'es-AR')` en `app.config.ts`. No se cambió el
+  `LOCALE_ID` global (para no alterar fechas existentes): cada pipe pasa `'es-AR'` explícito.
+- **Período de prueba — `billingEnabled: false`** en los dos environments (también en la interfaz
+  `AppEnvironment`, que existe duplicada; ver pendiente del token `ENVIRONMENT`). Con `false`: sin ítem
+  de menú, sin banner (ni consulta), rutas redirigen a `/trainer/students`, sin link a planes en el
+  error de límite. Para habilitar: `true` en ambos environments y rebuild.
+
 ---
 
 ## Pendiente de implementar
@@ -771,6 +829,16 @@ Ambas páginas reutilizan `login.component.css`. Alumnos: fuera del MVP (se resu
 - [x] `app-page-loader` con el gym-loader en toda la app
 - [x] Marca unificada PlanGym + favicon propio
 - [ ] `ToastService` — feedback de éxito/error global
+
+### Suscripciones
+- [x] Modelos, `BillingService`, planes, Mi suscripción, polling de vuelta, banner, menú, guard
+- [x] Interruptor `billingEnabled` (hoy en `false`, período de prueba)
+- [ ] Backend: interruptor equivalente (ej. `billing.enforce=false`) para que en la prueba no se
+      bloquee el login de alumnos ni se aplique el límite de alumnos del plan
+- [ ] Probar el flujo completo con usuario de prueba de MP (en local el `back_url` del backend tiene
+      que apuntar a `localhost:4200`)
+- [ ] `isStudentLimitError` detecta el límite buscando "plan" en el mensaje: si el backend agrega un
+      `code` en el error, cambiar a ese campo
 
 ### Backend pendiente
 - [ ] `exerciseCount` y `assignedStudents` en `WorkoutTemplateSummary`

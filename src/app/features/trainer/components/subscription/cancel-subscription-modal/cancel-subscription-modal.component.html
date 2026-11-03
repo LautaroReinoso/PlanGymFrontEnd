@@ -1,0 +1,15 @@
+<gp-modal [isOpen]="isOpen()" title="Cancelar suscripción" size="sm" [closeOnBackdrop]="!isCancelling()" (closed)="closed.emit()">
+  <div class="body">
+    <p>Si cancelás, se frena el débito automático y <strong>tus alumnos no van a poder ingresar</strong> hasta que vuelvas a suscribirte.</p>
+    <p class="muted">Tus alumnos, plantillas y ejercicios no se borran.</p>
+
+    @if (errorMessage()) {
+      <p class="error" role="alert">{{ errorMessage() }}</p>
+    }
+
+    <div class="actions">
+      <gp-button variant="ghost" size="md" [disabled]="isCancelling()" (click)="closed.emit()">Volver</gp-button>
+      <gp-button variant="danger" size="md" [loading]="isCancelling()" (click)="confirmed.emit()">Sí, cancelar</gp-button>
+    </div>
+  </div>
+</gp-modal>

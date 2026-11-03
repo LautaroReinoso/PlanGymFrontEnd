@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../../../core/auth/services/auth.service';
+import { ENVIRONMENT } from '../../../../../../../environments/tokens/environment.token';
 
 interface NavItem {
   label: string;
@@ -31,11 +32,12 @@ interface NavItem {
 export class SidebarComponent {
 
   private readonly auth = inject(AuthService);
+  private readonly billingEnabled = inject(ENVIRONMENT).billingEnabled;
 
   readonly isOpen       = input<boolean>(false);
   readonly closeRequest = output<void>();
 
-  readonly navItems: NavItem[] = [
+  private readonly allNavItems: NavItem[] = [
     {
       label: 'Alumnos',
       route: '/trainer/students',
@@ -51,7 +53,17 @@ export class SidebarComponent {
       route: '/trainer/exercises',
       icon: 'M6 18h2M16 18h2M4 14h16M4 10h16M6 6h2M16 6h2M8 6v12M18 6v12',
     },
+    {
+      label: 'Suscripción',
+      route: '/trainer/suscripcion',
+      icon: 'M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7zM3 10h18M7 15h4',
+    },
   ];
+
+  // "Suscripción" solo aparece con billingEnabled
+  readonly navItems: NavItem[] = this.allNavItems.filter(
+    item => this.billingEnabled || item.route !== '/trainer/suscripcion',
+  );
 
   readonly userMail = this.auth.currentMail;
 

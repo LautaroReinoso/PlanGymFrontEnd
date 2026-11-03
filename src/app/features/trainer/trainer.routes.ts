@@ -6,6 +6,7 @@
 
 import { Routes } from '@angular/router';
 import { authGuard, roleGuard } from '../../core/auth/services/auth-guard.service';
+import { billingEnabledGuard } from './guards/billing-enabled.guard';
 
 export const TRAINER_ROUTES: Routes = [
   {
@@ -84,6 +85,25 @@ export const TRAINER_ROUTES: Routes = [
             m => m.TemplateDetailPageComponent
           ),
         title: 'Editor de plantilla — PlanGym',
+      },
+      // ── Suscripción (solo TRAINER) ───────────
+      {
+        path: 'suscripcion',
+        canActivate: [billingEnabledGuard, roleGuard('ROLE_TRAINER')],
+        loadComponent: () =>
+          import('./pages/subscription/subscription-page/subscription-page.component').then(
+            m => m.SubscriptionPageComponent
+          ),
+        title: 'Mi suscripción — PlanGym',
+      },
+      {
+        path: 'suscripcion/planes',
+        canActivate: [billingEnabledGuard, roleGuard('ROLE_TRAINER')],
+        loadComponent: () =>
+          import('./pages/subscription/subscription-plans-page/subscription-plans-page.component').then(
+            m => m.SubscriptionPlansPageComponent
+          ),
+        title: 'Planes — PlanGym',
       },
       {
         path: 'profile',

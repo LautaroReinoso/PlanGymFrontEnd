@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
 import { InputFieldComponent } from '../../../../../shared/components/input-field/input-field.component';
 import { ButtonComponent } from '../../../../../shared/components/button-component/button-component.component';
+import { RouterLink } from '@angular/router';
 import { CreateStudentRequest } from '../../../models/student.models';
 
 @Component({
   selector: 'app-new-student-modal',
-  imports: [CommonModule, FormsModule, ModalComponent, InputFieldComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, RouterLink, ModalComponent, InputFieldComponent, ButtonComponent],
   templateUrl: './new-student-modal.component.html',
   styleUrl: './new-student-modal.component.css'
 })
@@ -18,6 +19,7 @@ export class NewStudentModalComponent {
   readonly isOpen       = input<boolean>(false);  // FIX: default false
   readonly isSaving     = input<boolean>(false);
   readonly errorMessage = input<string | null>(null);
+  readonly showPlansLink = input<boolean>(false);   // error de límite del plan
 
   // ── Outputs ───────────────────────────────────
   readonly closed = output<void>();

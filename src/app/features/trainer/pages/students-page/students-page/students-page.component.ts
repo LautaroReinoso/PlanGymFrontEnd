@@ -23,6 +23,8 @@ import { ButtonComponent } from '../../../../../shared/components/button-compone
 import { NewStudentModalComponent } from "../../../components/students/new-student-modal/new-student-modal.component";
 import { CreateStudentRequest } from '../../../models/student.models';
 import { PageLoaderComponent } from '../../../../../shared/components/page-loader/page-loader.component';
+import { SubscriptionBannerComponent } from '../../../components/subscription/subscription-banner/subscription-banner.component';
+import { BillingService, apiErrorMessage, isStudentLimitError } from '../../../services/billing.service';
 
 @Component({
   selector: 'app-students-page',
@@ -33,7 +35,8 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
     FormsModule,
     StudentCardComponent,
     ButtonComponent,
-    NewStudentModalComponent
+    NewStudentModalComponent,
+    SubscriptionBannerComponent,
 ],
   templateUrl: './students-page.component.html',
   styleUrl: './students-page.component.css',
@@ -42,6 +45,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
 export class StudentsPageComponent implements OnInit {
 
     private readonly studentService = inject(StudentService);
+  private readonly billing = inject(BillingService);
 
   // ── Estado ────────────────────────────────────
   readonly students   = signal<StudentSummary[]>([]);
@@ -49,6 +53,9 @@ export class StudentsPageComponent implements OnInit {
   readonly isCreating = signal(false);   // solo para crear alumno
   readonly error      = signal<string | null>(null);
   readonly createError = signal<string | null>(null); // error específico del modal
+  readonly createErrorIsLimit = computed(() =>
+    this.billing.enabled && isStudentLimitError(this.createError()),
+  );
   readonly searchTerm = signal('');
   readonly showCreateStudentModal = signal(false);
 
@@ -125,8 +132,9 @@ export class StudentsPageComponent implements OnInit {
       // Recargar lista para obtener el alumno real del backend
       this.loadStudents();
       },
-      error: () => {
-        this.createError.set('No se pudo crear el alumno.');
+      error: err => {
+        // 400 de negocio (DNI repetido/inválido, límite del plan) trae `message`
+        this.createError.set(apiErrorMessage(err, 'No se pudo crear el alumno.'));
         this.isCreating.set(false);
       },
     });

@@ -1,0 +1,70 @@
+:host { display: block; }
+
+.plans-page { display: flex; flex-direction: column; gap: var(--space-6); max-width: 1000px; }
+
+.back-link {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  font-size: 13px;
+  color: var(--color-muted-light);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--color-text); }
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+.page-subtitle { margin: var(--space-1) 0 0; color: var(--color-muted-light); font-size: 14px; }
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted-light);
+  font-size: 14px;
+}
+.notice a { color: var(--color-accent); }
+.notice--error { border-color: color-mix(in srgb, var(--color-danger) 40%, transparent); color: var(--color-danger); }
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.plan-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--ease-smooth);
+}
+.plan-card:hover { border-color: var(--color-accent); }
+.plan-card--current { border-color: var(--color-success); box-shadow: 0 0 0 1px var(--color-success-dim); }
+
+.plan-card__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.plan-card__name { margin: 0; font-family: var(--font-display); font-size: 17px; color: var(--color-text); }
+
+.plan-card__price {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.plan-card__period { font-size: 14px; font-weight: 400; color: var(--color-muted-light); }
+.plan-card__limit { margin: 0 0 var(--space-2); color: var(--color-muted-light); font-size: 14px; flex: 1; }
+
+.empty { color: var(--color-muted); }

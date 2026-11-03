@@ -1,0 +1,73 @@
+<div class="plans-page">
+
+  <div class="page-header">
+    <div>
+      <a class="back-link" routerLink="/trainer/suscripcion">← Mi suscripción</a>
+      <h1 class="page-title">Planes</h1>
+      <p class="page-subtitle">Elegí el plan según la cantidad de alumnos que entrenás. Se debita todos los meses con Mercado Pago.</p>
+    </div>
+  </div>
+
+  @if (isActive()) {
+    <div class="notice">
+      Ya tenés una suscripción activa. Para cambiar de plan, primero
+      <a routerLink="/trainer/suscripcion">cancelá la actual</a>.
+    </div>
+  }
+
+  @if (pendingPlanCode()) {
+    <div class="notice">
+      Tenés un pago pendiente. Podés elegir el mismo plan para reintentar o elegir otro:
+      generamos un link de pago nuevo.
+    </div>
+  }
+
+  @if (actionError()) {
+    <div class="notice notice--error" role="alert">{{ actionError() }}</div>
+  }
+
+  @if (isLoading()) {
+    <app-page-loader message="Cargando planes…" />
+  } @else if (loadError()) {
+    <div class="notice notice--error" role="alert">
+      {{ loadError() }}
+      <gp-button variant="secondary" size="sm" (click)="load()">Reintentar</gp-button>
+    </div>
+  } @else {
+    <div class="plans-grid">
+      @for (plan of plans(); track plan.code) {
+        <article class="plan-card" [class.plan-card--current]="plan.code === currentPlanCode()">
+          <header class="plan-card__header">
+            <h2 class="plan-card__name">{{ plan.name }}</h2>
+            @if (plan.code === currentPlanCode()) {
+              <gp-badge variant="success" size="sm">Tu plan</gp-badge>
+            } @else if (plan.code === pendingPlanCode()) {
+              <gp-badge variant="warning" size="sm">Pago pendiente</gp-badge>
+            }
+          </header>
+
+          <p class="plan-card__price">
+            {{ plan.price | currency: plan.currency : 'symbol-narrow' : '1.0-0' : 'es-AR' }}
+            <span class="plan-card__period">{{ periodLabel(plan) }}</span>
+          </p>
+
+          <p class="plan-card__limit">{{ studentsLabel(plan) }}</p>
+
+          <gp-button
+            variant="primary"
+            size="md"
+            [fullWidth]="true"
+            [disabled]="isActive() || (subscribing() !== null && subscribing() !== plan.code)"
+            [loading]="subscribing() === plan.code"
+            (click)="subscribe(plan)"
+          >
+            {{ plan.code === currentPlanCode() ? 'Plan actual'
+               : plan.code === pendingPlanCode() ? 'Reintentar pago' : 'Suscribirme' }}
+          </gp-button>
+        </article>
+      } @empty {
+        <p class="empty">No hay planes disponibles en este momento.</p>
+      }
+    </div>
+  }
+</div>

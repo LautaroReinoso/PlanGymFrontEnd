@@ -1,0 +1,14 @@
+@if (visible()) {
+  <div class="banner" role="status">
+    <svg class="banner__icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span class="banner__text">Tus alumnos no pueden ingresar hasta que actives tu suscripción.</span>
+    @if (isPending()) {
+      <a class="banner__link" routerLink="/trainer/suscripcion">Continuar con el pago →</a>
+    } @else {
+      <a class="banner__link" routerLink="/trainer/suscripcion/planes">Ver planes →</a>
+    }
+  </div>
+}
