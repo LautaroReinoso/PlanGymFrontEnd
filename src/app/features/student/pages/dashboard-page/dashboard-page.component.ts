@@ -22,6 +22,7 @@ import { WorkoutTemplateDay } from '../../../trainer/models/trainer.models';
 import { BadgeComponent } from '../../../../shared/components/badge-component/badge.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
 import { PageLoaderComponent } from '../../../../shared/components/page-loader/page-loader.component';
+import { apiErrorText } from '../../../../core/http/api-error.util';
 import { BookingStudentService } from '../../../booking/services/booking-student.service';
 
 @Component({
@@ -79,8 +80,10 @@ export class DashboardPageComponent implements OnInit {
         this.detail.set(detail);
         this.isLoading.set(false);
       },
-      error: () => {
-        this.error.set('No pudimos cargar tu entrenamiento. Intentá nuevamente.');
+      error: err => {
+        // Mostrar el motivo real del backend (403 sin suscripción, 500, sin conexión…)
+        console.error('[Dashboard] my-workout falló', err);
+        this.error.set(apiErrorText(err, 'No pudimos cargar tu entrenamiento. Intentá nuevamente.'));
         this.isLoading.set(false);
       },
     });
