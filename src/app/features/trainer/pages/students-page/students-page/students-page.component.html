@@ -94,5 +94,9 @@
 
     <app-new-student-modal [isOpen]="showCreateStudentModal()" [isSaving]="isCreating()" [errorMessage]="createError()" [showPlansLink]="createErrorIsLimit()" (closed)="showCreateStudentModal.set(false)"   (saved)="createStudent($event)" />
 
+    <!-- Turnos: ofrecer horario fijo al alumno recién creado -->
+    <app-enroll-student-modal [isOpen]="!!enrollDni()" [dni]="enrollDni() ?? ''"
+      (closed)="enrollDni.set(null)" (saved)="enrollDni.set(null)" />
+
 
 </div>

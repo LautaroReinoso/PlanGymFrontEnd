@@ -7,6 +7,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, roleGuard } from '../../core/auth/services/auth-guard.service';
 import { billingEnabledGuard } from './guards/billing-enabled.guard';
+import { trainerBookingGuard } from '../booking/booking.guard';
 
 export const TRAINER_ROUTES: Routes = [
   {
@@ -104,6 +105,31 @@ export const TRAINER_ROUTES: Routes = [
             m => m.SubscriptionPlansPageComponent
           ),
         title: 'Planes — PlanGym',
+      },
+      // ── Turnos (módulo de booking; 403 = apagado) ──
+      {
+        path: 'turnos',
+        canActivate: [trainerBookingGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('../booking/pages/trainer-agenda/trainer-agenda-page.component').then(m => m.TrainerAgendaPageComponent),
+            title: 'Turnos — PlanGym',
+          },
+          {
+            path: 'horarios-fijos',
+            loadComponent: () =>
+              import('../booking/pages/trainer-enrollments/trainer-enrollments-page.component').then(m => m.TrainerEnrollmentsPageComponent),
+            title: 'Horarios fijos — PlanGym',
+          },
+          {
+            path: 'disponibilidad',
+            loadComponent: () =>
+              import('../booking/pages/trainer-availability/trainer-availability-page.component').then(m => m.TrainerAvailabilityPageComponent),
+            title: 'Horarios y cupos — PlanGym',
+          },
+        ],
       },
       {
         path: 'profile',

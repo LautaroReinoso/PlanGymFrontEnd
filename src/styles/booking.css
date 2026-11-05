@@ -1,0 +1,83 @@
+/* ─────────────────────────────────────────────
+   PlanGym — estilos compartidos de Turnos (prefijo bk-)
+───────────────────────────────────────────── */
+.bk-page { container-type: inline-size; display: flex; flex-direction: column; gap: var(--space-5); padding-bottom: var(--space-8); }
+.bk-header { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.bk-title { margin: 0; font: 800 28px var(--font-display); color: var(--color-text); }
+.bk-subtitle { margin: 4px 0 0; color: var(--color-muted-light); font-size: 14px; }
+.bk-tabs { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.bk-tab {
+  font: 600 14px var(--font-body); color: var(--color-muted-light); text-decoration: none;
+  padding: 8px 14px; border-radius: var(--radius-full); border: 1px solid var(--color-border);
+  background: var(--color-card); cursor: pointer;
+}
+.bk-tab.on, .bk-tab.active { color: #fff; background: var(--color-accent); border-color: var(--color-accent); }
+
+.bk-card {
+  position: relative; background: var(--color-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3);
+}
+.bk-card::before {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 2px; border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-celeste));
+}
+.bk-card h2, .bk-card h3 { margin: 0; font: 700 17px var(--font-display); color: var(--color-text); }
+.bk-muted { color: var(--color-muted-light); font-size: 13px; margin: 0; }
+.bk-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.bk-row--between { justify-content: space-between; }
+.bk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.bk-item {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  padding: var(--space-3); background: var(--color-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm); flex-wrap: wrap;
+}
+.bk-item__main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bk-item__title { font-weight: 600; color: var(--color-text); }
+.bk-item__actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+.bk-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.bk-field input, .bk-field select, .bk-field textarea {
+  font: 14px var(--font-body); color: var(--color-text); background: var(--color-surface);
+  border: 1.5px solid var(--color-border); border-radius: var(--radius-sm); padding: 9px 12px;
+}
+.bk-field input:focus, .bk-field select:focus, .bk-field textarea:focus { outline: none; border-color: var(--color-accent); }
+.bk-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); }
+.bk-check { display: flex; align-items: center; gap: var(--space-2); font-size: 14px; color: var(--color-text); cursor: pointer; }
+.bk-check input { accent-color: var(--color-accent); width: 18px; height: 18px; }
+
+.bk-chip {
+  font: 600 12px var(--font-body); padding: 3px 10px; border-radius: var(--radius-full);
+  background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-muted-light);
+}
+.bk-chip--ok   { color: var(--color-success); border-color: var(--color-success); }
+.bk-chip--warn { color: var(--color-warning); border-color: var(--color-warning); }
+.bk-chip--off  { color: var(--color-muted); }
+.bk-chip--acc  { color: var(--color-celeste); border-color: var(--color-celeste); }
+
+.bk-error { color: var(--color-danger); font-size: 13px; margin: 0; }
+.bk-note { font-size: 13px; color: var(--color-muted-light); background: var(--color-surface);
+  border: 1px dashed var(--color-border); border-radius: var(--radius-sm); padding: var(--space-3); margin: 0; }
+
+/* Grilla semanal de franjas (cupos / elegir horarios) */
+.bk-slots { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); }
+.bk-slots__col { display: flex; flex-direction: column; gap: 6px; }
+.bk-slots__head { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--color-muted-light); text-align: center; }
+.bk-slot {
+  font: 600 13px var(--font-body); color: var(--color-text); text-align: left; cursor: pointer;
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  padding: 8px; display: flex; flex-direction: column; gap: 2px;
+}
+.bk-slot small { font-weight: 500; color: var(--color-muted-light); font-size: 11px; }
+.bk-slot.mine { border-color: var(--color-accent); background: var(--color-accent-dim); }
+.bk-slot.full { opacity: .5; cursor: not-allowed; }
+.bk-slot.picked { border-color: var(--color-celeste); }
+@container (max-width: 760px) {
+  .bk-slots { grid-template-columns: 1fr; }
+  .bk-slots__col { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .bk-slots__head { width: 100%; text-align: left; }
+  .bk-slot { flex: 1 1 120px; }
+}
+
+/* Fila de franja: día · desde · hasta · cupo */
+.bk-rule { flex: 1; min-width: 260px; display: grid; grid-template-columns: 1.4fr 1fr 1fr .7fr; gap: var(--space-2); }
+@container (max-width: 560px) { .bk-rule { grid-template-columns: 1fr 1fr; } }

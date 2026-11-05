@@ -25,6 +25,8 @@ import { CreateStudentRequest } from '../../../models/student.models';
 import { PageLoaderComponent } from '../../../../../shared/components/page-loader/page-loader.component';
 import { SubscriptionBannerComponent } from '../../../components/subscription/subscription-banner/subscription-banner.component';
 import { BillingService, apiErrorMessage, isStudentLimitError } from '../../../services/billing.service';
+import { EnrollStudentModalComponent } from '../../../../booking/components/enroll-modal/enroll-student-modal.component';
+import { BookingTrainerService } from '../../../../booking/services/booking-trainer.service';
 
 @Component({
   selector: 'app-students-page',
@@ -37,6 +39,7 @@ import { BillingService, apiErrorMessage, isStudentLimitError } from '../../../s
     ButtonComponent,
     NewStudentModalComponent,
     SubscriptionBannerComponent,
+    EnrollStudentModalComponent,
 ],
   templateUrl: './students-page.component.html',
   styleUrl: './students-page.component.css',
@@ -46,13 +49,18 @@ export class StudentsPageComponent implements OnInit {
 
     private readonly studentService = inject(StudentService);
   private readonly billing = inject(BillingService);
+  private readonly booking = inject(BookingTrainerService);
 
   // ── Estado ────────────────────────────────────
   readonly students   = signal<StudentSummary[]>([]);
   readonly isLoading  = signal(false);   // solo para carga inicial
   readonly isCreating = signal(false);   // solo para crear alumno
   readonly error      = signal<string | null>(null);
-  readonly createError = signal<string | null>(null); // error específico del modal
+  readonly createError = signal<string | null>(null);
+
+  // ── Turnos: ofrecer horario fijo después del alta ──
+  private readonly bookingEnabled = signal(false);
+  readonly enrollDni = signal<string | null>(null); // error específico del modal
   readonly createErrorIsLimit = computed(() =>
     this.billing.enabled && isStudentLimitError(this.createError()),
   );
@@ -89,6 +97,7 @@ export class StudentsPageComponent implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────
   ngOnInit(): void {
+    this.booking.probe().subscribe(ok => this.bookingEnabled.set(ok));
     this.loadStudents();
   }
 
@@ -128,6 +137,7 @@ export class StudentsPageComponent implements OnInit {
     this.studentService.createStudent(request).subscribe({
       next: () => {
     this.showCreateStudentModal.set(false);
+      if (this.bookingEnabled()) this.enrollDni.set(request.dni);
       this.isCreating.set(false);
       // Recargar lista para obtener el alumno real del backend
       this.loadStudents();

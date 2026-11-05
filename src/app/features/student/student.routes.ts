@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { catchError, map, of } from 'rxjs';
 import { authGuard, roleGuard } from '../../core/auth/services/auth-guard.service';
 import { WeekStatusService } from './services/week-status.service';
+import { studentBookingGuard } from '../booking/booking.guard';
 
 /** "Hoy": manda al primer día del plan que falta esta semana (lo calcula el backend);
  *  si ya hizo todos, a Semana; si no tiene plan o falla, al inicio. */
@@ -66,6 +67,31 @@ export const STUDENT_ROUTES: Routes = [
         loadComponent: () =>
           import('./pages/weekly-page/weekly-page.component').then(m => m.WeeklyPageComponent),
         title: 'Tu semana — PlanGym',
+      },
+      // ── Turnos (módulo de booking; 403 = apagado) ──
+      {
+        path: 'turnos',
+        canActivate: [studentBookingGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('../booking/pages/student-agenda/student-agenda-page.component').then(m => m.StudentAgendaPageComponent),
+            title: 'Mis turnos — PlanGym',
+          },
+          {
+            path: 'elegir',
+            loadComponent: () =>
+              import('../booking/pages/student-choose/student-choose-page.component').then(m => m.StudentChoosePageComponent),
+            title: 'Elegir horarios — PlanGym',
+          },
+          {
+            path: 'reservar',
+            loadComponent: () =>
+              import('../booking/pages/student-book/student-book-page.component').then(m => m.StudentBookPageComponent),
+            title: 'Reservar clase — PlanGym',
+          },
+        ],
       },
       {
         path: 'monthly',

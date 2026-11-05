@@ -1,0 +1,103 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <h1 class="bk-title">Turnos</h1>
+      <p class="bk-subtitle">Tus clases de la semana y del mes.</p>
+    </div>
+    <nav class="bk-tabs">
+      <a class="bk-tab on" routerLink="/trainer/turnos">Calendario</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/horarios-fijos">Horarios fijos</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/disponibilidad">Horarios y cupos</a>
+    </nav>
+  </header>
+
+  <label class="bk-check">
+    <input type="checkbox" [ngModel]="showCancelled()" (ngModelChange)="showCancelled.set($event)" />
+    Mostrar canceladas
+  </label>
+
+  @if (loadError()) {
+    <p class="bk-error">{{ loadError() }}</p>
+  }
+
+  <app-booking-calendar
+    [view]="view()" [anchor]="anchor()" [entries]="entries()" [loading]="isLoading()" [showPeople]="true"
+    emptyText="No tenés clases en estos días."
+    (viewChange)="onView($event)" (anchorChange)="onAnchor($event)" (entryClick)="openEntry($event)" />
+
+  <div class="legend">
+    <span class="dot dot--confirmed"></span> Confirmada
+    <span class="dot dot--completed"></span> Tomada
+    <span class="dot dot--noshow"></span> Ausente
+    <span class="dot dot--cancelled"></span> Cancelada
+    <span class="legend__fixed">↻ Horario fijo</span>
+  </div>
+</div>
+
+<gp-modal [isOpen]="!!openGroup()" [title]="openTitle()" size="md" (closed)="closeDetail()">
+  @if (openGroup(); as g) {
+    <div class="detail">
+      <p class="bk-muted">{{ openDate() }}
+        @if (g.capacity) { · Cupo {{ g.capacity }} }
+      </p>
+
+      @if (openStarted()) {
+        <div class="bk-row bk-row--between">
+          <strong>Pasar lista</strong>
+          <gp-button variant="ghost" size="sm" (click)="allPresent()">Todos presentes</gp-button>
+        </div>
+      }
+
+      <ul class="bk-list">
+        @for (i of openRows(); track i.id) {
+          <li class="bk-item" [class.is-cancelled]="i.status === 'CANCELLED'">
+            <div class="bk-item__main">
+              <span class="bk-item__title">{{ nameOf(i) }}</span>
+              <span class="bk-muted">
+                {{ statusLabels[i.status] }}
+                @if (i.enrollmentId) { · horario fijo }
+                @if (i.cancelReason) { · {{ i.cancelReason }} }
+              </span>
+            </div>
+
+            @if (i.status !== 'CANCELLED') {
+              <div class="bk-item__actions">
+                @if (openStarted()) {
+                  <button type="button" class="mark" [class.mark--on-ok]="markOf(i) === 'present'"
+                          [disabled]="isSaving()" (click)="setMark(i, 'present')">Vino</button>
+                  <button type="button" class="mark" [class.mark--on-no]="markOf(i) === 'absent'"
+                          [disabled]="isSaving()" (click)="setMark(i, 'absent')">Faltó</button>
+                } @else {
+                  <gp-button variant="ghost" size="sm" [disabled]="isSaving()" (click)="askCancel(i)">Cancelar</gp-button>
+                }
+              </div>
+            }
+
+            @if (cancelId() === i.id) {
+              <div class="cancel-box">
+                <label class="bk-field">
+                  Motivo (lo ve el alumno)
+                  <input type="text" maxlength="200" [ngModel]="cancelReason()" (ngModelChange)="cancelReason.set($event)"
+                         placeholder="Ej.: no hay clase por feriado" />
+                </label>
+                <div class="bk-row">
+                  <gp-button variant="danger" size="sm" [loading]="isSaving()" [disabled]="!cancelReason().trim()"
+                             (click)="confirmCancel()">Cancelar turno</gp-button>
+                  <gp-button variant="ghost" size="sm" [disabled]="isSaving()" (click)="cancelId.set(null)">Volver</gp-button>
+                </div>
+              </div>
+            }
+          </li>
+        } @empty {
+          <li class="bk-muted">No hay alumnos en esta clase.</li>
+        }
+      </ul>
+
+      @if (openStarted()) {
+        <gp-button [fullWidth]="true" [loading]="isSaving()" [disabled]="!hasMarks()" (click)="saveAttendance()">
+          Guardar lista
+        </gp-button>
+      }
+    </div>
+  }
+</gp-modal>

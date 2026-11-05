@@ -1,0 +1,103 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <a class="bk-muted" routerLink="/student/turnos">‹ Mis turnos</a>
+      <h1 class="bk-title">Elegir mis horarios</h1>
+    </div>
+  </header>
+
+  @if (choosable().length > 1) {
+    <div class="bk-tabs">
+      @for (s of choosable(); track s.id) {
+        <button type="button" class="bk-tab" [class.on]="s.id === serviceId()" (click)="selectService(s.id)">{{ s.name }}</button>
+      }
+    </div>
+  }
+
+  @if (error()) { <p class="bk-error">{{ error() }}</p> }
+
+  @if (isLoading()) {
+    <app-page-loader message="Cargando horarios…" />
+  }
+  @if (!isLoading() && options(); as o) {
+    <section class="bk-card">
+      <h2>{{ o.serviceName }}</h2>
+      <div class="bk-row">
+        <span class="bk-chip bk-chip--acc">Usás {{ o.used }} de {{ o.weeklyLimit }} por semana</span>
+        <span class="bk-chip" [class.bk-chip--warn]="o.changesLeft === 0">Te quedan {{ o.changesLeft }} cambios este mes</span>
+      </div>
+      @if (changing()) {
+        <p class="bk-note">Tocá el horario nuevo al que te querés pasar.</p>
+      } @else if (o.used < o.weeklyLimit) {
+        <p class="bk-muted">Tocá los horarios libres para anotarte ({{ remaining() }} por elegir).</p>
+      } @else {
+        <p class="bk-muted">Tocá uno de tus horarios (en azul) para cambiarlo o dejarlo.</p>
+      }
+    </section>
+
+    @for (p of professionals(); track p.id) {
+      <section class="bk-card">
+        <h3>Con {{ p.displayName }}</h3>
+        <div class="bk-slots">
+          @for (col of p.byDay; track col.day) {
+            <div class="bk-slots__col">
+              <span class="bk-slots__head">{{ dayShort[col.day] }}</span>
+              @for (s of col.slots; track s.startTime) {
+                <button type="button" class="bk-slot"
+                        [class.mine]="s.mine" [class.picked]="picked().includes(key(s, p.id)) || selected() === s"
+                        [class.full]="!s.mine && s.free <= 0" [disabled]="isSaving() || (!s.mine && s.free <= 0)"
+                        (click)="tap(s, p.id)">
+                  {{ hhmm(s.startTime) }}
+                  <small>{{ s.mine ? 'Tu horario' : (s.free > 0 ? s.free + ' libres' : 'Completo') }}</small>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    } @empty {
+      <p class="bk-muted">Tu entrenador todavía no cargó horarios para este servicio.</p>
+    }
+
+    @if (picked().length) {
+      <gp-button [fullWidth]="true" [loading]="isSaving()" (click)="enroll()">
+        Anotarme en {{ picked().length }} {{ picked().length === 1 ? 'horario' : 'horarios' }}
+      </gp-button>
+    }
+
+    @if (selected(); as s) {
+      <section class="bk-card">
+        <h3>{{ slotText(s) }}</h3>
+        <div class="bk-row">
+          <gp-button variant="secondary" [disabled]="isSaving() || o.changesLeft === 0" (click)="changing.set(true)">Cambiar</gp-button>
+          <gp-button variant="ghost" [disabled]="isSaving() || o.changesLeft === 0" (click)="askLeave()">Dejar</gp-button>
+        </div>
+        @if (o.changesLeft === 0) { <p class="bk-muted">Ya usaste todos tus cambios de este mes.</p> }
+      </section>
+    }
+  }
+  @if (!isLoading() && !error() && services().length > 0 && choosable().length === 0) {
+    <p class="bk-muted">Tu entrenador no habilitó elegir horarios. Pedile que te anote.</p>
+  }
+</div>
+
+<gp-modal [isOpen]="!!pending()" [title]="pending()?.kind === 'change' ? 'Cambiar horario' : 'Dejar horario'"
+          size="sm" (closed)="pending.set(null)">
+  @if (pending(); as p) {
+    <div class="bk-page" style="padding-bottom:0">
+      @if (p.kind === 'change') {
+        <p>De <strong>{{ slotText(p.from) }}</strong> a <strong>{{ slotText(p.to) }}</strong>.</p>
+      } @else {
+        <p>Vas a dejar <strong>{{ slotText(p.from) }}</strong>.</p>
+      }
+      <p class="bk-note">
+        Gastás 1 de tus {{ options()?.changesLeft }} cambios.
+        Tus clases de las próximas {{ options()?.changeNoticeHours }} h se mantienen; el horario nuevo empieza después.
+      </p>
+      <div class="bk-row">
+        <gp-button [loading]="isSaving()" (click)="confirmPending()">Confirmar</gp-button>
+        <gp-button variant="ghost" [disabled]="isSaving()" (click)="pending.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>

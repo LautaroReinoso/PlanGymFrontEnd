@@ -35,7 +35,7 @@
 
   <!-- ── Nav items ───────────────────────────── -->
   <nav class="sidebar-nav" aria-label="Navegación principal">
-    @for (item of navItems; track item.route) {
+    @for (item of navItems(); track item.route) {
       <a
         class="nav-item"
         [routerLink]="item.route"

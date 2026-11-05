@@ -1,0 +1,81 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <h1 class="bk-title">Mis turnos</h1>
+      <p class="bk-subtitle">Tus clases con tu entrenador.</p>
+    </div>
+  </header>
+
+  <section class="bk-card">
+    <div class="bk-row bk-row--between">
+      <h2>Mis horarios fijos</h2>
+      <div class="bk-row">
+        @if (canChoose()) {
+          <a class="bk-tab" routerLink="/student/turnos/elegir">Elegir mis horarios</a>
+        }
+        @if (canBookSingle()) {
+          <a class="bk-tab" routerLink="/student/turnos/reservar">Reservar clase</a>
+        }
+      </div>
+    </div>
+    @for (f of fixedLines(); track f.label) {
+      <p class="fixed-line">
+        {{ f.label }}
+        @if (f.paused) { <span class="bk-chip bk-chip--warn">En pausa</span> }
+      </p>
+    } @empty {
+      <p class="bk-muted">Todavía no tenés horarios fijos. Tu entrenador te los puede asignar.</p>
+    }
+  </section>
+
+  <label class="bk-check">
+    <input type="checkbox" [ngModel]="showCancelled()" (ngModelChange)="showCancelled.set($event)" />
+    Mostrar canceladas
+  </label>
+
+  @if (loadError()) { <p class="bk-error">{{ loadError() }}</p> }
+
+  <app-booking-calendar
+    [view]="view()" [anchor]="anchor()" [entries]="entries()" [loading]="isLoading()"
+    emptyText="No tenés clases en estos días."
+    (viewChange)="onView($event)" (anchorChange)="onAnchor($event)" (entryClick)="openEntry($event)" />
+</div>
+
+<gp-modal [isOpen]="!!open()" [title]="openTitle()" size="sm" (closed)="close()">
+  @if (open(); as b) {
+    <div class="detail">
+      <p class="bk-muted">{{ openDate() }}</p>
+      <p class="line"><strong>Entrenador:</strong> {{ b.professionalName }}</p>
+      @if (b.location) { <p class="line"><strong>Lugar:</strong> {{ b.location }}</p> }
+      <p class="line">
+        <span class="bk-chip" [class.bk-chip--ok]="b.status === 'COMPLETED'"
+              [class.bk-chip--warn]="b.status === 'NO_SHOW'" [class.bk-chip--off]="b.status === 'CANCELLED'">
+          {{ statusLabels[b.status] }}
+        </span>
+        @if (b.enrollmentId) { <span class="bk-chip bk-chip--acc">Horario fijo</span> }
+      </p>
+      @if (b.cancelReason) { <p class="bk-muted">Motivo: {{ b.cancelReason }}</p> }
+
+      @if (openIsFuture()) {
+        @if (blocked()[b.id]; as msg) {
+          <p class="bk-note">{{ msg }}</p>
+        } @else if (b.enrollmentId) {
+          <p class="bk-note">Si avisás que no vas, tu lugar queda libre para otro alumno. Tu horario fijo sigue igual.</p>
+          <gp-button variant="secondary" [fullWidth]="true" [loading]="isWorking()" (click)="notifyAbsence()">
+            Avisar que no voy
+          </gp-button>
+        } @else if (confirming()) {
+          <p class="bk-note">{{ preview() }}</p>
+          <div class="bk-row">
+            <gp-button variant="danger" [loading]="isWorking()" (click)="confirmCancel()">Sí, cancelar</gp-button>
+            <gp-button variant="ghost" [disabled]="isWorking()" (click)="confirming.set(false)">Volver</gp-button>
+          </div>
+        } @else {
+          <gp-button variant="secondary" [fullWidth]="true" [loading]="isWorking()" (click)="askCancel()">
+            Cancelar clase
+          </gp-button>
+        }
+      }
+    </div>
+  }
+</gp-modal>

@@ -9,11 +9,14 @@ import {
   input,
   output,
   inject,
+  computed,
+  signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../../../core/auth/services/auth.service';
 import { ENVIRONMENT } from '../../../../../../../environments/tokens/environment.token';
+import { BookingTrainerService } from '../../../../../booking/services/booking-trainer.service';
 
 interface NavItem {
   label: string;
@@ -44,6 +47,11 @@ export class SidebarComponent {
       icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
     },
     {
+      label: 'Turnos',
+      route: '/trainer/turnos',
+      icon: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 14h2M14 14h2M8 18h2',
+    },
+    {
       label: 'Plantillas',
       route: '/trainer/templates',
       icon: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2M12 12h4M12 16h4M8 12h.01M8 16h.01',
@@ -60,10 +68,18 @@ export class SidebarComponent {
     },
   ];
 
-  // "Suscripción" solo aparece con billingEnabled
-  readonly navItems: NavItem[] = this.allNavItems.filter(
-    item => this.billingEnabled || item.route !== '/trainer/suscripcion',
-  );
+  /** Módulo de turnos prendido (un 403 lo apaga) */
+  private readonly bookingEnabled = signal(false);
+
+  constructor() {
+    inject(BookingTrainerService).probe().subscribe(ok => this.bookingEnabled.set(ok));
+  }
+
+  // "Suscripción" solo aparece con billingEnabled; "Turnos" si el módulo responde
+  readonly navItems = computed<NavItem[]>(() => this.allNavItems.filter(item =>
+    (this.billingEnabled || item.route !== '/trainer/suscripcion') &&
+    (this.bookingEnabled() || item.route !== '/trainer/turnos'),
+  ));
 
   readonly userMail = this.auth.currentMail;
 

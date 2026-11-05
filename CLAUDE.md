@@ -682,6 +682,8 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /student/weekly                 → WeeklyPageComponent
 /student/monthly                → MonthlyPageComponent
 /student/profile                → ProfilePageComponent
+/student/turnos                 → StudentAgendaPage (+ /elegir, /reservar) — studentBookingGuard
+/trainer/turnos                 → TrainerAgendaPage (+ /horarios-fijos, /disponibilidad) — trainerBookingGuard
 ```
 ⚠️ `templates/new` debe ir ANTES que `templates/:id` en el array de rutas.
 ⚠️ El guard de `/trainer` deja pasar ADMIN y GYM_ADMIN; las rutas de suscripción suman
@@ -789,6 +791,59 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
   de menú, sin banner (ni consulta), rutas redirigen a `/trainer/students`, sin link a planes en el
   error de límite. Para habilitar: `true` en ambos environments y rebuild.
 
+## Turnos / calendario (booking, nov-2026)
+
+Módulo de turnos de `elytra-platform`. Base: `${apiUrl}/booking/plangym` (JWT, mismo login).
+PlanGym **no cobra turnos**: no se muestran precios ni MP; los servicios se mandan con `price: 0`.
+
+### Estructura
+```
+features/booking/
+├── booking.guard.ts                  → trainerBookingGuard / studentBookingGuard (403 = módulo apagado)
+├── models/booking.models.ts          → Booking, AgendaItem, Enrollment, ScheduleOverviewItem, SelfEnrollmentOptions, Rule…
+├── utils/booking-date.util.ts        → rangos semana/mes, splitRange (≤92 días), isoTime/isoDateKey, hhmm, textos
+├── services/
+│   ├── booking-http.service.ts       → base URL, cache GET 60 s, invalidación en mutaciones, signal `enabled`
+│   ├── booking-trainer.service.ts    → /professional/** (agenda, attendance, availability, blocks, enrollments, services…)
+│   ├── booking-student.service.ts    → /bookings/mine, /enrollments/**, /services, /bookings
+│   └── calendar-prefs.ts             → última vista (localStorage con try/catch)
+├── components/
+│   ├── calendar/                     → app-booking-calendar (grilla propia Semana/Mes, sin librería)
+│   └── enroll-modal/                 → app-enroll-student-modal (anotar por DNI en horario fijo)
+└── pages/
+    ├── trainer-agenda/               → /trainer/turnos — agrupa por startAt+serviceId, pasar lista, cancelar con motivo
+    ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — pausar/reactivar/terminar + Mis servicios
+    ├── trainer-availability/         → /trainer/turnos/disponibilidad — franjas (PUT reemplaza todo), cupos, bloqueos
+    ├── student-agenda/               → /student/turnos — mis clases + mis horarios fijos, ausencia / cancelar
+    ├── student-choose/               → /student/turnos/elegir — elegir/cambiar/dejar horarios (selfEnrollment)
+    └── student-book/                 → /student/turnos/reservar — clase suelta (SELF/BOTH)
+core/http/api-error.util.ts           → apiErrorText(err, fallback): `message` del backend para cualquier status
+shared/services/toast.service.ts + shared/components/toast → <gp-toast /> montado en app.component
+src/styles/booking.css                → estilos compartidos de turnos (prefijo bk-), importado en styles.css
+```
+
+### Decisiones
+- **Calendario propio** (sin FullCalendar/angular-calendar): agrupación por clase, contadores en Mes y
+  theming con tokens. Semana = 7 columnas; en pantallas angostas (container query) se apila por día.
+- **Fechas:** `startAt`/`endAt` se leen por texto (`isoTime`, `isoDateKey`), nunca se convierten a la zona
+  del navegador. Bloqueos: el `datetime-local` se manda con offset `-03:00`.
+- **Recarga, no parcheo:** a diferencia del resto de la app, después de cada acción se recarga el rango
+  visible (el backend genera/borra clases solo). La cache de 60 s se invalida entera en cada POST/PUT/PATCH/DELETE.
+- **Módulo apagado:** el primer 403 (antes de cualquier 2xx) pone `enabled = false`. El sidebar del trainer,
+  la tarjeta "Mis turnos" del Dashboard del alumno y la oferta de horario fijo en "Mis alumnos" dependen de `probe()`.
+- **Alumno:** se entra desde la tarjeta "Mis turnos" del Dashboard. La bottom-nav (5 pestañas) NO se tocó:
+  queda pendiente decidir si "Turnos" reemplaza a "Mes" u otra pestaña.
+- **Cupo "7/10"** en el calendario del trainer: sale de cruzar `schedule-overview` (día + hora) porque `AgendaItem`
+  no trae capacidad. Si no hay franja que coincida, se muestra solo "7 alumnos".
+- **Alta de alumno:** al crear un alumno, si el módulo está prendido se abre el modal de horario fijo con su DNI.
+- **Admin (GYM_ADMIN):** no implementado; no existe panel de GYM_ADMIN en este front.
+
+### ⚠️ Formas supuestas (verificar contra el backend / Postman carpeta 8)
+- `BookingService` (servicio): `{ id, name, description?, durationMinutes, bookingMode, selfEnrollment?, weeklyLimit?, price?, active? }`
+- `Block`: `{ id, startAt, endAt, reason }` · `FreeSlot` (`GET /services/{id}/slots`): `{ startAt, endAt, professionalName?, free? }`
+- `CancellationPreview`: `{ message, allowed? }` — si `allowed === false` se deshabilita cancelar.
+- Respuestas 400/409 en ausencia/cancelación se toman como "fuera de término" → se muestra `message` y se deshabilita el botón.
+
 ---
 
 ## Pendiente de implementar
@@ -828,7 +883,7 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
 - [x] **Íconos de músculos**: silueta anatómica frente/espalda, modos zoom/single/both, secundarios
 - [x] `app-page-loader` con el gym-loader en toda la app
 - [x] Marca unificada PlanGym + favicon propio
-- [ ] `ToastService` — feedback de éxito/error global
+- [x] `ToastService` — feedback de éxito/error global (`<gp-toast />`, usado por Turnos)
 
 ### Suscripciones
 - [x] Modelos, `BillingService`, planes, Mi suscripción, polling de vuelta, banner, menú, guard
@@ -839,6 +894,16 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
       que apuntar a `localhost:4200`)
 - [ ] `isStudentLimitError` detecta el límite buscando "plan" en el mensaje: si el backend agrega un
       `code` en el error, cambiar a ese campo
+
+### Turnos
+- [x] Calendario trainer (semana/mes, detalle de clase, pasar lista, cancelar)
+- [x] Calendario alumno (semana/mes, horarios fijos, ausencia, cancelar con preview)
+- [x] Horarios fijos del trainer + servicios + anotar por DNI (también tras el alta)
+- [x] Elegir horarios del alumno + clase suelta
+- [x] Disponibilidad, bloqueos y resumen de cupos
+- [ ] Decidir pestaña de "Turnos" en la bottom-nav del alumno
+- [ ] Verificar contra el backend las formas supuestas (ver sección Turnos)
+- [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)
 
 ### Backend pendiente
 - [ ] `exerciseCount` y `assignedStudents` en `WorkoutTemplateSummary`

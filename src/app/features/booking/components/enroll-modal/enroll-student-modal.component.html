@@ -1,0 +1,58 @@
+<gp-modal [isOpen]="isOpen()" title="Anotar en horario fijo" size="lg" (closed)="closed.emit()">
+  <div class="bk-page" style="padding-bottom:0">
+    <div class="bk-grid2">
+      <label class="bk-field">
+        DNI del alumno
+        <input type="text" inputmode="numeric" maxlength="10" [ngModel]="dniValue()" (ngModelChange)="dniValue.set($event)" />
+      </label>
+      <label class="bk-field">
+        Servicio
+        <select [ngModel]="serviceId()" (ngModelChange)="serviceId.set(+$event)">
+          @for (s of fixedServices(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+        </select>
+      </label>
+      <label class="bk-field">
+        Desde (opcional)
+        <input type="date" [ngModel]="validFrom()" (ngModelChange)="validFrom.set($event)" />
+      </label>
+      <label class="bk-field">
+        Hasta (opcional)
+        <input type="date" [ngModel]="validTo()" (ngModelChange)="validTo.set($event)" />
+      </label>
+    </div>
+
+    @if (!loadingData() && fixedServices().length === 0) {
+      <p class="bk-note">Primero creá un servicio de horario fijo en "Horarios fijos → Mis servicios".</p>
+    }
+
+    <div>
+      <p class="bk-muted" style="margin-bottom:8px">Elegí los días y horarios (según tus franjas con cupo):</p>
+      @if (slots().length === 0 && !loadingData()) {
+        <p class="bk-note">No tenés franjas cargadas. Cargalas en "Horarios y cupos".</p>
+      } @else {
+        <div class="bk-slots">
+          @for (col of byDay(); track col.day) {
+            <div class="bk-slots__col">
+              <span class="bk-slots__head">{{ dayShort[col.day] }}</span>
+              @for (s of col.slots; track s.ruleId) {
+                <button type="button" class="bk-slot" [class.mine]="picked().includes(slotKey(s))"
+                        [class.full]="s.free <= 0 && !picked().includes(slotKey(s))"
+                        [disabled]="s.free <= 0 && !picked().includes(slotKey(s))" (click)="toggle(s)">
+                  {{ hhmm(s.startTime) }}
+                  <small>{{ s.enrolled }}/{{ s.capacity }}</small>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (error()) { <p class="bk-error">{{ error() }}</p> }
+
+    <div class="bk-row">
+      <gp-button [loading]="isSaving()" [disabled]="!canSave()" (click)="save()">Anotar</gp-button>
+      <gp-button variant="ghost" [disabled]="isSaving()" (click)="closed.emit()">Ahora no</gp-button>
+    </div>
+  </div>
+</gp-modal>

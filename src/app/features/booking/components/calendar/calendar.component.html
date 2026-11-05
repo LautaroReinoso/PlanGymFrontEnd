@@ -1,0 +1,79 @@
+<ng-template #entryTpl let-e>
+  <button type="button" class="cal-entry cal-entry--{{ e.tone }}" [class.cal-entry--past]="e.past"
+          (click)="entryClick.emit(e)">
+    <span class="cal-entry__time">{{ e.time }}</span>
+    <span class="cal-entry__body">
+      <span class="cal-entry__title">{{ e.title }}</span>
+      @if (e.subtitle) { <span class="cal-entry__sub">{{ e.subtitle }}</span> }
+    </span>
+    @if (e.meta) { <span class="cal-entry__meta">{{ e.meta }}</span> }
+    @if (e.fixed) { <span class="cal-entry__fixed" title="Horario fijo">↻</span> }
+  </button>
+</ng-template>
+
+<section class="cal">
+  <header class="cal__toolbar">
+    <div class="cal__nav">
+      <button type="button" class="cal__arrow" (click)="move(-1)" aria-label="Anterior">‹</button>
+      <button type="button" class="cal__today" (click)="goToday()">Hoy</button>
+      <button type="button" class="cal__arrow" (click)="move(1)" aria-label="Siguiente">›</button>
+    </div>
+    <h2 class="cal__title">{{ title() }}</h2>
+    <div class="cal__switch" role="tablist">
+      <button type="button" role="tab" [class.on]="view() === 'week'" (click)="setView('week')">Semana</button>
+      <button type="button" role="tab" [class.on]="view() === 'month'" (click)="setView('month')">Mes</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <app-page-loader [size]="40" [compact]="true" message="Cargando clases…" />
+  } @else if (view() === 'week') {
+    <div class="cal-week">
+      @for (d of weekDays(); track d.key) {
+        <div class="cal-week__day" [class.cal-week__day--today]="d.key === today"
+             [class.cal-week__day--empty]="d.entries.length === 0">
+          <div class="cal-week__head">
+            <span class="cal-week__dow">{{ dayShort[d.dow] }}</span>
+            <span class="cal-week__num">{{ d.num }}</span>
+          </div>
+          <div class="cal-week__list">
+            @for (e of d.entries; track e.key) {
+              <ng-container *ngTemplateOutlet="entryTpl; context: { $implicit: e }" />
+            } @empty {
+              <span class="cal-week__none">Sin clases</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    @if (isEmpty()) { <p class="cal__empty">{{ emptyText() }}</p> }
+  } @else {
+    <div class="cal-month">
+      @for (h of [1,2,3,4,5,6,7]; track h) { <span class="cal-month__h">{{ dayShort[h] }}</span> }
+      @for (c of monthCells(); track c.key) {
+        <button type="button" class="cal-month__cell"
+                [class.out]="!c.inMonth" [class.today]="c.key === today"
+                [class.sel]="c.key === selectedDay()" [class.has]="c.classes > 0"
+                (click)="pickDay(c.key)">
+          <span class="cal-month__num">{{ c.num }}</span>
+          @if (c.classes > 0) {
+            <span class="cal-month__count">{{ c.classes }} {{ c.classes === 1 ? 'clase' : 'clases' }}</span>
+            @if (showPeople() && c.people > 0) { <span class="cal-month__people">{{ c.people }} al.</span> }
+          }
+        </button>
+      }
+    </div>
+    @if (selectedDay(); as d) {
+      <div class="cal-dayList">
+        <h3>{{ longDate(d) }}</h3>
+        @for (e of selectedEntries(); track e.key) {
+          <ng-container *ngTemplateOutlet="entryTpl; context: { $implicit: e }" />
+        } @empty {
+          <p class="cal__empty">No hay clases este día.</p>
+        }
+      </div>
+    } @else {
+      <p class="cal__hint">Tocá un día para ver el detalle.</p>
+    }
+  }
+</section>

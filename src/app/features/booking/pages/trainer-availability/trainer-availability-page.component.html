@@ -1,0 +1,170 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <h1 class="bk-title">Horarios y cupos</h1>
+      <p class="bk-subtitle">Cuándo das clase, cuántos alumnos entran y los días que no estás.</p>
+    </div>
+    <nav class="bk-tabs">
+      <a class="bk-tab" routerLink="/trainer/turnos">Calendario</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/horarios-fijos">Horarios fijos</a>
+      <a class="bk-tab on" routerLink="/trainer/turnos/disponibilidad">Horarios y cupos</a>
+    </nav>
+  </header>
+
+  <div class="bk-tabs">
+    <button type="button" class="bk-tab" [class.on]="tab() === 'rules'" (click)="setTab('rules')">Franjas</button>
+    <button type="button" class="bk-tab" [class.on]="tab() === 'overview'" (click)="setTab('overview')">Resumen de cupos</button>
+    <button type="button" class="bk-tab" [class.on]="tab() === 'blocks'" (click)="setTab('blocks')">Días sin clase</button>
+  </div>
+
+  <!-- ── Franjas ────────────────────────────── -->
+  @if (tab() === 'rules') {
+    <section class="bk-card">
+      <div class="bk-row bk-row--between">
+        <h2>Franjas semanales</h2>
+        <gp-button size="sm" variant="secondary" (click)="addRule()">+ Agregar franja</gp-button>
+      </div>
+      @if (isLoadingRules()) {
+        <app-page-loader [size]="40" [compact]="true" message="Cargando franjas…" />
+      } @else {
+        <ul class="bk-list">
+          @for (row of sortedRules(); track row.i) {
+            <li class="bk-item">
+              <div class="bk-rule">
+                <label class="bk-field">
+                  Día
+                  <select [ngModel]="row.r.dayOfWeek" (ngModelChange)="updateDay(row.i, $event)">
+                    @for (d of dayOptions; track d.value) { <option [ngValue]="d.value">{{ d.label }}</option> }
+                  </select>
+                </label>
+                <label class="bk-field">
+                  Desde
+                  <input type="time" [ngModel]="row.r.startTime" (ngModelChange)="updateRule(row.i, { startTime: $event })" />
+                </label>
+                <label class="bk-field">
+                  Hasta
+                  <input type="time" [ngModel]="row.r.endTime" (ngModelChange)="updateRule(row.i, { endTime: $event })" />
+                </label>
+                <label class="bk-field">
+                  Cupo
+                  <input type="number" min="1" [ngModel]="row.r.capacity" (ngModelChange)="updateRule(row.i, { capacity: +$event })" />
+                </label>
+              </div>
+              <div class="bk-item__actions">
+                <gp-button variant="ghost" size="sm" (click)="duplicateRule(row.i)">Copiar al día siguiente</gp-button>
+                <gp-button variant="ghost" size="sm" (click)="removeRule(row.i)">Quitar</gp-button>
+              </div>
+            </li>
+          } @empty {
+            <li class="bk-muted">No tenés franjas. Agregá la primera (ej.: lunes 18:00 a 19:00, cupo 10).</li>
+          }
+        </ul>
+      }
+      @if (!rulesValid()) { <p class="bk-error">Revisá las franjas: el fin tiene que ser después del inicio y el cupo al menos 1.</p> }
+      @if (rulesError()) { <p class="bk-error">{{ rulesError() }}</p> }
+      <div class="bk-row">
+        <gp-button [disabled]="!dirty() || !rulesValid() || isSaving()" (click)="confirmSave.set(true)">Guardar franjas</gp-button>
+        @if (dirty()) {
+          <gp-button variant="ghost" [disabled]="isSaving()" (click)="loadRules()">Descartar cambios</gp-button>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- ── Resumen de cupos ──────────────────── -->
+  @if (tab() === 'overview') {
+    <section class="bk-card">
+      <h2>Resumen de cupos</h2>
+      <p class="bk-muted">Alumnos con horario fijo en cada franja. Tocá una franja para ver quiénes son.</p>
+      @if (isLoadingOverview()) {
+        <app-page-loader [size]="40" [compact]="true" message="Cargando cupos…" />
+      } @else {
+        <div class="bk-slots">
+          @for (col of overviewByDay(); track col.day) {
+            <div class="bk-slots__col">
+              <span class="bk-slots__head">{{ dayShort[col.day] }}</span>
+              @for (s of col.slots; track s.ruleId) {
+                <button type="button" class="bk-slot" [class.mine]="s.free <= 0" (click)="openSlot.set(s)">
+                  {{ hhmm(s.startTime) }}
+                  <small>{{ s.enrolled }}/{{ s.capacity }} · {{ s.free }} libres</small>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ── Bloqueos ──────────────────────────── -->
+  @if (tab() === 'blocks') {
+    <section class="bk-card">
+      <h2>Días sin clase</h2>
+      <p class="bk-muted">Bloqueá un día o un rato en el que no das clase (horario de Argentina).</p>
+      <div class="bk-grid2">
+        <label class="bk-field">
+          Desde
+          <input type="datetime-local" [ngModel]="blockFrom()" (ngModelChange)="blockFrom.set($event)" />
+        </label>
+        <label class="bk-field">
+          Hasta
+          <input type="datetime-local" [ngModel]="blockTo()" (ngModelChange)="blockTo.set($event)" />
+        </label>
+        <label class="bk-field">
+          Motivo
+          <input type="text" maxlength="120" placeholder="Ej.: viaje" [ngModel]="blockReason()" (ngModelChange)="blockReason.set($event)" />
+        </label>
+      </div>
+      @if (blockError()) { <p class="bk-error">{{ blockError() }}</p> }
+      <div>
+        <gp-button size="sm" [loading]="busyBlock() === 'new'" [disabled]="!blockFrom() || !blockTo()" (click)="createBlock()">
+          Bloquear
+        </gp-button>
+      </div>
+
+      @if (isLoadingBlocks()) {
+        <app-page-loader [size]="40" [compact]="true" message="Cargando…" />
+      } @else {
+        <ul class="bk-list">
+          @for (b of blocks(); track b.id) {
+            <li class="bk-item">
+              <div class="bk-item__main">
+                <span class="bk-item__title">{{ blockLabel(b) }}</span>
+                @if (b.reason) { <span class="bk-muted">{{ b.reason }}</span> }
+              </div>
+              <gp-button variant="ghost" size="sm" [loading]="busyBlock() === b.id" (click)="deleteBlock(b)">Quitar</gp-button>
+            </li>
+          } @empty {
+            <li class="bk-muted">No tenés días bloqueados.</li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>
+
+<gp-modal [isOpen]="confirmSave()" title="Guardar franjas" size="sm" (closed)="confirmSave.set(false)">
+  <div class="bk-page" style="padding-bottom:0">
+    <p class="bk-note">Esto reemplaza todas tus franjas por las que ves en pantalla. Las que quitaste dejan de existir.</p>
+    <div class="bk-row">
+      <gp-button [loading]="isSaving()" (click)="saveRules()">Sí, guardar</gp-button>
+      <gp-button variant="ghost" [disabled]="isSaving()" (click)="confirmSave.set(false)">Volver</gp-button>
+    </div>
+  </div>
+</gp-modal>
+
+<gp-modal [isOpen]="!!openSlot()" [title]="openSlot() ? dayLabels[openSlot()!.dayOfWeek] + ' ' + hhmm(openSlot()!.startTime) : ''"
+          size="sm" (closed)="openSlot.set(null)">
+  @if (openSlot(); as s) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p class="bk-muted">{{ s.enrolled }} de {{ s.capacity }} · {{ s.free }} libres</p>
+      <ul class="bk-list">
+        @for (c of s.clients; track c.enrollmentId) {
+          <li class="bk-item"><span class="bk-item__title">{{ clientName(c.name) }}</span></li>
+        } @empty {
+          <li class="bk-muted">Nadie anotado en esta franja.</li>
+        }
+      </ul>
+    </div>
+  }
+</gp-modal>
