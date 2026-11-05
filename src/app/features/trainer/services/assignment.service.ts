@@ -30,7 +30,7 @@ export class AssignmentService {
 
   /** Actualizar asignación (fechas, estado activo) */
   update(id: number, dto: UpdateAssignmentRequest): Observable<StudentWorkout> {
-    return this.http.put<StudentWorkout>(`${this.api}/api/v1/student-workouts/${id}`, dto);
+    return this.http.put<StudentWorkout>(`${this.api}/student-workouts/${id}`, dto);
   }
 
   /** Desasignar / eliminar asignación */

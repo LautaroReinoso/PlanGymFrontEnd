@@ -4,6 +4,8 @@
 //  workoutHistory, recentLogs y adherencia.
 // ─────────────────────────────────────────────
 
+import { apiErrorText } from '../../../../../core/http/api-error.util';
+import { todayKey } from '../../../../booking/utils/booking-date.util';
 import {
   Component,
   inject,
@@ -128,8 +130,7 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
       next: (data: any) => {
         this.student.set(data);
         this.isLoading.set(false);
-        
-    console.log(this.student())
+
       },
       error: () => {
         this.error.set('No se pudo cargar el alumno.');
@@ -174,7 +175,8 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
     this.assignSvc.assign({
       studentId:         this.studentId(),
       workoutTemplateId: templateId,
-      startDate:         new Date().toISOString().split('T')[0],
+      // Fecha LOCAL (toISOString da UTC: después de las 21 h en Argentina mandaba mañana)
+      startDate:         todayKey(),
     }).subscribe({
       next: () => {
         this.isAssigning.set(false);
@@ -183,11 +185,9 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
       },
       error: (err: any) => {
         this.isAssigning.set(false);
-        this.assignError.set(
-          err.status === 409
-            ? 'El alumno ya tiene un plan activo.'
-            : 'Error al asignar el plan.'
-        );
+        console.error('[Asignar plan] falló', err);
+        this.assignError.set(apiErrorText(err,
+          err.status === 409 ? 'El alumno ya tiene un plan activo.' : 'Error al asignar el plan.'));
       },
     });
   }
