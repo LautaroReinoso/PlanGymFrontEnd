@@ -43,7 +43,8 @@ export class TrainerEnrollmentsPageComponent {
   readonly isLoading   = signal(false);
   readonly busyId      = signal<number | null>(null);
 
-  readonly statusFilter  = signal<EnrollmentStatus | ''>('ACTIVE');
+  /** CURRENT = activos + en pausa: los dos ocupan lugar y bloquean cambiar la franja */
+  readonly statusFilter  = signal<EnrollmentStatus | '' | 'CURRENT'>('CURRENT');
   readonly serviceFilter = signal<number | null>(null);
   readonly search        = signal('');
 
@@ -95,8 +96,12 @@ export class TrainerEnrollmentsPageComponent {
 
   load(): void {
     this.isLoading.set(true);
-    this.api.enrollments({ status: this.statusFilter(), serviceId: this.serviceFilter() }).subscribe({
-      next: list => { this.enrollments.set(list); this.isLoading.set(false); },
+    const st = this.statusFilter();
+    this.api.enrollments({ status: st === 'CURRENT' ? '' : st, serviceId: this.serviceFilter() }).subscribe({
+      next: list => {
+        this.enrollments.set(st === 'CURRENT' ? list.filter(e => e.status !== 'ENDED') : list);
+        this.isLoading.set(false);
+      },
       error: err => { this.isLoading.set(false); this.toast.error(apiErrorText(err)); },
     });
   }
@@ -131,7 +136,7 @@ export class TrainerEnrollmentsPageComponent {
     });
   }
 
-  setStatus(s: EnrollmentStatus | ''): void { this.statusFilter.set(s); this.load(); }
+  setStatus(s: EnrollmentStatus | '' | 'CURRENT'): void { this.statusFilter.set(s); this.load(); }
   setService(id: number | null): void { this.serviceFilter.set(id); this.load(); }
 
   nameOf(e: Enrollment): string { return e.clientName?.trim() || 'Sin nombre'; }

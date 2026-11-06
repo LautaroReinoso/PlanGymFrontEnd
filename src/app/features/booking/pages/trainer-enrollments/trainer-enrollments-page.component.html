@@ -27,6 +27,7 @@
       <label class="bk-field">
         Estado
         <select [ngModel]="statusFilter()" (ngModelChange)="setStatus($event)">
+          <option value="CURRENT">Vigentes (activos y en pausa)</option>
           <option value="ACTIVE">Activos</option>
           <option value="PAUSED">En pausa</option>
           <option value="ENDED">Terminados</option>
