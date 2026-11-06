@@ -15,7 +15,7 @@
   <section class="bk-card">
     <div class="bk-row bk-row--between">
       <h2>Alumnos anotados</h2>
-      <gp-button size="sm" (click)="showEnroll.set(true)">+ Anotar alumno</gp-button>
+      <gp-button size="sm" (click)="openEnroll()">+ Anotar alumno</gp-button>
     </div>
 
     <div class="bk-grid2">
@@ -44,36 +44,30 @@
     @if (isLoading()) {
       <app-page-loader [size]="40" [compact]="true" message="Cargando horarios…" />
     } @else {
-      <ul class="bk-list">
-        @for (e of filtered(); track e.id) {
-          <li class="bk-item">
-            <div class="bk-item__main">
-              <span class="bk-item__title">{{ nameOf(e) }}</span>
-              <span class="bk-muted">
-                {{ dayLabels[e.dayOfWeek] }} {{ hhmm(e.startTime) }} · {{ e.serviceName }}
-                @if (e.validTo) { · hasta {{ e.validTo }} }
-              </span>
+      <div class="grid">
+        @for (g of grouped(); track g.userId) {
+          <div class="grid__row">
+            <div class="grid__who">
+              <span class="grid__name">{{ g.name }}</span>
+              <span class="bk-muted">{{ g.services.join(' · ') }}</span>
             </div>
-            <div class="bk-item__actions">
-              <span class="bk-chip" [class.bk-chip--ok]="e.status === 'ACTIVE'"
-                    [class.bk-chip--warn]="e.status === 'PAUSED'" [class.bk-chip--off]="e.status === 'ENDED'">
-                {{ statusText[e.status] }}
-              </span>
-              @if (e.status === 'ACTIVE') {
-                <gp-button variant="ghost" size="sm" [loading]="busyId() === e.id" (click)="setEnrollmentStatus(e, 'PAUSED')">Pausar</gp-button>
+            <div class="grid__chips">
+              @for (e of g.items; track e.id) {
+                <button type="button" class="chip chip--{{ e.status }}" (click)="actionTarget.set(e)"
+                        [attr.title]="e.serviceName + ' · ' + statusText[e.status] + (e.validTo ? ' · hasta ' + e.validTo : '')">
+                  <span class="chip__day">{{ dayShort[e.dayOfWeek] }}</span> {{ hhmm(e.startTime) }}
+                  @if (e.status === 'PAUSED') { <span class="chip__flag">pausa</span> }
+                  @if (e.validTo && e.status !== 'ENDED') { <span class="chip__flag">hasta {{ e.validTo.slice(8, 10) }}/{{ e.validTo.slice(5, 7) }}</span> }
+                </button>
               }
-              @if (e.status === 'PAUSED') {
-                <gp-button variant="ghost" size="sm" [loading]="busyId() === e.id" (click)="setEnrollmentStatus(e, 'ACTIVE')">Reactivar</gp-button>
-              }
-              @if (e.status !== 'ENDED') {
-                <gp-button variant="ghost" size="sm" [disabled]="busyId() === e.id" (click)="askEnd(e)">Terminar</gp-button>
-              }
+              <button type="button" class="chip chip--add" (click)="openEnroll(g.userId)" title="Agregar otro día">+</button>
             </div>
-          </li>
+          </div>
         } @empty {
-          <li class="bk-muted">No hay horarios fijos con estos filtros.</li>
+          <p class="bk-muted">No hay horarios fijos con estos filtros.</p>
         }
-      </ul>
+      </div>
+      @if (grouped().length) { <p class="bk-muted">Tocá un horario para pausarlo, reactivarlo o terminarlo.</p> }
     }
   </section>
 
@@ -124,7 +118,26 @@
   </section>
 </div>
 
-<app-enroll-student-modal [isOpen]="showEnroll()" (closed)="showEnroll.set(false)" (saved)="onEnrolled()" />
+<app-enroll-student-modal [isOpen]="showEnroll()" [studentId]="enrollStudentId()"
+  (closed)="showEnroll.set(false)" (saved)="onEnrolled()" />
+
+<!-- Acciones de un horario fijo -->
+<gp-modal [isOpen]="!!actionTarget()" [title]="actionTarget() ? dayLabels[actionTarget()!.dayOfWeek] + ' ' + hhmm(actionTarget()!.startTime) : ''"
+          size="sm" (closed)="actionTarget.set(null)">
+  @if (actionTarget(); as e) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p class="bk-muted">{{ nameOf(e) }} · {{ e.serviceName }} · {{ statusText[e.status] }}
+        @if (e.validTo) { · hasta {{ e.validTo }} }
+      </p>
+      <div class="bk-row">
+        @if (e.status === 'ACTIVE') { <gp-button variant="secondary" (click)="act('pause')">Pausar</gp-button> }
+        @if (e.status === 'PAUSED') { <gp-button variant="secondary" (click)="act('resume')">Reactivar</gp-button> }
+        @if (e.status !== 'ENDED') { <gp-button variant="danger" (click)="act('end')">Terminar</gp-button> }
+        <gp-button variant="ghost" (click)="actionTarget.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>
 
 <!-- Terminar horario fijo -->
 <gp-modal [isOpen]="!!endTarget()" title="Terminar horario fijo" size="sm" (closed)="endTarget.set(null)">

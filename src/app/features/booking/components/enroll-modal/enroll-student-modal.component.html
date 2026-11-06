@@ -1,32 +1,60 @@
 <gp-modal [isOpen]="isOpen()" title="Anotar en horario fijo" size="lg" (closed)="closed.emit()">
   <div class="bk-page" style="padding-bottom:0">
-    <div class="bk-grid2">
-      <label class="bk-field">
-        DNI del alumno
-        <input type="text" inputmode="numeric" maxlength="10" [ngModel]="dniValue()" (ngModelChange)="dniValue.set($event)" />
-      </label>
-      <label class="bk-field">
-        Servicio
-        <select [ngModel]="serviceId()" (ngModelChange)="serviceId.set(+$event)">
-          @for (s of fixedServices(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
-        </select>
-      </label>
-      <label class="bk-field">
-        Desde (opcional)
-        <input type="date" [ngModel]="validFrom()" (ngModelChange)="validFrom.set($event)" />
-      </label>
-      <label class="bk-field">
-        Hasta (opcional)
-        <input type="date" [ngModel]="validTo()" (ngModelChange)="validTo.set($event)" />
-      </label>
-    </div>
 
-    @if (!loadingData() && fixedServices().length === 0) {
-      <p class="bk-note">Primero creá un servicio de horario fijo en "Horarios fijos → Mis servicios".</p>
-    }
+    <!-- 1. Alumno -->
+    <section class="step">
+      <span class="step__label">1. Alumno</span>
+      @if (selected(); as s) {
+        <div class="picked">
+          <span class="picked__name">{{ nameOf(s) }}</span>
+          @if (s.fullName && s.dni) { <span class="bk-muted">DNI {{ s.dni }}</span> }
+          <button type="button" class="picked__change" (click)="clearStudent()">Cambiar</button>
+        </div>
+      } @else {
+        <input class="search" type="search" placeholder="Buscar por nombre o DNI"
+               [ngModel]="search()" (ngModelChange)="search.set($event)" />
+        <ul class="students">
+          @for (s of filteredStudents(); track s.id) {
+            <li>
+              <button type="button" class="students__item" (click)="select(s)">
+                <span>{{ nameOf(s) }}</span>
+                @if (s.fullName && s.dni) { <small>DNI {{ s.dni }}</small> }
+              </button>
+            </li>
+          } @empty {
+            <li class="bk-muted">{{ students().length ? 'Ningún alumno coincide.' : 'Todavía no tenés alumnos.' }}</li>
+          }
+        </ul>
+      }
+    </section>
 
-    <div>
-      <p class="bk-muted" style="margin-bottom:8px">Elegí los días y horarios (según tus franjas con cupo):</p>
+    <!-- 2. Servicio y fechas -->
+    <section class="step">
+      <span class="step__label">2. Servicio</span>
+      <div class="bk-grid2">
+        <label class="bk-field">
+          Servicio
+          <select [ngModel]="serviceId()" (ngModelChange)="serviceId.set(+$event)">
+            @for (s of fixedServices(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+          </select>
+        </label>
+        <label class="bk-field">
+          Desde (opcional)
+          <input type="date" [ngModel]="validFrom()" (ngModelChange)="validFrom.set($event)" />
+        </label>
+        <label class="bk-field">
+          Hasta (opcional)
+          <input type="date" [ngModel]="validTo()" (ngModelChange)="validTo.set($event)" />
+        </label>
+      </div>
+      @if (!loadingData() && fixedServices().length === 0) {
+        <p class="bk-note">Primero creá un servicio de horario fijo en "Horarios fijos → Mis servicios".</p>
+      }
+    </section>
+
+    <!-- 3. Días y horarios -->
+    <section class="step">
+      <span class="step__label">3. Días y horarios</span>
       @if (slots().length === 0 && !loadingData()) {
         <p class="bk-note">No tenés franjas cargadas. Cargalas en "Horarios y cupos".</p>
       } @else {
@@ -35,23 +63,27 @@
             <div class="bk-slots__col">
               <span class="bk-slots__head">{{ dayShort[col.day] }}</span>
               @for (s of col.slots; track s.ruleId) {
-                <button type="button" class="bk-slot" [class.mine]="picked().includes(slotKey(s))"
-                        [class.full]="s.free <= 0 && !picked().includes(slotKey(s))"
-                        [disabled]="s.free <= 0 && !picked().includes(slotKey(s))" (click)="toggle(s)">
+                @let inIt = isIn(s);
+                @let on = picked().includes(slotKey(s));
+                <button type="button" class="bk-slot" [class.mine]="on || inIt"
+                        [class.full]="!inIt && s.free <= 0 && !on"
+                        [disabled]="inIt || (s.free <= 0 && !on)" (click)="toggle(s)">
                   {{ hhmm(s.startTime) }}
-                  <small>{{ s.enrolled }}/{{ s.capacity }}</small>
+                  <small>{{ inIt ? 'Ya anotado' : s.enrolled + '/' + s.capacity }}</small>
                 </button>
               }
             </div>
           }
         </div>
       }
-    </div>
+    </section>
 
     @if (error()) { <p class="bk-error">{{ error() }}</p> }
 
     <div class="bk-row">
-      <gp-button [loading]="isSaving()" [disabled]="!canSave()" (click)="save()">Anotar</gp-button>
+      <gp-button [loading]="isSaving()" [disabled]="!canSave()" (click)="save()">
+        Anotar{{ picked().length ? ' (' + picked().length + ')' : '' }}
+      </gp-button>
       <gp-button variant="ghost" [disabled]="isSaving()" (click)="closed.emit()">Ahora no</gp-button>
     </div>
   </div>

@@ -809,10 +809,10 @@ features/booking/
 │   └── calendar-prefs.ts             → última vista (localStorage con try/catch)
 ├── components/
 │   ├── calendar/                     → app-booking-calendar (grilla propia Semana/Mes, sin librería)
-│   └── enroll-modal/                 → app-enroll-student-modal (anotar por DNI en horario fijo)
+│   └── enroll-modal/                 → app-enroll-student-modal (elegir alumno de la lista + franjas → batch con userId)
 └── pages/
     ├── trainer-agenda/               → /trainer/turnos — agrupa por startAt+serviceId, pasar lista, cancelar con motivo
-    ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — pausar/reactivar/terminar + Mis servicios
+    ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — grilla por alumno (chips Lun 07:00…), acciones por horario, recuperaciones, Mis servicios
     ├── trainer-availability/         → /trainer/turnos/disponibilidad — franjas (PUT reemplaza todo), cupos, bloqueos
     ├── student-agenda/               → /student/turnos — mis clases + mis horarios fijos, ausencia / cancelar
     ├── student-choose/               → /student/turnos/elegir — elegir/cambiar/dejar horarios (selfEnrollment)
@@ -848,7 +848,11 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   - Todo informativo: el plan de ejercicios sigue sin depender del día de la semana.
 - **Cupo "7/10"** en el calendario del trainer: sale de cruzar `schedule-overview` (día + hora) porque `AgendaItem`
   no trae capacidad. Si no hay franja que coincida, se muestra solo "7 alumnos".
-- **Alta de alumno:** al crear un alumno, si el módulo está prendido se abre el modal de horario fijo con su DNI.
+- **Anotar en horario fijo:** el entrenador elige al alumno de su lista (`GET /v1/users/students`, buscador por nombre o
+  DNI) y el batch se manda con `userId` (el backend acepta exactamente uno de userId / dni / mail). Las franjas donde
+  ya está anotado se ven como "Ya anotado". Al dar de alta un alumno se abre el modal con él preseleccionado (match por DNI).
+- **Horarios fijos:** una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
+  tiene fin). Tocar un chip abre sus acciones; "+" agrega otro día a ese alumno.
 - **Admin (GYM_ADMIN):** no implementado; no existe panel de GYM_ADMIN en este front.
 
 ### Recuperar clases (backend V21, carpeta 13 de Postman)

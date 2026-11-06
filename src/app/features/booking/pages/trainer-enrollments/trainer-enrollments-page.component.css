@@ -1,0 +1,26 @@
+:host { display: block; }
+.grid { display: flex; flex-direction: column; }
+.grid__row {
+  display: grid; grid-template-columns: minmax(160px, 1fr) 2fr; gap: var(--space-3); align-items: center;
+  padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border);
+}
+.grid__row:last-child { border-bottom: none; }
+.grid__who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.grid__name { font-weight: 600; color: var(--color-text); }
+.grid__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+  font: 600 13px var(--font-body); color: var(--color-text);
+  padding: 6px 10px; border-radius: var(--radius-full);
+  background: var(--color-surface); border: 1px solid var(--color-accent);
+}
+.chip:hover { background: var(--color-accent-dim); }
+.chip__day { color: var(--color-celeste); }
+.chip__flag { font-size: 11px; font-weight: 500; color: var(--color-muted-light); }
+.chip--PAUSED { border-color: var(--color-warning); border-style: dashed; }
+.chip--ENDED { border-color: var(--color-border); color: var(--color-muted); }
+.chip--ENDED .chip__day { color: var(--color-muted); }
+.chip--add { border-style: dashed; border-color: var(--color-border); color: var(--color-muted-light); padding: 6px 12px; }
+@container (max-width: 600px) {
+  .grid__row { grid-template-columns: 1fr; gap: var(--space-2); }
+}

@@ -1,78 +1,116 @@
 // ─────────────────────────────────────────────
 //  PlanGym — app-enroll-student-modal
-//  Anotar a un alumno (por DNI) en horario fijo.
-//  Se usa desde Horarios fijos y justo después de dar de alta
-//  un alumno en "Mis alumnos".
+//  Anotar a un alumno en horario fijo eligiéndolo de la lista
+//  de "Mis alumnos" (buscador por nombre o DNI). Se manda userId.
+//  Se usa desde Horarios fijos (nuevo o "+ Agregar horario") y
+//  justo después de dar de alta un alumno en "Mis alumnos".
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 
 import { BookingTrainerService } from '../../services/booking-trainer.service';
 import { BookingService, DayOfWeek, ScheduleOverviewItem, SlotRef } from '../../models/booking.models';
 import { DAY_SHORT, hhmm } from '../../utils/booking-date.util';
+import { StudentService } from '../../../trainer/services/student.service';
+import { StudentSummary } from '../../../trainer/models/trainer.models';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { apiErrorText } from '../../../../core/http/api-error.util';
+
+/** Sin acentos y en minúscula, para buscar */
+function norm(s: string): string {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
 
 @Component({
   selector: 'app-enroll-student-modal',
   standalone: true,
   imports: [FormsModule, ModalComponent, ButtonComponent],
   templateUrl: './enroll-student-modal.component.html',
+  styleUrl: './enroll-student-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EnrollStudentModalComponent {
   private readonly api = inject(BookingTrainerService);
+  private readonly studentsApi = inject(StudentService);
   private readonly toast = inject(ToastService);
 
-  readonly isOpen = input(false);
-  /** DNI precargado (ej. recién creado el alumno) */
-  readonly dni    = input<string>('');
+  readonly isOpen    = input(false);
+  /** Preseleccionar por DNI (recién dado de alta) */
+  readonly dni       = input<string>('');
+  /** Preseleccionar por id (desde "+ Agregar horario" de un alumno) */
+  readonly studentId = input<number | null>(null);
   readonly closed = output<void>();
   readonly saved  = output<void>();
 
   readonly days = [1, 2, 3, 4, 5, 6, 7] as DayOfWeek[];
   readonly dayShort = DAY_SHORT;
+  readonly hhmm = hhmm;
 
-  readonly dniValue  = signal('');
-  readonly serviceId = signal<number | null>(null);
-  readonly validFrom = signal('');
-  readonly validTo   = signal('');
-  readonly picked    = signal<string[]>([]);   // `${dow}-${HH:mm}`
-  readonly services  = signal<BookingService[]>([]);
-  readonly slots     = signal<ScheduleOverviewItem[]>([]);
-  readonly isSaving  = signal(false);
-  readonly error     = signal<string | null>(null);
+  readonly students   = signal<StudentSummary[]>([]);
+  readonly search     = signal('');
+  readonly selectedId = signal<number | null>(null);
+  readonly serviceId  = signal<number | null>(null);
+  readonly validFrom  = signal('');
+  readonly validTo    = signal('');
+  readonly picked     = signal<string[]>([]);   // `${dow}-${HH:mm}`
+  readonly services   = signal<BookingService[]>([]);
+  readonly slots      = signal<ScheduleOverviewItem[]>([]);
+  /** Franjas en las que el alumno elegido ya está anotado (activo o en pausa) */
+  readonly alreadyIn  = signal<Set<string>>(new Set());
+  readonly isSaving   = signal(false);
+  readonly error      = signal<string | null>(null);
   readonly loadingData = signal(false);
 
-  /** Servicios de horario fijo */
   readonly fixedServices = computed(() => this.services().filter(s => s.bookingMode !== 'SELF'));
+
+  readonly selected = computed(() => this.students().find(s => s.id === this.selectedId()) ?? null);
+
+  readonly filteredStudents = computed(() => {
+    const q = norm(this.search().trim());
+    return this.students()
+      .filter(s => !q || norm(s.fullName ?? '').includes(q) || (s.dni ?? '').includes(q))
+      .sort((a, b) => this.nameOf(a).localeCompare(this.nameOf(b)));
+  });
 
   readonly byDay = computed(() => this.days.map(d => ({
     day: d,
     slots: this.slots().filter(s => s.dayOfWeek === d).sort((a, b) => a.startTime.localeCompare(b.startTime)),
   })));
 
-  readonly canSave = computed(() =>
-    /^\d{6,10}$/.test(this.dniValue().trim()) && !!this.serviceId() && this.picked().length > 0);
+  readonly canSave = computed(() => !!this.selectedId() && !!this.serviceId() && this.picked().length > 0);
 
   constructor() {
     effect(() => {
       if (!this.isOpen()) return;
-      this.dniValue.set(this.dni() ?? '');
-      this.picked.set([]);
-      this.validFrom.set('');
-      this.validTo.set('');
-      this.error.set(null);
-      this.loadData();
+      const dni = this.dni();
+      const id = this.studentId();
+      untracked(() => {
+        this.search.set('');
+        this.selectedId.set(id);
+        this.picked.set([]);
+        this.validFrom.set('');
+        this.validTo.set('');
+        this.error.set(null);
+        this.loadData(dni);
+        if (id) this.loadAlreadyIn(id);
+        else this.alreadyIn.set(new Set());
+      });
     });
   }
 
-  private loadData(): void {
+  private loadData(dni: string): void {
     this.loadingData.set(true);
+    this.studentsApi.getMyStudents().pipe(catchError(() => of([] as StudentSummary[]))).subscribe(list => {
+      this.students.set(list);
+      if (dni && !this.selectedId()) {
+        const match = list.find(s => s.dni === dni);
+        if (match) this.select(match);
+      }
+    });
     this.api.services().pipe(catchError(() => of([]))).subscribe(list => {
       this.services.set(list);
       const fixed = list.filter(s => s.bookingMode !== 'SELF');
@@ -84,10 +122,36 @@ export class EnrollStudentModalComponent {
     });
   }
 
+  private loadAlreadyIn(userId: number): void {
+    this.api.enrollments({ status: '' }).pipe(catchError(() => of([]))).subscribe(list => {
+      this.alreadyIn.set(new Set(list
+        .filter(e => e.userId === userId && e.status !== 'ENDED')
+        .map(e => `${e.dayOfWeek}-${hhmm(e.startTime)}`)));
+    });
+  }
+
+  nameOf(s: StudentSummary): string {
+    return s.fullName?.trim() || (s.dni ? `DNI ${s.dni}` : 'Sin nombre');
+  }
+
+  select(s: StudentSummary): void {
+    this.selectedId.set(s.id);
+    this.picked.set([]);
+    this.loadAlreadyIn(s.id);
+  }
+
+  clearStudent(): void {
+    this.selectedId.set(null);
+    this.alreadyIn.set(new Set());
+    this.picked.set([]);
+  }
+
   slotKey(s: ScheduleOverviewItem): string { return `${s.dayOfWeek}-${hhmm(s.startTime)}`; }
-  hhmm = hhmm;
+
+  isIn(s: ScheduleOverviewItem): boolean { return this.alreadyIn().has(this.slotKey(s)); }
 
   toggle(s: ScheduleOverviewItem): void {
+    if (this.isIn(s)) return;
     const k = this.slotKey(s);
     this.picked.update(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
   }
@@ -101,7 +165,7 @@ export class EnrollStudentModalComponent {
     this.isSaving.set(true);
     this.error.set(null);
     this.api.enrollBatch({
-      dni: this.dniValue().trim(),
+      userId: this.selectedId()!,
       serviceId: this.serviceId()!,
       slots,
       validFrom: this.validFrom() || undefined,

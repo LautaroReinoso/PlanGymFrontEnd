@@ -187,8 +187,10 @@ export interface SlotRef {
   startTime: string;
 }
 
+/** Exactamente uno de userId / dni / mail */
 export interface EnrollBatchRequest {
-  dni: string;
+  userId?: number;
+  dni?: string;
   serviceId: number;
   slots: SlotRef[];
   validFrom?: string;

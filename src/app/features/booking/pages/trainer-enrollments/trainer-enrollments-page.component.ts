@@ -11,7 +11,7 @@ import { BookingTrainerService } from '../../services/booking-trainer.service';
 import {
   BookingMode, BookingService, BookingServiceRequest, Enrollment, EnrollmentStatus, ProfessionalMe,
 } from '../../models/booking.models';
-import { DAY_LABELS, hhmm } from '../../utils/booking-date.util';
+import { DAY_LABELS, DAY_SHORT, hhmm } from '../../utils/booking-date.util';
 import { EnrollStudentModalComponent } from '../../components/enroll-modal/enroll-student-modal.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
@@ -34,6 +34,7 @@ const EMPTY_SERVICE: BookingServiceRequest = {
   standalone: true,
   imports: [FormsModule, RouterLink, EnrollStudentModalComponent, ModalComponent, ButtonComponent, PageLoaderComponent],
   templateUrl: './trainer-enrollments-page.component.html',
+  styleUrl: './trainer-enrollments-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainerEnrollmentsPageComponent {
@@ -43,6 +44,7 @@ export class TrainerEnrollmentsPageComponent {
   readonly statusText = STATUS_TEXT;
   readonly modeText = MODE_TEXT;
   readonly dayLabels = DAY_LABELS;
+  readonly dayShort = DAY_SHORT;
   readonly hhmm = hhmm;
 
   readonly enrollments = signal<Enrollment[]>([]);
@@ -55,6 +57,10 @@ export class TrainerEnrollmentsPageComponent {
   readonly search        = signal('');
 
   readonly showEnroll = signal(false);
+  /** Alumno preseleccionado al abrir el modal desde "+ Agregar horario" */
+  readonly enrollStudentId = signal<number | null>(null);
+  /** Horario fijo tocado en la grilla (abre sus acciones) */
+  readonly actionTarget = signal<Enrollment | null>(null);
 
   // fin de horario fijo
   readonly endTarget = signal<Enrollment | null>(null);
@@ -79,6 +85,20 @@ export class TrainerEnrollmentsPageComponent {
       .filter(e => !q || (e.clientName ?? '').toLowerCase().includes(q))
       .sort((a, b) => (a.clientName ?? '').localeCompare(b.clientName ?? '')
         || a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime));
+  });
+
+  /** Una fila por alumno: "Ana López — Lun 07:00 · Mié 07:00 · Vie 07:00" */
+  readonly grouped = computed(() => {
+    const map = new Map<number, { userId: number; name: string; services: string[]; items: Enrollment[] }>();
+    for (const e of this.filtered()) {
+      const g = map.get(e.userId) ?? { userId: e.userId, name: this.nameOf(e), services: [], items: [] };
+      g.items.push(e);
+      if (!g.services.includes(e.serviceName)) g.services.push(e.serviceName);
+      map.set(e.userId, g);
+    }
+    return [...map.values()]
+      .map(g => ({ ...g, items: g.items.sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime)) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   });
 
   readonly allowsEnrollment = computed(() => {
@@ -166,7 +186,21 @@ export class TrainerEnrollmentsPageComponent {
     });
   }
 
+  openEnroll(userId: number | null = null): void {
+    this.enrollStudentId.set(userId);
+    this.showEnroll.set(true);
+  }
+
   onEnrolled(): void { this.showEnroll.set(false); this.load(); }
+
+  /** Desde el modal de acciones de un horario */
+  act(kind: 'pause' | 'resume' | 'end'): void {
+    const e = this.actionTarget();
+    if (!e) return;
+    this.actionTarget.set(null);
+    if (kind === 'end') this.askEnd(e);
+    else this.setEnrollmentStatus(e, kind === 'pause' ? 'PAUSED' : 'ACTIVE');
+  }
 
   // ── Servicios ──
   newService(): void {
