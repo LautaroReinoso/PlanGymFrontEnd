@@ -701,6 +701,7 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /trainer/turnos                 → TrainerAgendaPage (calendario) — trainerBookingGuard
 /trainer/turnos/horarios-fijos  → TrainerEnrollmentsPage
 /trainer/turnos/disponibilidad  → TrainerAvailabilityPage (franjas y cupos + días sin clase) — unsavedChangesGuard
+/trainer/turnos/servicios       → TrainerServicesPage (Mis servicios: activos + eliminados con Reactivar)
 ```
 ⚠️ `templates/new` debe ir ANTES que `templates/:id` en el array de rutas.
 ⚠️ El guard de `/trainer` deja pasar ADMIN y GYM_ADMIN; las rutas de suscripción suman
@@ -830,7 +831,8 @@ features/booking/
 └── pages/
     ├── trainer-today/                → /trainer/hoy — quién viene hoy (por clase) + plan del día del alumno + marcar hecho
     ├── trainer-agenda/               → /trainer/turnos — agrupa por startAt+serviceId, pasar lista, cancelar con motivo
-    ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — grilla por alumno (chips Lun 07:00…), acciones por horario, recuperaciones, Mis servicios
+    ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — grilla por alumno (chips Lun 07:00…), acciones por horario, recuperaciones
+    ├── trainer-services/             → /trainer/turnos/servicios — Mis servicios (activos / eliminados → Reactivar)
     ├── trainer-availability/         → /trainer/turnos/disponibilidad — semana lun–dom con franjas y cupos juntos (borrador + Guardar cambios), bloqueos
     ├── student-agenda/               → /student/turnos — mis clases + mis horarios fijos, ausencia / cancelar
     ├── student-choose/               → /student/turnos/elegir — elegir/cambiar/dejar horarios (selfEnrollment)
@@ -886,6 +888,9 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   salir con cambios (`unsavedChangesGuard` + `beforeunload`). Las nuevas se ven "sin guardar".
   Cambiar la hora de una franja **no** mueve a los alumnos fijos (quedan en la hora vieja); el editor lo avisa y el
   backend rechaza con 409 si un cambio deja horarios fijos vigentes fuera de las franjas.
+- **Servicios — soft delete:** `DELETE /professional/services/{id}` pone `active=false` y el GET los sigue devolviendo.
+  `BookingTrainerService.services()` filtra los activos (filtros, modal de anotar); `allServices()` trae todos y solo lo usa
+  la página Servicios, que muestra los eliminados aparte con "Reactivar" (`PUT` con `active: true`).
 - ⚠️ **Bug corregido (nov-2026):** `GET/PUT /professional/availability` devuelven `RuleResponse[]` (array), no
   `{ rules }`. El front leía `res.rules` → veía la semana vacía y al guardar **borraba las franjas existentes**.
 - **Entrenador en el celular:** barra inferior `app-trainer-bottom-nav` (≤768px): Hoy · Alumnos · Turnos · Plantillas ·

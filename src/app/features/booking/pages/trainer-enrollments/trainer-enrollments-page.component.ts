@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────
 //  PlanGym — TrainerEnrollmentsPage (/trainer/turnos/horarios-fijos)
-//  Horarios fijos de los alumnos + Mis servicios (sin precio).
+//  Horarios fijos de los alumnos (servicios: TrainerServicesPage).
 // ─────────────────────────────────────────────
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
 
 import { BookingTrainerService } from '../../services/booking-trainer.service';
 import {
-  BookingMode, BookingService, BookingServiceRequest, Enrollment, EnrollmentStatus, ProfessionalMe,
+  BookingService, Enrollment, EnrollmentStatus, ProfessionalMe,
 } from '../../models/booking.models';
 import { DAY_LABELS, DAY_SHORT, hhmm } from '../../utils/booking-date.util';
 import { EnrollStudentModalComponent } from '../../components/enroll-modal/enroll-student-modal.component';
@@ -20,14 +20,6 @@ import { ToastService } from '../../../../shared/services/toast.service';
 import { apiErrorText } from '../../../../core/http/api-error.util';
 
 const STATUS_TEXT: Record<EnrollmentStatus, string> = { ACTIVE: 'Activo', PAUSED: 'En pausa', ENDED: 'Terminado' };
-const MODE_TEXT: Record<BookingMode, string> = {
-  ENROLLMENT: 'Horario fijo', SELF: 'Clase suelta', BOTH: 'Horario fijo y clase suelta',
-};
-
-const EMPTY_SERVICE: BookingServiceRequest = {
-  name: '', description: '', durationMinutes: 60, bookingMode: 'ENROLLMENT',
-  selfEnrollment: false, weeklyLimit: 2, price: 0,
-};
 
 @Component({
   selector: 'app-trainer-enrollments-page',
@@ -42,7 +34,6 @@ export class TrainerEnrollmentsPageComponent {
   private readonly toast = inject(ToastService);
 
   readonly statusText = STATUS_TEXT;
-  readonly modeText = MODE_TEXT;
   readonly dayLabels = DAY_LABELS;
   readonly dayShort = DAY_SHORT;
   readonly hhmm = hhmm;
@@ -67,11 +58,6 @@ export class TrainerEnrollmentsPageComponent {
   readonly endDate   = signal('');
 
   // servicio
-  readonly editingService = signal<BookingService | null>(null);
-  readonly serviceForm    = signal<BookingServiceRequest | null>(null);
-  readonly serviceError   = signal<string | null>(null);
-  readonly isSavingService = signal(false);
-  readonly deleteTarget   = signal<BookingService | null>(null);
 
   // recuperaciones (tope por mes, del entrenador)
   readonly me = signal<ProfessionalMe | null>(null);
@@ -99,11 +85,6 @@ export class TrainerEnrollmentsPageComponent {
     return [...map.values()]
       .map(g => ({ ...g, items: g.items.sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime)) }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  });
-
-  readonly allowsEnrollment = computed(() => {
-    const f = this.serviceForm();
-    return !!f && (f.bookingMode === 'ENROLLMENT' || f.bookingMode === 'BOTH');
   });
 
   constructor() {
@@ -200,64 +181,5 @@ export class TrainerEnrollmentsPageComponent {
     this.actionTarget.set(null);
     if (kind === 'end') this.askEnd(e);
     else this.setEnrollmentStatus(e, kind === 'pause' ? 'PAUSED' : 'ACTIVE');
-  }
-
-  // ── Servicios ──
-  newService(): void {
-    this.editingService.set(null);
-    this.serviceForm.set({ ...EMPTY_SERVICE });
-    this.serviceError.set(null);
-  }
-
-  editService(s: BookingService): void {
-    this.editingService.set(s);
-    this.serviceForm.set({
-      name: s.name, description: s.description ?? '', durationMinutes: s.durationMinutes,
-      bookingMode: s.bookingMode, selfEnrollment: !!s.selfEnrollment, weeklyLimit: s.weeklyLimit ?? 2,
-      price: 0, active: s.active,
-    });
-    this.serviceError.set(null);
-  }
-
-  patchForm(patch: Partial<BookingServiceRequest>): void {
-    this.serviceForm.update(f => f ? { ...f, ...patch } : f);
-  }
-
-  saveService(): void {
-    const f = this.serviceForm();
-    if (!f || !f.name.trim() || !f.durationMinutes) return;
-    const body: BookingServiceRequest = {
-      ...f,
-      name: f.name.trim(),
-      price: 0,
-      selfEnrollment: this.allowsEnrollment() ? !!f.selfEnrollment : false,
-      weeklyLimit: this.allowsEnrollment() ? f.weeklyLimit : null,
-    };
-    const editing = this.editingService();
-    this.isSavingService.set(true);
-    (editing ? this.api.updateService(editing.id, body) : this.api.createService(body)).subscribe({
-      next: () => {
-        this.isSavingService.set(false);
-        this.serviceForm.set(null);
-        this.toast.success('Servicio guardado.');
-        this.loadServices();
-      },
-      error: err => { this.isSavingService.set(false); this.serviceError.set(apiErrorText(err)); },
-    });
-  }
-
-  confirmDeleteService(): void {
-    const s = this.deleteTarget();
-    if (!s) return;
-    this.isSavingService.set(true);
-    this.api.deleteService(s.id).subscribe({
-      next: () => {
-        this.isSavingService.set(false);
-        this.deleteTarget.set(null);
-        this.toast.success('Servicio eliminado.');
-        this.loadServices();
-      },
-      error: err => { this.isSavingService.set(false); this.toast.error(apiErrorText(err)); },
-    });
   }
 }

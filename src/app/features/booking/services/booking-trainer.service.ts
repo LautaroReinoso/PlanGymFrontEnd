@@ -81,8 +81,14 @@ export class BookingTrainerService {
   }
 
   // ── Servicios (siempre gratis) ──────────────
-  services(): Observable<BookingService[]> {
+  /** Todos, incluidos los eliminados (el backend hace soft delete: active = false). */
+  allServices(): Observable<BookingService[]> {
     return this.api.get<BookingService[]>('/professional/services');
+  }
+
+  /** Solo los activos: para elegir servicio en filtros y modales. */
+  services(): Observable<BookingService[]> {
+    return this.allServices().pipe(map(list => list.filter(sv => sv.active !== false)));
   }
 
   createService(body: BookingServiceRequest): Observable<BookingService> {

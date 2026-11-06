@@ -138,6 +138,12 @@ export const TRAINER_ROUTES: Routes = [
               import('../booking/pages/trainer-availability/trainer-availability-page.component').then(m => m.TrainerAvailabilityPageComponent),
             title: 'Horarios y cupos — PlanGym',
           },
+          {
+            path: 'servicios',
+            loadComponent: () =>
+              import('../booking/pages/trainer-services/trainer-services-page.component').then(m => m.TrainerServicesPageComponent),
+            title: 'Mis servicios — PlanGym',
+          },
         ],
       },
       {
