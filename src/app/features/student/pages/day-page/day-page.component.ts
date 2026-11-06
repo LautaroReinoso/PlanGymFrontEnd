@@ -9,6 +9,7 @@
 //  Trainer— dentro de un gp-modal, sin salir de esta pantalla.
 // ─────────────────────────────────────────────
 
+import { TodayClassesComponent } from '../../../booking/components/today-classes/today-classes.component';
 import { dayExerciseSummary } from '../../../trainer/models/exercise-meta.util';
 import {
   Component,
@@ -39,7 +40,7 @@ import { PageLoaderComponent } from '../../../../shared/components/page-loader/p
 @Component({
   selector: 'app-day-page',
   standalone: true,
-  imports: [PageLoaderComponent, 
+  imports: [PageLoaderComponent, TodayClassesComponent, 
     CommonModule,
     ButtonComponent,
     ModalComponent,

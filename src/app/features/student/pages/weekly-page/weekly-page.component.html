@@ -37,6 +37,9 @@
           <span class="strip__label">{{ c.label }}</span>
           <span class="strip__num">{{ c.dayNumber }}</span>
           <span class="strip__dot" [attr.aria-label]="c.trained ? 'Entrenó' : null"></span>
+          @if (c.classTimes.length) {
+            <span class="strip__class" [attr.title]="'Clase ' + c.classTimes.join(', ')">{{ c.classTimes[0] }}</span>
+          }
         </div>
       }
     </section>
@@ -56,6 +59,25 @@
           <p class="progress__done">¡Completaste todos los días de esta semana! 💪</p>
         }
       </section>
+
+      <!-- Clases (turnos) de la semana -->
+      @if (classRows().length) {
+        <section class="card classes">
+          <div class="classes__head">
+            <h3 class="section-title">Tus clases</h3>
+            <a class="classes__link" routerLink="/student/turnos">Ver turnos</a>
+          </div>
+          <ul class="classes__list">
+            @for (r of classRows(); track r.id) {
+              <li class="classes__row" [class.classes__row--past]="r.past">
+                <span class="classes__day">{{ r.day }}</span>
+                <span class="classes__time">{{ r.time }}</span>
+                <span class="classes__what">{{ r.what }}</span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
 
       <!-- Siguiente sugerido (solo semana actual) -->
       @if (nextDay(); as nd) {

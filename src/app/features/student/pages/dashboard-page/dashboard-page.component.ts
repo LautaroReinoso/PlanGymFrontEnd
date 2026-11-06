@@ -23,12 +23,13 @@ import { BadgeComponent } from '../../../../shared/components/badge-component/ba
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
 import { PageLoaderComponent } from '../../../../shared/components/page-loader/page-loader.component';
 import { apiErrorText } from '../../../../core/http/api-error.util';
-import { BookingStudentService } from '../../../booking/services/booking-student.service';
+import { StudentClassesService } from '../../../booking/services/student-classes.service';
+import { NextClassCardComponent } from '../../../booking/components/next-class/next-class-card.component';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [PageLoaderComponent, CommonModule, RouterLink, BadgeComponent, ButtonComponent],
+  imports: [NextClassCardComponent, PageLoaderComponent, CommonModule, RouterLink, BadgeComponent, ButtonComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,11 +37,10 @@ import { BookingStudentService } from '../../../booking/services/booking-student
 export class DashboardPageComponent implements OnInit {
 
   private readonly workoutService = inject(StudentWorkoutService);
-  private readonly bookingProbe   = inject(BookingStudentService);
   private readonly router         = inject(Router);
 
-  /** Módulo de turnos prendido → tarjeta "Mis turnos" */
-  readonly bookingEnabled = signal(false);
+  /** Turnos: prendido → tarjeta de próxima clase */
+  readonly classes = inject(StudentClassesService);
 
   // ── Estado ────────────────────────────────────
   readonly detail    = signal<StudentWorkoutDetail | null>(null);
@@ -67,7 +67,7 @@ export class DashboardPageComponent implements OnInit {
   readonly skeletons = Array(3).fill(0);
 
   ngOnInit(): void {
-    this.bookingProbe.probe().subscribe(ok => this.bookingEnabled.set(ok));
+    this.classes.init();
     this.load();
   }
 

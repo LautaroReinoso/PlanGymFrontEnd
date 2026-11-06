@@ -35,6 +35,9 @@
         }
       </header>
 
+      <!-- Turnos: "Hoy tenés clase…" (solo si hay) -->
+      <app-today-classes />
+
       <!-- Lista de ejercicios: mismo app-exercise-item que usa Trainer -->
       @if (d.day.exercises.length > 0) {
         <ul class="day__exercises">

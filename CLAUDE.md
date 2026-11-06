@@ -831,8 +831,14 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   visible (el backend genera/borra clases solo). La cache de 60 s se invalida entera en cada POST/PUT/PATCH/DELETE.
 - **Módulo apagado:** el primer 403 (antes de cualquier 2xx) pone `enabled = false`. El sidebar del trainer,
   la tarjeta "Mis turnos" del Dashboard del alumno y la oferta de horario fijo en "Mis alumnos" dependen de `probe()`.
-- **Alumno:** se entra desde la tarjeta "Mis turnos" del Dashboard. La bottom-nav (5 pestañas) NO se tocó:
-  queda pendiente decidir si "Turnos" reemplaza a "Mes" u otra pestaña.
+- **Alumno — integración en su vista** (`StudentClassesService`, root: probe único + `classesIn(range)` + `upcoming()`):
+  - Bottom-nav: 5.ª pestaña = **Turnos** si el módulo está prendido, si no **Perfil**. El Perfil vive además
+    en el avatar del header del Inicio (con punto naranja si falta completar el nombre).
+  - Inicio: `app-next-class-card` — próxima clase ("Hoy · 20:00"), "y N más en 7 días", "Avisar que no voy"
+    en horario fijo; sin clases → atajos a Elegir horarios / Reservar clase.
+  - Semana: hora de la clase en la tira de días + tarjeta "Tus clases" de la semana mostrada.
+  - Día: `app-today-classes` — aviso "Hoy tenés clase: Funcional 18:00" (solo si hay).
+  - Todo informativo: el plan de ejercicios sigue sin depender del día de la semana.
 - **Cupo "7/10"** en el calendario del trainer: sale de cruzar `schedule-overview` (día + hora) porque `AgendaItem`
   no trae capacidad. Si no hay franja que coincida, se muestra solo "7 alumnos".
 - **Alta de alumno:** al crear un alumno, si el módulo está prendido se abre el modal de horario fijo con su DNI.
@@ -901,7 +907,8 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] Horarios fijos del trainer + servicios + anotar por DNI (también tras el alta)
 - [x] Elegir horarios del alumno + clase suelta
 - [x] Disponibilidad, bloqueos y resumen de cupos
-- [ ] Decidir pestaña de "Turnos" en la bottom-nav del alumno
+- [x] Turnos en la vista del alumno: pestaña (Perfil al header), próxima clase en Inicio, clases en Semana y Día
+- [ ] Detalles: contador en la pestaña, puntos de clase en Mes
 - [ ] Verificar contra el backend las formas supuestas (ver sección Turnos)
 - [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)
 
