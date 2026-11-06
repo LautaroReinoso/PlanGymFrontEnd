@@ -4,7 +4,7 @@
 //  y resumen de cupos por franja.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -17,7 +17,7 @@ import { PageLoaderComponent } from '../../../../shared/components/page-loader/p
 import { ToastService } from '../../../../shared/services/toast.service';
 import { apiErrorText } from '../../../../core/http/api-error.util';
 
-type Tab = 'rules' | 'overview' | 'blocks';
+type Tab = 'rules' | 'blocks';
 
 /** "2026-11-10T18:00" (input datetime-local) → "2026-11-10T18:00:00-03:00" */
 function toArgIso(local: string): string {
@@ -41,6 +41,15 @@ function addMinutes(t: string, mins: number): string {
   const total = Math.min(toMin(t) + mins, 23 * 60 + 59);
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
+/** Clave completa de una franja (para comparar borrador vs. guardado) */
+function ruleKeyFull(r: Rule): string { return `${r.dayOfWeek}|${r.startTime}|${r.endTime}|${r.capacity}`; }
+function ruleSig(list: Rule[]): string { return list.map(ruleKeyFull).sort().join(','); }
+function normalizeRules(list: Rule[] | null | undefined): Rule[] {
+  return (list ?? [])
+    .filter(r => r.active !== false)
+    .map(r => ({ ...r, startTime: hhmm(r.startTime), endTime: hhmm(r.endTime) }));
+}
+
 const CAPACITY_KEY = 'pg.trainer.lastCapacity';
 function loadCapacity(): number {
   try { const n = Number(localStorage.getItem(CAPACITY_KEY)); return n >= 1 ? n : 10; } catch { return 10; }
@@ -70,10 +79,13 @@ export class TrainerAvailabilityPageComponent {
   readonly tab = signal<Tab>('rules');
 
   // ── Franjas ──
+  /** Borrador que se edita en pantalla */
   readonly rules       = signal<Rule[]>([]);
+  /** Lo que está guardado en el backend (para saber si hay cambios y descartar) */
+  readonly savedRules  = signal<Rule[]>([]);
+  /** true solo si la carga salió bien: sin esto no se deja guardar (no pisar lo existente) */
+  readonly rulesLoaded = signal(false);
   readonly isLoadingRules = signal(false);
-  /** Guardado automático: estado para el indicador */
-  readonly saveState   = signal<'idle' | 'saving' | 'saved'>('idle');
 
   // ── Editor de franja (agregar / editar) ──
   readonly durations = [45, 60, 90];
@@ -86,7 +98,6 @@ export class TrainerAvailabilityPageComponent {
   // ── Cupos ──
   readonly overview = signal<ScheduleOverviewItem[]>([]);
   readonly isLoadingOverview = signal(false);
-  readonly openSlot = signal<ScheduleOverviewItem | null>(null);
 
   // ── Bloqueos ──
   readonly blocks = signal<Block[]>([]);
@@ -107,9 +118,25 @@ export class TrainerAvailabilityPageComponent {
       .sort((a, b) => a.r.startTime.localeCompare(b.r.startTime)),
   })));
 
-  /** Alumnos con horario fijo por franja (del resumen de cupos) */
-  private readonly enrolledByKey = computed(() =>
-    new Map(this.overview().map(o => [`${o.dayOfWeek}-${hhmm(o.startTime)}`, o.enrolled])));
+  /** Resumen de cupos por franja guardada (día + hora) */
+  private readonly overviewByKey = computed(() =>
+    new Map(this.overview().map(o => [`${o.dayOfWeek}-${hhmm(o.startTime)}`, o])));
+
+  /** Cambios sin guardar (compara borrador vs. guardado, sin importar el orden) */
+  readonly dirty = computed(() => ruleSig(this.rules()) !== ruleSig(this.savedRules()));
+  readonly changeCount = computed(() => {
+    const a = new Set(this.rules().map(ruleKeyFull)), b = new Set(this.savedRules().map(ruleKeyFull));
+    let n = 0;
+    a.forEach(k => { if (!b.has(k)) n++; });
+    b.forEach(k => { if (!a.has(k)) n++; });
+    return n;
+  });
+
+  readonly totals = computed(() => {
+    let cap = 0, enrolled = 0;
+    for (const r of this.rules()) { cap += r.capacity; enrolled += this.enrolledIn(r); }
+    return { slots: this.rules().length, cap, enrolled };
+  });
 
   readonly editorEnd = computed(() => {
     const e = this.editor();
@@ -121,37 +148,62 @@ export class TrainerAvailabilityPageComponent {
       && this.editorEnd() > e.start;
   });
 
-  readonly overviewByDay = computed(() => this.days.map(d => ({
-    day: d,
-    slots: this.overview().filter(s => s.dayOfWeek === d).sort((a, b) => a.startTime.localeCompare(b.startTime)),
-  })));
 
   constructor() {
     this.loadRules();
     this.loadOverview();
   }
 
+  /** Para el guard de salida y el aviso del navegador */
+  hasUnsavedChanges(): boolean { return this.dirty(); }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(ev: BeforeUnloadEvent): void {
+    if (this.dirty()) ev.preventDefault();
+  }
+
   setTab(t: Tab): void {
     this.tab.set(t);
-    if (t === 'overview') this.loadOverview();
     if (t === 'blocks') this.loadBlocks();
   }
 
   // ── Franjas ──
   loadRules(): void {
     this.isLoadingRules.set(true);
+    this.rulesError.set(null);
     this.api.availability().subscribe({
-      next: res => {
-        this.rules.set((res.rules ?? []).map(r => ({ ...r, startTime: hhmm(r.startTime), endTime: hhmm(r.endTime) })));
+      next: list => {
+        const norm = normalizeRules(list);
+        this.rules.set(norm);
+        this.savedRules.set(norm);
+        this.rulesLoaded.set(true);
         this.isLoadingRules.set(false);
       },
-      error: err => { this.isLoadingRules.set(false); this.rulesError.set(apiErrorText(err)); },
+      error: err => {
+        this.isLoadingRules.set(false);
+        this.rulesLoaded.set(false);
+        this.rulesError.set(apiErrorText(err, 'No se pudieron cargar tus horarios.'));
+      },
     });
   }
 
+  /** Alumnos con horario fijo en esa franja (solo franjas ya guardadas) */
   enrolledIn(r: Rule): number {
-    return this.enrolledByKey().get(`${r.dayOfWeek}-${hhmm(r.startTime)}`) ?? 0;
+    return this.overviewOf(r)?.enrolled ?? 0;
   }
+
+  overviewOf(r: Rule): ScheduleOverviewItem | undefined {
+    if (!this.isSaved(r)) return undefined;
+    return this.overviewByKey().get(`${r.dayOfWeek}-${hhmm(r.startTime)}`);
+  }
+
+  /** ¿Está tal cual en lo guardado? (si no, es nueva o editada) */
+  isSaved(r: Rule): boolean {
+    const k = ruleKeyFull(r);
+    return this.savedRules().some(x => ruleKeyFull(x) === k);
+  }
+
+  clientName(n: string | null): string { return n?.trim() || 'Sin nombre'; }
 
   durationOf(r: Rule): number { return minutesBetween(r.startTime, r.endTime); }
 
@@ -225,26 +277,34 @@ export class TrainerAvailabilityPageComponent {
     this.persist(this.rules().filter((_, i) => i !== index), () => this.deleteTarget.set(null));
   }
 
-  /** Guardado automático: el PUT reemplaza todas las franjas por `next`. */
+  /** Los cambios quedan en el borrador hasta "Guardar cambios". */
   private persist(next: Rule[], onOk?: () => void): void {
-    const prev = this.rules();
-    this.rules.set(next);               // se ve al instante
+    this.rules.set(next);
+    onOk?.();
+  }
+
+  discard(): void {
+    this.rules.set(this.savedRules());
+    this.editor.set(null);
+  }
+
+  /** PUT con todas las franjas del borrador (el backend reemplaza todo). */
+  saveAll(): void {
+    if (!this.rulesLoaded() || !this.dirty() || this.isSaving()) return;
     this.isSaving.set(true);
-    this.saveState.set('saving');
     this.rulesError.set(null);
-    this.api.saveAvailability(next).subscribe({
-      next: () => {
+    this.api.saveAvailability(this.rules()).subscribe({
+      next: list => {
+        const norm = normalizeRules(list);
+        this.rules.set(norm);
+        this.savedRules.set(norm);
         this.isSaving.set(false);
-        this.saveState.set('saved');
-        onOk?.();
-        this.loadRules();               // ids reales del backend
+        this.toast.success('Horarios guardados.');
         this.loadOverview();
       },
       error: err => {
         this.isSaving.set(false);
-        this.saveState.set('idle');
-        this.rules.set(prev);           // vuelve atrás
-        this.toast.error(apiErrorText(err, 'No se pudo guardar el horario.'));
+        this.rulesError.set(apiErrorText(err, 'No se pudieron guardar los horarios.'));
       },
     });
   }
@@ -257,8 +317,6 @@ export class TrainerAvailabilityPageComponent {
       error: err => { this.isLoadingOverview.set(false); this.toast.error(apiErrorText(err)); },
     });
   }
-
-  clientName(n: string | null): string { return n?.trim() || 'Sin nombre'; }
 
   // ── Bloqueos ──
   loadBlocks(): void {

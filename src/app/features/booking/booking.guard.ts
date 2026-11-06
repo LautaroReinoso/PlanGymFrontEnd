@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────
 
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, CanDeactivateFn, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { BookingTrainerService } from './services/booking-trainer.service';
 import { BookingStudentService } from './services/booking-student.service';
@@ -20,3 +20,7 @@ export const studentBookingGuard: CanActivateFn = () => {
   return inject(BookingStudentService).probe().pipe(
     map(ok => ok || router.createUrlTree(['/student/dashboard'])));
 };
+
+/** Avisa antes de salir de una pantalla con cambios sin guardar. */
+export const unsavedChangesGuard: CanDeactivateFn<{ hasUnsavedChanges(): boolean }> = component =>
+  !component?.hasUnsavedChanges?.() || confirm('Tenés cambios sin guardar en tus horarios. ¿Salir igual?');

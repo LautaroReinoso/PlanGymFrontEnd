@@ -60,3 +60,20 @@
   font: 600 13px var(--font-body); color: var(--color-celeste); cursor: pointer;
   background: none; border: none; padding: 2px 0; text-decoration: underline;
 }
+
+/* Cupos dentro de la franja */
+.slot__bar { display: block; height: 3px; margin-top: 3px; border-radius: 2px; background: var(--color-border); overflow: hidden; }
+.slot__bar span { display: block; height: 100%; background: var(--color-celeste); }
+.slot--full { border-left-color: var(--color-warning); }
+.slot--full .slot__bar span { background: var(--color-warning); }
+.slot--new { border-style: dashed; border-left-style: solid; border-left-color: var(--color-celeste); }
+.ed__clients { margin: 0; padding-left: 18px; font-size: 14px; color: var(--color-text); max-height: 160px; overflow-y: auto; }
+
+/* Barra de guardado */
+.savebar {
+  position: sticky; bottom: var(--space-3); z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4); font-size: 14px; color: var(--color-text);
+  background: var(--color-card); border: 1px solid var(--color-accent); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}

@@ -813,7 +813,7 @@ features/booking/
 └── pages/
     ├── trainer-agenda/               → /trainer/turnos — agrupa por startAt+serviceId, pasar lista, cancelar con motivo
     ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — grilla por alumno (chips Lun 07:00…), acciones por horario, recuperaciones, Mis servicios
-    ├── trainer-availability/         → /trainer/turnos/disponibilidad — semana lun–dom de franjas (guardado automático), cupos, bloqueos
+    ├── trainer-availability/         → /trainer/turnos/disponibilidad — semana lun–dom con franjas y cupos juntos (borrador + Guardar cambios), bloqueos
     ├── student-agenda/               → /student/turnos — mis clases + mis horarios fijos, ausencia / cancelar
     ├── student-choose/               → /student/turnos/elegir — elegir/cambiar/dejar horarios (selfEnrollment)
     ├── student-schedule/             → /student/turnos/horarios — horarios día por día + Recuperar
@@ -853,10 +853,14 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   ya está anotado se ven como "Ya anotado". Al dar de alta un alumno se abre el modal con él preseleccionado (match por DNI).
 - **Horarios fijos:** una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
   tiene fin). Tocar un chip abre sus acciones; "+" agrega otro día a ese alumno.
-- **Franjas (Horarios y cupos):** grilla lun–dom; "+ Agregar" abre Desde + Duración (45/60/90/Otra) + Cupo + "Repetir en"
-  (L M M J V S D, atajos Lunes a viernes / Todos los días). Tocar una franja la edita; ✕ la borra (si tiene alumnos fijos,
-  confirma). **Guardado automático:** cada cambio hace el PUT con todas las franjas (el backend reemplaza todo); si falla,
-  vuelve al estado anterior. No duplica franjas con el mismo día y hora. El último cupo usado se recuerda (localStorage).
+- **Franjas y cupos (una sola vista):** grilla lun–dom; cada franja muestra "3/10 fijos" con barra (naranja si está
+  completa) y al tocarla se ve la lista de alumnos fijos y se edita. "+ Agregar": Desde + Duración (45/60/90/Otra) + Cupo +
+  "Repetir en" (L–D, atajos Lunes a viernes / Todos los días). ✕ quita (confirma si tiene alumnos fijos).
+  **Borrador:** todo se arma en pantalla y se guarda con "Guardar cambios" (barra con N cambios + Descartar). El PUT
+  reemplaza todas las franjas, por eso **no se deja guardar si la carga inicial falló** (`rulesLoaded`), y hay aviso al
+  salir con cambios (`unsavedChangesGuard` + `beforeunload`). Las nuevas se ven "sin guardar".
+- ⚠️ **Bug corregido (nov-2026):** `GET/PUT /professional/availability` devuelven `RuleResponse[]` (array), no
+  `{ rules }`. El front leía `res.rules` → veía la semana vacía y al guardar **borraba las franjas existentes**.
 - **Admin (GYM_ADMIN):** no implementado; no existe panel de GYM_ADMIN en este front.
 
 ### Recuperar clases (backend V21, carpeta 13 de Postman)

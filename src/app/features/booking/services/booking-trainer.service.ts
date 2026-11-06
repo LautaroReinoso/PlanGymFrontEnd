@@ -32,13 +32,18 @@ export class BookingTrainerService {
   }
 
   // ── Disponibilidad / bloqueos / cupos ───────
-  availability(): Observable<{ rules: Rule[] }> {
-    return this.api.get<{ rules: Rule[] }>('/professional/availability');
+  /** GET devuelve directamente RuleResponse[] (verificado contra el backend). */
+  availability(): Observable<Rule[]> {
+    return this.api.get<Rule[]>('/professional/availability', undefined, false);
   }
 
-  /** ⚠️ Reemplaza TODAS las reglas. */
-  saveAvailability(rules: Rule[]): Observable<{ rules: Rule[] }> {
-    return this.api.put<{ rules: Rule[] }>('/professional/availability', { rules });
+  /** ⚠️ Reemplaza TODAS las reglas. Body { rules }, responde RuleResponse[]. */
+  saveAvailability(rules: Rule[]): Observable<Rule[]> {
+    const body = rules.map(r => ({
+      dayOfWeek: r.dayOfWeek, startTime: r.startTime, endTime: r.endTime, capacity: r.capacity,
+      validFrom: r.validFrom ?? null, validTo: r.validTo ?? null,
+    }));
+    return this.api.put<Rule[]>('/professional/availability', { rules: body });
   }
 
   blocks(): Observable<Block[]> {

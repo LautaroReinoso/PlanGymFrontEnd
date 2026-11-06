@@ -7,7 +7,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, roleGuard } from '../../core/auth/services/auth-guard.service';
 import { billingEnabledGuard } from './guards/billing-enabled.guard';
-import { trainerBookingGuard } from '../booking/booking.guard';
+import { trainerBookingGuard, unsavedChangesGuard } from '../booking/booking.guard';
 
 export const TRAINER_ROUTES: Routes = [
   {
@@ -125,6 +125,7 @@ export const TRAINER_ROUTES: Routes = [
           },
           {
             path: 'disponibilidad',
+            canDeactivate: [unsavedChangesGuard],
             loadComponent: () =>
               import('../booking/pages/trainer-availability/trainer-availability-page.component').then(m => m.TrainerAvailabilityPageComponent),
             title: 'Horarios y cupos — PlanGym',

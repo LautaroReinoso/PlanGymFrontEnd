@@ -12,27 +12,26 @@
   </header>
 
   <div class="bk-tabs">
-    <button type="button" class="bk-tab" [class.on]="tab() === 'rules'" (click)="setTab('rules')">Franjas</button>
-    <button type="button" class="bk-tab" [class.on]="tab() === 'overview'" (click)="setTab('overview')">Resumen de cupos</button>
+    <button type="button" class="bk-tab" [class.on]="tab() === 'rules'" (click)="setTab('rules')">Semana</button>
     <button type="button" class="bk-tab" [class.on]="tab() === 'blocks'" (click)="setTab('blocks')">Días sin clase</button>
   </div>
 
-  <!-- ── Franjas ────────────────────────────── -->
+  <!-- ── Franjas + cupos ───────────────────── -->
   @if (tab() === 'rules') {
     <section class="bk-card">
       <div class="bk-row bk-row--between">
         <h2>Tu semana</h2>
-        <span class="save-state">
-          @switch (saveState()) {
-            @case ('saving') { Guardando… }
-            @case ('saved') { ✓ Guardado }
-          }
-        </span>
+        @if (rulesLoaded()) {
+          <span class="bk-muted">{{ totals().slots }} horarios · {{ totals().enrolled }} de {{ totals().cap }} lugares ocupados por fijos</span>
+        }
       </div>
-      <p class="bk-muted">Tocá "+ Agregar" en un día para cargar un horario, o tocá uno para editarlo. Los cambios se guardan solos.</p>
+      <p class="bk-muted">Agregá, editá o quitá horarios y al final tocá <strong>Guardar cambios</strong>. Cada horario muestra cuántos alumnos fijos tiene sobre el cupo.</p>
 
       @if (isLoadingRules()) {
         <app-page-loader [size]="40" [compact]="true" message="Cargando horarios…" />
+      } @else if (!rulesLoaded()) {
+        <p class="bk-error">{{ rulesError() }}</p>
+        <div><gp-button size="sm" variant="secondary" (click)="loadRules()">Reintentar</gp-button></div>
       } @else {
         <div class="week">
           @for (col of rulesByDay(); track col.day) {
@@ -40,13 +39,20 @@
               <span class="week__name">{{ dayLabels[col.day] }}</span>
               <div class="week__items">
                 @for (x of col.items; track x.i) {
-                  <div class="slot">
-                    <button type="button" class="slot__main" [disabled]="isSaving()" (click)="openEdit(x.i)" title="Editar">
+                  @let ov = overviewOf(x.r);
+                  @let saved = isSaved(x.r);
+                  <div class="slot" [class.slot--new]="!saved" [class.slot--full]="ov && ov.free <= 0">
+                    <button type="button" class="slot__main" [disabled]="isSaving()" (click)="openEdit(x.i)" title="Ver alumnos / editar">
                       <span class="slot__time">{{ x.r.startTime }}–{{ x.r.endTime }}</span>
-                      <span class="slot__cap">cupo {{ x.r.capacity }}@if (enrolledIn(x.r)) { · {{ enrolledIn(x.r) }} fijos }</span>
+                      @if (!saved) {
+                        <span class="slot__cap">cupo {{ x.r.capacity }} · sin guardar</span>
+                      } @else {
+                        <span class="slot__cap">{{ ov?.enrolled ?? 0 }}/{{ x.r.capacity }} fijos</span>
+                        <span class="slot__bar"><span [style.width.%]="((ov?.enrolled ?? 0) / x.r.capacity) * 100"></span></span>
+                      }
                     </button>
                     <button type="button" class="slot__x" [disabled]="isSaving()" (click)="askRemove(x.i)"
-                            [attr.aria-label]="'Eliminar ' + dayLabels[col.day] + ' ' + x.r.startTime">✕</button>
+                            [attr.aria-label]="'Quitar ' + dayLabels[col.day] + ' ' + x.r.startTime">✕</button>
                   </div>
                 }
                 <button type="button" class="week__add" [disabled]="isSaving()" (click)="openAdd(col.day)">+ Agregar</button>
@@ -54,34 +60,19 @@
             </div>
           }
         </div>
+        @if (rulesError()) { <p class="bk-error">{{ rulesError() }}</p> }
       }
-      @if (rulesError()) { <p class="bk-error">{{ rulesError() }}</p> }
     </section>
-  }
 
-  <!-- ── Resumen de cupos ──────────────────── -->
-  @if (tab() === 'overview') {
-    <section class="bk-card">
-      <h2>Resumen de cupos</h2>
-      <p class="bk-muted">Alumnos con horario fijo en cada franja. Tocá una franja para ver quiénes son.</p>
-      @if (isLoadingOverview()) {
-        <app-page-loader [size]="40" [compact]="true" message="Cargando cupos…" />
-      } @else {
-        <div class="bk-slots">
-          @for (col of overviewByDay(); track col.day) {
-            <div class="bk-slots__col">
-              <span class="bk-slots__head">{{ dayShort[col.day] }}</span>
-              @for (s of col.slots; track s.ruleId) {
-                <button type="button" class="bk-slot" [class.mine]="s.free <= 0" (click)="openSlot.set(s)">
-                  {{ hhmm(s.startTime) }}
-                  <small>{{ s.enrolled }}/{{ s.capacity }} · {{ s.free }} libres</small>
-                </button>
-              }
-            </div>
-          }
+    @if (dirty()) {
+      <div class="savebar" role="status">
+        <span>{{ changeCount() }} {{ changeCount() === 1 ? 'cambio sin guardar' : 'cambios sin guardar' }}</span>
+        <div class="bk-row">
+          <gp-button variant="ghost" size="sm" [disabled]="isSaving()" (click)="discard()">Descartar</gp-button>
+          <gp-button size="sm" [loading]="isSaving()" (click)="saveAll()">Guardar cambios</gp-button>
         </div>
-      }
-    </section>
+      </div>
+    }
   }
 
   <!-- ── Bloqueos ──────────────────────────── -->
@@ -147,7 +138,21 @@
           (closed)="editor.set(null)">
   @if (editor(); as e) {
     <div class="bk-page ed" style="padding-bottom:0">
-      @if (e.mode === 'edit') { <p class="bk-muted">{{ dayLabels[e.days[0]] }}</p> }
+      @if (e.mode === 'edit') {
+        <p class="bk-muted">{{ dayLabels[e.days[0]] }}</p>
+        @if (e.index !== null && overviewOf(rules()[e.index]); as ov) {
+          <div class="ed__group">
+            <span class="ed__label">Alumnos fijos ({{ ov.enrolled }}/{{ ov.capacity }} · {{ ov.free }} libres)</span>
+            @if (ov.clients.length) {
+              <ul class="ed__clients">
+                @for (c of ov.clients; track c.enrollmentId) { <li>{{ clientName(c.name) }}</li> }
+              </ul>
+            } @else {
+              <span class="bk-muted">Nadie anotado todavía.</span>
+            }
+          </div>
+        }
+      }
       <div class="bk-grid2">
         <label class="bk-field">
           Desde
@@ -193,7 +198,7 @@
 
       <div class="bk-row">
         <gp-button [loading]="isSaving()" [disabled]="!editorValid()" (click)="saveEditor()">
-          {{ e.mode === 'edit' ? 'Guardar' : (e.days.length > 1 ? 'Agregar en ' + e.days.length + ' días' : 'Agregar') }}
+          {{ e.mode === 'edit' ? 'Aplicar' : (e.days.length > 1 ? 'Agregar en ' + e.days.length + ' días' : 'Agregar') }}
         </gp-button>
         <gp-button variant="ghost" [disabled]="isSaving()" (click)="editor.set(null)">Cancelar</gp-button>
       </div>
@@ -206,27 +211,12 @@
   @if (deleteTarget(); as d) {
     <div class="bk-page" style="padding-bottom:0">
       <p><strong>{{ dayLabels[d.rule.dayOfWeek] }} {{ d.rule.startTime }}–{{ d.rule.endTime }}</strong></p>
-      <p class="bk-note">Tiene {{ d.enrolled }} {{ d.enrolled === 1 ? 'alumno' : 'alumnos' }} con horario fijo. Si lo eliminás, ya no vas a ofrecer ese horario.</p>
+      <p class="bk-note">Tiene {{ d.enrolled }} {{ d.enrolled === 1 ? 'alumno' : 'alumnos' }} con horario fijo. Si lo quitás y guardás, ya no vas a ofrecer ese horario.</p>
       <div class="bk-row">
-        <gp-button variant="danger" [loading]="isSaving()" (click)="remove(d.index)">Eliminar igual</gp-button>
+        <gp-button variant="danger" [loading]="isSaving()" (click)="remove(d.index)">Quitar igual</gp-button>
         <gp-button variant="ghost" [disabled]="isSaving()" (click)="deleteTarget.set(null)">Volver</gp-button>
       </div>
     </div>
   }
 </gp-modal>
 
-<gp-modal [isOpen]="!!openSlot()" [title]="openSlot() ? dayLabels[openSlot()!.dayOfWeek] + ' ' + hhmm(openSlot()!.startTime) : ''"
-          size="sm" (closed)="openSlot.set(null)">
-  @if (openSlot(); as s) {
-    <div class="bk-page" style="padding-bottom:0">
-      <p class="bk-muted">{{ s.enrolled }} de {{ s.capacity }} · {{ s.free }} libres</p>
-      <ul class="bk-list">
-        @for (c of s.clients; track c.enrollmentId) {
-          <li class="bk-item"><span class="bk-item__title">{{ clientName(c.name) }}</span></li>
-        } @empty {
-          <li class="bk-muted">Nadie anotado en esta franja.</li>
-        }
-      </ul>
-    </div>
-  }
-</gp-modal>
