@@ -58,6 +58,13 @@
                 {{ statusLabels[i.status] }}
                 @if (i.enrollmentId) { · horario fijo }
                 @if (i.recoveryOfBookingId) { · <span class="tag-rec">recupera</span> }
+                @if (i.status === 'CANCELLED') {
+                  @switch (i.cancelledBy) {
+                    @case ('STUDENT') { · canceló el alumno }
+                    @case ('PROFESSIONAL') { · cancelaste vos }
+                    @case ('SYSTEM') { · cancelación automática }
+                  }
+                }
                 @if (i.cancelReason) { · {{ i.cancelReason }} }
               </span>
             </div>

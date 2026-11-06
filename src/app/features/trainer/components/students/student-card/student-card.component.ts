@@ -22,6 +22,8 @@ export type StudentStatus = 'active' | 'no-plan' | 'pending';
 export class StudentCardComponent {
 
   readonly student = input.required<StudentSummary>();
+  /** "Próxima clase: jue 12 nov 18:00" (solo con Turnos prendido) */
+  readonly turnos = input<string | null>(null);
 
   // Output para navegar al detalle
   readonly cardClick = output<void>();

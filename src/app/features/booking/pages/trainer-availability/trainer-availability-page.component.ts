@@ -94,6 +94,8 @@ export class TrainerAvailabilityPageComponent {
   readonly deleteTarget = signal<{ index: number; rule: Rule; enrolled: number } | null>(null);
   readonly isSaving    = signal(false);
   readonly rulesError  = signal<string | null>(null);
+  /** 409 al guardar: el cambio deja afuera horarios fijos de alumnos */
+  readonly rulesConflict = signal(false);
 
   // ── Cupos ──
   readonly overview = signal<ScheduleOverviewItem[]>([]);
@@ -171,6 +173,7 @@ export class TrainerAvailabilityPageComponent {
   loadRules(): void {
     this.isLoadingRules.set(true);
     this.rulesError.set(null);
+    this.rulesConflict.set(false);
     this.api.availability().subscribe({
       next: list => {
         const norm = normalizeRules(list);
@@ -293,6 +296,7 @@ export class TrainerAvailabilityPageComponent {
     if (!this.rulesLoaded() || !this.dirty() || this.isSaving()) return;
     this.isSaving.set(true);
     this.rulesError.set(null);
+    this.rulesConflict.set(false);
     this.api.saveAvailability(this.rules()).subscribe({
       next: list => {
         const norm = normalizeRules(list);
@@ -304,6 +308,7 @@ export class TrainerAvailabilityPageComponent {
       },
       error: err => {
         this.isSaving.set(false);
+        this.rulesConflict.set(err?.status === 409);
         this.rulesError.set(apiErrorText(err, 'No se pudieron guardar los horarios.'));
       },
     });

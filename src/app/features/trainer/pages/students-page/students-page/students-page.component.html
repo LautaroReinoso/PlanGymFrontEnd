@@ -86,7 +86,7 @@
   } @else {
   <div class="students-grid">
     @for (student of filtered(); track student.id) {
-    <app-student-card [student]="student" [routerLink]="['/trainer/students', student.id]" />
+    <app-student-card [student]="student" [turnos]="turnosText().get(student.id) ?? null" [routerLink]="['/trainer/students', student.id]" />
     }
   </div>
   }

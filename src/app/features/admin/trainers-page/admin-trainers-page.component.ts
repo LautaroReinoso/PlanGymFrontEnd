@@ -8,6 +8,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } 
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
+import { apiErrorText } from '../../../core/http/api-error.util';
 import { AdminService, AdminTrainer } from '../services/admin.service';
 import { PageLoaderComponent } from '../../../shared/components/page-loader/page-loader.component';
 
@@ -28,6 +29,8 @@ export class AdminTrainersPageComponent implements OnInit {
   readonly isLoading = signal(false);
   readonly error     = signal<string | null>(null);
   readonly pendingId = signal<number | null>(null);
+  /** userIds de entrenadores que todavía no están dados de alta en turnos */
+  readonly notInBooking = signal<Set<number>>(new Set());
 
   readonly search = signal('');
   readonly status = signal<StatusFilter>('ALL');
@@ -50,7 +53,44 @@ export class AdminTrainersPageComponent implements OnInit {
     this.load();
   }
 
+  loadCandidates(): void {
+    this.adminService.bookingCandidates().subscribe({
+      next: list => this.notInBooking.set(new Set(list.map(c => c.userId))),
+      error: () => this.notInBooking.set(new Set()),   // módulo apagado o sin permiso: no se ofrece
+    });
+  }
+
+  toggleSubscription(t: AdminTrainer): void {
+    const next = !t.subscriptionActive;
+    const msg = next
+      ? `¿Activar a mano la suscripción de ${this.fullName(t)}? (prueba, cortesía o pago por fuera)`
+      : `¿Desactivar la suscripción de ${this.fullName(t)}? Sus alumnos pueden dejar de entrar.`;
+    if (!confirm(msg)) return;
+    this.pendingId.set(t.id);
+    this.error.set(null);
+    this.adminService.setSubscription(t.id, next).subscribe({
+      next: u => {
+        this.trainers.update(list => list.map(x => x.id === t.id ? { ...x, subscriptionActive: u?.subscriptionActive ?? next } : x));
+        this.pendingId.set(null);
+      },
+      error: err => { this.error.set(apiErrorText(err, 'No se pudo cambiar la suscripción.')); this.pendingId.set(null); },
+    });
+  }
+
+  addToBooking(t: AdminTrainer): void {
+    this.pendingId.set(t.id);
+    this.error.set(null);
+    this.adminService.addProfessional(t.id).subscribe({
+      next: () => {
+        this.notInBooking.update(s => { const n = new Set(s); n.delete(t.id); return n; });
+        this.pendingId.set(null);
+      },
+      error: err => { this.error.set(apiErrorText(err, 'No se pudo dar de alta en turnos.')); this.pendingId.set(null); },
+    });
+  }
+
   load(): void {
+    this.loadCandidates();
     this.isLoading.set(true);
     this.error.set(null);
     this.adminService.getTrainers().subscribe({

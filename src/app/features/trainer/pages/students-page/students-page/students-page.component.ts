@@ -26,6 +26,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
 import { SubscriptionBannerComponent } from '../../../components/subscription/subscription-banner/subscription-banner.component';
 import { BillingService, apiErrorMessage, isStudentLimitError } from '../../../services/billing.service';
 import { EnrollStudentModalComponent } from '../../../../booking/components/enroll-modal/enroll-student-modal.component';
+import { DAY_SHORT, hhmm, isoDateKey, isoTime, shortDate } from '../../../../booking/utils/booking-date.util';
 import { BookingTrainerService } from '../../../../booking/services/booking-trainer.service';
 
 @Component({
@@ -97,8 +98,32 @@ export class StudentsPageComponent implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────
   ngOnInit(): void {
-    this.booking.probe().subscribe(ok => this.bookingEnabled.set(ok));
+    this.booking.probe().subscribe(ok => {
+      this.bookingEnabled.set(ok);
+      if (ok) this.loadTurnos();
+    });
     this.loadStudents();
+  }
+
+  // ── Turnos por alumno (GET /professional/students) ──
+  readonly turnosText = signal<Map<number, string>>(new Map());
+
+  private loadTurnos(): void {
+    this.booking.students('', 'ALL').subscribe({
+      next: list => {
+        const m = new Map<number, string>();
+        for (const s of list) {
+          const parts: string[] = [];
+          if (s.nextBookingAt) parts.push(`Próxima clase: ${shortDate(isoDateKey(s.nextBookingAt))} ${isoTime(s.nextBookingAt)}`);
+          else if (s.activeEnrollments?.length) parts.push('Sin clases próximas');
+          const fixed = (s.activeEnrollments ?? []).map(e => `${DAY_SHORT[e.dayOfWeek]} ${hhmm(e.startTime)}`);
+          if (fixed.length) parts.push(fixed.join(' · '));
+          if (parts.length) m.set(s.userId, parts.join(' — '));
+        }
+        this.turnosText.set(m);
+      },
+      error: () => {},
+    });
   }
 
   // ── Carga ─────────────────────────────────────

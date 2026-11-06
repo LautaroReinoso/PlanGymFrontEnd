@@ -185,7 +185,6 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
       },
       error: (err: any) => {
         this.isAssigning.set(false);
-        console.error('[Asignar plan] falló', err);
         this.assignError.set(apiErrorText(err,
           err.status === 409 ? 'El alumno ya tiene un plan activo.' : 'Error al asignar el plan.'));
       },

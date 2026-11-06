@@ -57,6 +57,7 @@ export interface AgendaItem {
   cancelReason: string | null;
   /** != null → el alumno vino a recuperar */
   recoveryOfBookingId?: number | null;
+  cancelledBy?: 'STUDENT' | 'PROFESSIONAL' | 'SYSTEM' | null;
 }
 
 export interface Enrollment {
@@ -125,6 +126,7 @@ export interface BookingStudentSummary {
   nextBookingAt: string | null;
   bookingsCount: number;
   activeEnrollments: { id: number; serviceName: string; dayOfWeek: DayOfWeek; startTime: string }[];
+  activeSubscription?: unknown;
 }
 
 export interface Rule {

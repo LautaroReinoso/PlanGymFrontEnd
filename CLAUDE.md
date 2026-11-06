@@ -903,6 +903,13 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   "Marcar como hecho" → `POST /workout-logs { studentId, workoutDayId, completedAt: hoy, completed: true }`
   (`TrainerWorkoutLogService`). No hay desmarcar del lado del entrenador (lo puede desmarcar el alumno).
 - **Admin (GYM_ADMIN):** no implementado; no existe panel de GYM_ADMIN en este front.
+- **Panel GLOBAL_ADMIN (`features/admin`, Entrenadores):** habilitar/deshabilitar, suscripción a mano
+  (`PATCH /admin/users/{id}/subscription { active }`) y "Dar de alta en turnos" para los que aparecen en
+  `GET /booking/plangym/admin/professionals/candidates` (`POST …/admin/professionals { userId }`). `subscriptionActive`
+  se muestra si `AdminTrainerResponse` lo trae (hoy no: se ve "—" hasta cambiarlo). No usa el `PATCH /admin/{id}/role` obsoleto.
+- **Agenda del entrenador:** en canceladas, "canceló el alumno / cancelaste vos / cancelación automática" (`cancelledBy`).
+- **Mis alumnos:** con Turnos prendido, cada tarjeta muestra próxima clase y horarios fijos (`GET /professional/students?status=ALL`, cruce por `userId`).
+- **409 de franjas:** se explica que primero hay que cambiar o terminar esos horarios fijos, con link a Horarios fijos.
 
 ### Recuperar clases (backend V21, carpeta 13 de Postman)
 - Avisar a tiempo que no va → gana 1 clase para recuperar **en el mismo mes**, en cualquier horario con lugar

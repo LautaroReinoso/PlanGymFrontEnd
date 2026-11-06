@@ -61,7 +61,16 @@
             </div>
           }
         </div>
-        @if (rulesError()) { <p class="bk-error">{{ rulesError() }}</p> }
+        @if (rulesError()) {
+          @if (rulesConflict()) {
+            <div class="bk-error">
+              <strong>No se guardó: estos alumnos tienen horario fijo en franjas que quitaste o cambiaste.</strong>
+              <p style="margin:6px 0">{{ rulesError() }}</p>
+              Primero cambiales el horario o terminalos en
+              <a routerLink="/trainer/turnos/horarios-fijos">Horarios fijos</a>, y después guardá de nuevo.
+            </div>
+          } @else { <p class="bk-error">{{ rulesError() }}</p> }
+        }
       }
     </section>
 
