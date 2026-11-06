@@ -798,6 +798,8 @@ el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite
 - `DayExercise.durationSeconds` (y en `AddExerciseToDayRequest`): ejercicio por tiempo, viene con `reps = 0`.
   `dayExerciseSummary` muestra "3 × 20 seg" y suma `notes` cortas ("Por pierna"); `setsRepsLabel` / `durationLabel` en
   `exercise-meta.util.ts`. El modal "Agregar ejercicio" tiene el selector Repeticiones / Por tiempo.
+- Probado contra el backend real ✔ (lista, ver días, copiar). Si aparece "Valor inválido para el parámetro 'id'" en
+  `/reference`, el backend corriendo es anterior a V24 (la ruta cae en `/{id}`): pull de `feature/booking` y reiniciar.
 
 ## Suscripciones del entrenador (nov-2026)
 Quien paga es el TRAINER: suscripción mensual a la plataforma con Mercado Pago (preapproval).
@@ -888,7 +890,8 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - **Anotar en horario fijo:** el entrenador elige al alumno de su lista (`GET /v1/users/students`, buscador por nombre o
   DNI) y el batch se manda con `userId` (el backend acepta exactamente uno de userId / dni / mail). Las franjas donde
   ya está anotado se ven como "Ya anotado". Al dar de alta un alumno se abre el modal con él preseleccionado (match por DNI).
-- **Horarios fijos:** una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
+- **Horarios fijos:** filtro por defecto **Vigentes (activos y en pausa)** — el mismo criterio que usa el backend para el 409
+  de franjas (antes se veían solo los activos y un horario en pausa bloqueaba guardar sin que se viera). Una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
   tiene fin). Tocar un chip abre sus acciones; "+" agrega otro día a ese alumno.
 - **Franjas y cupos (una sola vista):** grilla lun–dom; cada franja muestra "3/10 fijos" con barra (naranja si está
   completa) y al tocarla se ve la lista de alumnos fijos y se edita. "+ Agregar": Desde + Duración (45/60/90/Otra) + Cupo +
@@ -1029,9 +1032,19 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] Recuperar clases: horarios día por día, recuperar, tope del entrenador, "recupera" en su agenda
 - [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)
 
+### Plantillas
+- [x] Planes de referencia (ver días + "Usar este plan" → copia) — probado
+- [x] Ejercicios por tiempo (`durationSeconds`, "3 × 20 seg", selector en "Agregar ejercicio")
+- [ ] Traducir `level` si el backend manda otro valor que BASIC / INTERMEDIATE
+
+### Admin
+- [x] Suscripción a mano y "Dar de alta en turnos" en Entrenadores
+- [ ] Backend: sumar `subscriptionActive` a `AdminTrainerResponse` (hoy se ve "—" hasta cambiarlo)
+- [ ] Dar / quitar rol TRAINER desde el panel (`PUT/DELETE /admin/tenants/plangym/members/{userId}/roles/{role}`), si hace falta
+
 ### Cerrar Turnos (cuando termine la prueba)
 - [ ] PR `feature/turnos-calendario` → `master` (front) y `feature/booking` → `main` (backend `elytra-platform`)
-- [ ] Deploy: backend a Railway (Flyway corre V21 y V22) y `ng build` del front a HostGator
+- [ ] Deploy: backend a Railway (Flyway corre V21, V22 y V24) y `ng build` del front a HostGator
 - [ ] Producción: habilitar el módulo BOOKING para `plangym` y dar de alta como profesionales a los entrenadores que
       ya tenían TRAINER (los nuevos se dan de alta solos al recibir el rol)
 

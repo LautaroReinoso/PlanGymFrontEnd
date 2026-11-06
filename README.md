@@ -11,9 +11,11 @@ Producción: **https://plangympro.com** · Backend: `elytra-platform` (Spring Bo
 **Entrenador** (mail + contraseña)
 - **Hoy:** quién viene hoy, agrupado por clase, qué día del plan le toca a cada uno y "marcar como hecho".
 - **Alumnos:** alta por DNI, ficha, asignación de plan.
-- **Plantillas y Ejercicios:** armado de planes (días A, B, C…) y catálogo de ejercicios.
+- **Plantillas y Ejercicios:** armado de planes (días A, B, C…), planes de referencia de PlanGym para copiar,
+  ejercicios por repeticiones o por tiempo y catálogo de ejercicios.
 - **Turnos:** calendario semana/mes (pasar lista, cancelar), horarios fijos por alumno, horarios y cupos de la semana,
-  días sin clase, tope de recuperaciones y servicios.
+  días sin clase, tope de recuperaciones y servicios (pestaña propia).
+- **Admin (GLOBAL_ADMIN):** entrenadores habilitados, suscripción a mano y alta en turnos.
 - En el celular: barra inferior Hoy · Alumnos · Turnos · Plantillas · Ejercicios.
 
 **Alumno** (solo DNI)
@@ -42,3 +44,4 @@ si responde 403, el front oculta todo lo de Turnos.
 ## Probar contra el backend
 
 Colección de Postman del backend (`elytra-platform/docs/postman`): carpeta 8 (turnos) y carpeta 13 (recuperar clases).
+Planes de referencia: necesitan el backend con la migración V24.
