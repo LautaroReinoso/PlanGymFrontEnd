@@ -70,6 +70,8 @@
 ```
 src/app/
 ├── core/
+│   ├── http/
+│   │   └── api-error.util.ts        → apiErrorText(err, fallback): `message` del backend
 │   ├── auth/
 │   │   ├── auth.service.ts          → login, logout, sesión, roles
 │   │   ├── auth.guards.ts           → authGuard, roleGuard, loginGuard
@@ -89,7 +91,10 @@ src/app/
 │   │   ├── skeleton/                    → gp-skeleton
 │   │   ├── modal/                       → gp-modal
 │   │   ├── muscle-icon/                 → gp-muscle-icon
-│   │   └── exercise-item/               → app-exercise-item (NUEVO — fila reutilizable)
+│   │   ├── exercise-item/               → app-exercise-item (NUEVO — fila reutilizable)
+│   │   └── toast/                       → gp-toast (montado en app.component)
+│   ├── services/
+│   │   └── toast.service.ts             → ToastService (success / error / info)
 │   └── utils/
 │       └── muscle-group.util.ts         → NUEVO — labels ES + opciones de select
 │
@@ -110,7 +115,8 @@ src/app/
 │   │   │   ├── student.service.ts
 │   │   │   ├── template.service.ts
 │   │   │   ├── exercise.service.ts       → COMPLETADO (CRUD full)
-│   │   │   └── assignment.service.ts
+│   │   │   ├── assignment.service.ts
+│   │   │   └── trainer-workout-log.service.ts → historial del alumno + "marcar hecho" como entrenador (Hoy)
 │   │   ├── pages/
 │   │   │   ├── students-page/
 │   │   │   ├── student-detail-page/
@@ -124,8 +130,9 @@ src/app/
 │   │   │       └── subscription-plans-page/  → tarjetas de planes
 │   │   └── components/
 │   │       ├── layout/
-│   │       │   ├── trainer-layout.component
-│   │       │   └── sidebar/
+│   │       │   ├── trainer-layout.component   → incluye <app-trainer-bottom-nav /> (solo celular)
+│   │       │   ├── sidebar/                   → Hoy · Alumnos · Turnos · Plantillas · Ejercicios (+ Suscripción)
+│   │       │   └── bottom-nav/                → app-trainer-bottom-nav (≤768px)
 │   │       ├── students/
 │   │       │   ├── student-card.component
 │   │       │   └── new-student-modal.component  → muestra errorMessage del backend (+ link a planes)
@@ -155,14 +162,17 @@ src/app/
 │       ├── components/
 │       │   ├── exercise-card/
 │       │   └── layout/
-│       │       ├── student-layout.component   → incluye <app-bottom-nav />
-│       │       └── bottom-nav/                → Inicio · Hoy · Semana · Mes · Perfil
+│       │       ├── student-layout.component   → incluye <app-bottom-nav /> y <app-cancel-notice />
+│       │       └── bottom-nav/                → con Turnos: Inicio · Hoy · Semana · Turnos
+│       │                                         sin Turnos: Inicio · Hoy · Semana · Mes · Perfil
 │       └── pages/
 │           ├── dashboard-page/
 │           ├── day-page/          → ejercicios + "Marcar como hecho" / "Me equivoqué, desmarcar"
 │           ├── weekly-page/
 │           ├── monthly-page/
 │           └── profile-page/      → datos + "Cerrar sesión"
+│
+└── booking/                          → TURNOS (ver sección "Turnos / calendario")
 ```
 
 ---
@@ -682,8 +692,15 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /student/weekly                 → WeeklyPageComponent
 /student/monthly                → MonthlyPageComponent
 /student/profile                → ProfilePageComponent
-/student/turnos                 → StudentAgendaPage (+ /elegir, /reservar) — studentBookingGuard
-/trainer/turnos                 → TrainerAgendaPage (+ /horarios-fijos, /disponibilidad) — trainerBookingGuard
+/student/turnos                 → StudentAgendaPage (calendario + horarios libres) — studentBookingGuard
+/student/turnos/horarios        → StudentSchedulePage (horarios día por día + Recuperar)
+/student/turnos/elegir          → StudentChoosePage (elegir horarios fijos, si el servicio lo permite)
+/student/turnos/reservar        → StudentBookPage (clase suelta)
+
+/trainer/hoy                    → TrainerTodayPage (quién viene hoy + plan del día) — trainerBookingGuard
+/trainer/turnos                 → TrainerAgendaPage (calendario) — trainerBookingGuard
+/trainer/turnos/horarios-fijos  → TrainerEnrollmentsPage
+/trainer/turnos/disponibilidad  → TrainerAvailabilityPage (franjas y cupos + días sin clase) — unsavedChangesGuard
 ```
 ⚠️ `templates/new` debe ir ANTES que `templates/:id` en el array de rutas.
 ⚠️ El guard de `/trainer` deja pasar ADMIN y GYM_ADMIN; las rutas de suscripción suman
@@ -847,9 +864,8 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
     del rango visible, tenues y punteados, "3 lugares"). Tocar una clase suya → avisar que no va / cancelar; tocar un
     horario libre → recuperar ahí (si le quedan y es del mes). Filtros "Horarios libres" y "Canceladas".
   - **Aviso de cancelación del profe:** `app-cancel-notice` (en el layout del alumno) muestra un popup con las clases
-    canceladas por el profe (`Booking.cancelledBy === 'PROFESSIONAL'`) y botón "Elegir horario". Se muestra una vez por
-    clase (ids vistos en localStorage). ⚠️ `cancelledBy` / `grantsRecovery` están **pendientes en el backend**
-    (prompt `PROMPT_BACKEND_CANCELA_PROFE.md`): hasta que lleguen, el popup no aparece.
+    futuras canceladas por el profe o el sitio (`Booking.cancelledBy === 'PROFESSIONAL'`) y botón "Elegir horario"
+    (si `grantsRecovery`). Se muestra una vez por clase (ids vistos en localStorage `pg.student.seenCancelNotices`).
   - Inicio: `app-next-class-card` — próxima clase ("Hoy · 20:00"), "y N más en 7 días", "Avisar que no voy"
     en horario fijo; sin clases → atajos a Elegir horarios / Reservar clase.
   - Semana: hora de la clase en la tira de días + tarjeta "Tus clases" de la semana mostrada.
@@ -868,6 +884,8 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   **Borrador:** todo se arma en pantalla y se guarda con "Guardar cambios" (barra con N cambios + Descartar). El PUT
   reemplaza todas las franjas, por eso **no se deja guardar si la carga inicial falló** (`rulesLoaded`), y hay aviso al
   salir con cambios (`unsavedChangesGuard` + `beforeunload`). Las nuevas se ven "sin guardar".
+  Cambiar la hora de una franja **no** mueve a los alumnos fijos (quedan en la hora vieja); el editor lo avisa y el
+  backend rechaza con 409 si un cambio deja horarios fijos vigentes fuera de las franjas.
 - ⚠️ **Bug corregido (nov-2026):** `GET/PUT /professional/availability` devuelven `RuleResponse[]` (array), no
   `{ rules }`. El front leía `res.rules` → veía la semana vacía y al guardar **borraba las franjas existentes**.
 - **Entrenador en el celular:** barra inferior `app-trainer-bottom-nav` (≤768px): Hoy · Alumnos · Turnos · Plantillas ·
@@ -884,14 +902,22 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 ### Recuperar clases (backend V21, carpeta 13 de Postman)
 - Avisar a tiempo que no va → gana 1 clase para recuperar **en el mismo mes**, en cualquier horario con lugar
   de su entrenador (cualquier servicio). Avisar tarde o faltar no da recuperación. Lo no usado vence a fin de mes.
+- **El profe (o el sitio) cancela** una clase de horario fijo futura (cancelar turno, o bloqueo con `confirm=true`) →
+  el alumno gana 1 clase para recuperar **sin tope** (no cuenta para `recoveriesPerMonth`), mismo mes. El backend usa
+  primero estos créditos. Clases sueltas o recuperaciones ya tomadas no generan otra (al cancelar una recuperación
+  vuelve el crédito con el que se tomó). Backend V22; cancelaciones viejas (antes de V22) no dan recuperación.
 - Tope **por entrenador**: `GET/PUT /professional/me { displayName, recoveriesPerMonth }` (0 = no). El PUT exige
   `displayName`, por eso se manda el actual. Se edita en "Horarios fijos → Recuperar clases".
 - `GET /schedule?from=&to=` (máx. **42** días; `schedule()` parte en tramos) → `ScheduleSlot[]` con `capacity/booked/free/myBookingId`.
-- `GET /recoveries/mine?month=` → `RecoverySummary { month, limit, absences, used, available, expiresAt, items }`.
+- `GET /recoveries/mine?month=` → `RecoverySummary { month, limit, absences, professionalCancels, used, available,
+  expiresAt, items: [{ absenceBookingId, source: ABSENCE | PROFESSIONAL_CANCEL, cancelReason, serviceId, serviceName,
+  professionalId, professionalName, startAt, recoveredByBookingId, recoveredAt }] }`. `limit` es solo el tope de ausencias.
 - `POST /recoveries/mine { serviceId, professionalId, startAt }` → `Booking` con `recoveryOfBookingId`. 409 sin lugar · 400 sin
   recuperaciones / otro mes. La recuperación es clase suelta: se cancela con preview + cancel y vuelve a estar disponible.
-- UI alumno: `/student/turnos/horarios` (tira de 21 días, franjas con Tu clase / Completo / Recuperar · N libres / otro mes),
-  banner en Mis turnos y línea en la tarjeta de próxima clase del Inicio. Entrenador: "recupera" en el detalle de la clase.
+- UI alumno: en **Mis turnos** se toca un horario libre del calendario (semana o mes) → "Recuperar acá";
+  `/student/turnos/horarios` (tira de 21 días con Tu clase / Completo / Recuperar · N libres / otro mes);
+  banner en Mis turnos, línea en la tarjeta de próxima clase del Inicio y popup cuando el profe cancela.
+  Entrenador: "recupera" en el detalle de la clase y en Hoy.
 
 ### Formas verificadas contra el backend (`elytra-platform`, rama `feature/booking`)
 - Servicio = `ServiceAdminResponse` (trae además precio, modalidad, avisos mínimos, abonos…; el front ignora lo que no usa).
@@ -901,6 +927,13 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   `BookingStudentService.slots()` lo aplana a `FreeSlot` (una opción por horario + profesional con lugar).
 - `POST /bookings { serviceId, professionalId, startAt, acceptPolicy: true }`.
 - `CancellationPreview { canCancel, canReschedule, reschedulesLeft, losesPayment, message }` — si `!canCancel` se deshabilita cancelar.
+- `Booking` / `AgendaItem`: `cancelledBy: "STUDENT" | "PROFESSIONAL" | "SYSTEM" | null` (en la base: CLIENT/PROFESSIONAL/
+  ADMIN/SYSTEM; ADMIN se informa como PROFESSIONAL), `grantsRecovery: boolean`, `recoveryOfBookingId`.
+- `GET/PUT /professional/availability` → `RuleResponse[]` (array). El PUT recibe `{ rules: [...] }` y da **409 si deja
+  afuera horarios fijos vigentes** (el mensaje se muestra abajo de la semana).
+- `GET /v1/users/students/{id}` (entrenador) → `StudentDetail` con `activeTemplate` completo (días + ejercicios).
+- `GET /workout-logs/student/{id}` y `POST /workout-logs { studentId, workoutDayId, completedAt, completed }` como
+  entrenador (valida que el alumno sea suyo y que el día sea de su plan activo; 400 si ya está registrado ese día).
 - Respuestas 400/409 en ausencia/cancelación se toman como "fuera de término" → se muestra `message` y se deshabilita el botón.
 
 ---
@@ -963,12 +996,22 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] Turnos en la vista del alumno: pestaña (Perfil al header), próxima clase en Inicio, clases en Semana y Día
 - [x] Entrenador mobile: barra inferior + pantalla Hoy (alumnos del día, plan, marcar hecho)
 - [ ] Backend (opcional): "día que le toca" calculado en el backend para el entrenador (hoy lo calcula el front) y desmarcar desde el entrenador
-- [ ] Detalles: contador en la pestaña
-- [ ] Backend: la cancelación del profe da recuperación (sin tope, mismo mes) + `cancelledBy`/`grantsRecovery` en Booking
-- [ ] Cambiar la hora de una franja deja a los alumnos fijos en la hora vieja (el editor lo avisa); decidir si se mueven solos
+- [ ] Detalles: contador de clases en la pestaña Turnos del alumno
+- [x] La cancelación del profe da recuperación (sin tope, mismo mes) + `cancelledBy`/`grantsRecovery` (backend V22) + popup
+- [x] Recuperar tocando un horario libre del calendario (semana y mes)
+- [ ] Cambiar la hora de una franja deja a los alumnos fijos en la hora vieja (el editor avisa, el backend da 409);
+      decidir si se mueven solos
+- [ ] Probado contra el backend real: entrenador (horarios y cupos, horarios fijos, calendario, Hoy) y recuperación
+      por cancelación del profe ✔ — falta: límites de recuperación, bloqueos con alumnos, celular en general
 - [x] Formas verificadas contra el backend (servicio, bloqueos, slots, preview de cancelación)
 - [x] Recuperar clases: horarios día por día, recuperar, tope del entrenador, "recupera" en su agenda
 - [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)
+
+### Cerrar Turnos (cuando termine la prueba)
+- [ ] PR `feature/turnos-calendario` → `master` (front) y `feature/booking` → `main` (backend `elytra-platform`)
+- [ ] Deploy: backend a Railway (Flyway corre V21 y V22) y `ng build` del front a HostGator
+- [ ] Producción: habilitar el módulo BOOKING para `plangym` y dar de alta como profesionales a los entrenadores que
+      ya tenían TRAINER (los nuevos se dan de alta solos al recibir el rol)
 
 ### Backend pendiente
 - [ ] `exerciseCount` y `assignedStudents` en `WorkoutTemplateSummary`
