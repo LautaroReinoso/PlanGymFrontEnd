@@ -1,0 +1,89 @@
+<div class="today">
+  <header class="today__head">
+    <span class="today__eyebrow">Hoy</span>
+    <h1 class="today__title">{{ title }}</h1>
+    @if (!isLoading() && totalPeople()) {
+      <p class="today__sub">{{ totalPeople() }} {{ totalPeople() === 1 ? 'alumno' : 'alumnos' }} · {{ doneCount() }} ya entrenaron</p>
+    }
+  </header>
+
+  @if (error()) {
+    <p class="bk-error">{{ error() }}</p>
+    <gp-button size="sm" variant="secondary" (click)="load()">Reintentar</gp-button>
+  } @else if (isLoading()) {
+    <app-page-loader message="Cargando el día…" />
+  } @else {
+    @for (c of classes(); track c.key) {
+      <section class="cls" [class.cls--past]="c.past">
+        <div class="cls__head">
+          <span class="cls__time">{{ c.time }}</span>
+          <span class="cls__name">{{ c.service }}</span>
+          <span class="cls__count">{{ c.people.length }}</span>
+        </div>
+        <ul class="cls__list">
+          @for (p of c.people; track p.id) {
+            @let st = stateOf(p.client.userId);
+            <li>
+              <button type="button" class="person" (click)="open(p)">
+                <span class="person__avatar">{{ initials(p) }}</span>
+                <span class="person__body">
+                  <span class="person__name">{{ nameOf(p) }}</span>
+                  <span class="person__state person__state--{{ st.kind }}">
+                    @if (st.kind === 'doneToday') { ✓ }{{ st.label }}
+                    @if (p.status === 'NO_SHOW') { · faltó }
+                    @if (p.recoveryOfBookingId) { · recupera }
+                  </span>
+                </span>
+                <svg class="person__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    } @empty {
+      <div class="empty">
+        <p>Hoy no tenés clases.</p>
+        <a class="bk-tab" routerLink="/trainer/turnos">Ver calendario</a>
+      </div>
+    }
+  }
+</div>
+
+<gp-modal [isOpen]="openUserId() !== null" [title]="openItem() ? nameOf(openItem()!) : ''" size="lg" (closed)="close()">
+  @if (openStudent(); as s) {
+    <div class="plan">
+      @if (s.loading) {
+        <app-page-loader [size]="40" [compact]="true" message="Cargando plan…" />
+      } @else if (!s.detail?.activeTemplate) {
+        <p class="bk-note">Este alumno no tiene un plan asignado.</p>
+        <a class="bk-tab" [routerLink]="['/trainer/students', openUserId()]" (click)="close()">Ir al alumno</a>
+      } @else {
+        <p class="bk-muted">{{ s.detail!.activeTemplate!.name }}</p>
+        <div class="plan__days" role="tablist">
+          @for (d of openDays(); track d.workoutDayId) {
+            <button type="button" role="tab" class="plan__day" [class.on]="d.workoutDayId === openDayId()"
+                    (click)="openDayId.set(d.workoutDayId)">{{ d.name }}</button>
+          }
+        </div>
+        @if (openDay(); as d) {
+          <ul class="plan__list">
+            @for (ex of d.exercises; track ex.id; let i = $index) {
+              <li>
+                <app-exercise-item [name]="ex.exerciseName" [muscleGroup]="ex.primaryMuscle"
+                                   [detail]="summary(ex)" [index]="i + 1" />
+              </li>
+            } @empty {
+              <li class="bk-muted">Este día no tiene ejercicios.</li>
+            }
+          </ul>
+          @if (openDayDoneToday()) {
+            <p class="plan__done">✓ {{ d.name }} hecho hoy</p>
+          } @else {
+            <gp-button [fullWidth]="true" [loading]="isMarking()" (click)="markDone()">Marcar {{ d.name }} como hecho</gp-button>
+          }
+        }
+        <a class="plan__link" [routerLink]="['/trainer/students', openUserId()]" (click)="close()">Ver ficha del alumno ›</a>
+      }
+    </div>
+  }
+</gp-modal>

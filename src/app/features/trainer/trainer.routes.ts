@@ -106,6 +106,14 @@ export const TRAINER_ROUTES: Routes = [
           ),
         title: 'Planes — PlanGym',
       },
+      // ── Hoy: quién viene hoy y su plan del día (requiere Turnos) ──
+      {
+        path: 'hoy',
+        canActivate: [trainerBookingGuard],
+        loadComponent: () =>
+          import('../booking/pages/trainer-today/trainer-today-page.component').then(m => m.TrainerTodayPageComponent),
+        title: 'Hoy — PlanGym',
+      },
       // ── Turnos (módulo de booking; 403 = apagado) ──
       {
         path: 'turnos',

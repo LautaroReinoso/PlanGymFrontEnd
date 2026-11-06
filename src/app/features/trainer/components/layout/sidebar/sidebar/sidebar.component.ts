@@ -42,6 +42,11 @@ export class SidebarComponent {
 
   private readonly allNavItems: NavItem[] = [
     {
+      label: 'Hoy',
+      route: '/trainer/hoy',
+      icon: 'M12 8v4l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z',
+    },
+    {
       label: 'Alumnos',
       route: '/trainer/students',
       icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
@@ -78,7 +83,7 @@ export class SidebarComponent {
   // "Suscripción" solo aparece con billingEnabled; "Turnos" si el módulo responde
   readonly navItems = computed<NavItem[]>(() => this.allNavItems.filter(item =>
     (this.billingEnabled || item.route !== '/trainer/suscripcion') &&
-    (this.bookingEnabled() || item.route !== '/trainer/turnos'),
+    (this.bookingEnabled() || (item.route !== '/trainer/turnos' && item.route !== '/trainer/hoy')),
   ));
 
   readonly userMail = this.auth.currentMail;

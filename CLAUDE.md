@@ -811,6 +811,7 @@ features/booking/
 │   ├── calendar/                     → app-booking-calendar (grilla propia Semana/Mes, sin librería)
 │   └── enroll-modal/                 → app-enroll-student-modal (elegir alumno de la lista + franjas → batch con userId)
 └── pages/
+    ├── trainer-today/                → /trainer/hoy — quién viene hoy (por clase) + plan del día del alumno + marcar hecho
     ├── trainer-agenda/               → /trainer/turnos — agrupa por startAt+serviceId, pasar lista, cancelar con motivo
     ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — grilla por alumno (chips Lun 07:00…), acciones por horario, recuperaciones, Mis servicios
     ├── trainer-availability/         → /trainer/turnos/disponibilidad — semana lun–dom con franjas y cupos juntos (borrador + Guardar cambios), bloqueos
@@ -869,6 +870,15 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   salir con cambios (`unsavedChangesGuard` + `beforeunload`). Las nuevas se ven "sin guardar".
 - ⚠️ **Bug corregido (nov-2026):** `GET/PUT /professional/availability` devuelven `RuleResponse[]` (array), no
   `{ rules }`. El front leía `res.rules` → veía la semana vacía y al guardar **borraba las franjas existentes**.
+- **Entrenador en el celular:** barra inferior `app-trainer-bottom-nav` (≤768px): Hoy · Alumnos · Turnos · Plantillas ·
+  Ejercicios (Hoy y Turnos solo con el módulo prendido). El ☰ sigue para Perfil, Suscripción y Cerrar sesión. En
+  pantallas angostas las pestañas de Turnos (`.bk-tabs`) van en una fila que se desliza.
+- **Hoy (`/trainer/hoy`):** `GET /professional/agenda` de hoy (sin canceladas), agrupado por clase. Por cada alumno:
+  `GET /v1/users/students/{id}` (plan con días y ejercicios) + `GET /workout-logs/student/{id}`. "Le toca" se calcula en
+  el front con el mismo criterio que el "Hoy" del alumno: el día que ya marcó hoy, o el primer día pendiente de la
+  semana (lun–dom); si hizo todos, "Semana completa". Al tocar: plan del día (chips para ver otro día) y
+  "Marcar como hecho" → `POST /workout-logs { studentId, workoutDayId, completedAt: hoy, completed: true }`
+  (`TrainerWorkoutLogService`). No hay desmarcar del lado del entrenador (lo puede desmarcar el alumno).
 - **Admin (GYM_ADMIN):** no implementado; no existe panel de GYM_ADMIN en este front.
 
 ### Recuperar clases (backend V21, carpeta 13 de Postman)
@@ -951,6 +961,8 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] Elegir horarios del alumno + clase suelta
 - [x] Disponibilidad, bloqueos y resumen de cupos
 - [x] Turnos en la vista del alumno: pestaña (Perfil al header), próxima clase en Inicio, clases en Semana y Día
+- [x] Entrenador mobile: barra inferior + pantalla Hoy (alumnos del día, plan, marcar hecho)
+- [ ] Backend (opcional): "día que le toca" calculado en el backend para el entrenador (hoy lo calcula el front) y desmarcar desde el entrenador
 - [ ] Detalles: contador en la pestaña
 - [ ] Backend: la cancelación del profe da recuperación (sin tope, mismo mes) + `cancelledBy`/`grantsRecovery` en Booking
 - [ ] Cambiar la hora de una franja deja a los alumnos fijos en la hora vieja (el editor lo avisa); decidir si se mueven solos
