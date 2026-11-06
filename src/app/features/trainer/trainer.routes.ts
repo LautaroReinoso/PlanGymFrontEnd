@@ -72,6 +72,14 @@ export const TRAINER_ROUTES: Routes = [
         title: 'Plantillas — PlanGym',
       },
       {
+        path: 'templates/referencia',
+        loadComponent: () =>
+          import('./pages/reference-templates-page/reference-templates-page.component').then(
+            m => m.ReferenceTemplatesPageComponent
+          ),
+        title: 'Planes de referencia — PlanGym',
+      },
+      {
         path: 'templates/new',
         loadComponent: () =>
           import('./pages/template-create-page/template-create-page.component').then(

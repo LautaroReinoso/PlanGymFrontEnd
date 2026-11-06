@@ -191,6 +191,17 @@ export interface WorkoutTemplateSummary {
   assignedStudents?: number;   // pendiente de backend
 }
 
+/** Plan de referencia de PlanGym (GET /workout-templates/reference): se copia, no se edita. */
+export interface ReferenceTemplate {
+  id: number;
+  name: string;
+  description?: string | null;
+  level?: string | null;          // ej. BASIC / INTERMEDIATE
+  daysPerWeek?: number | null;
+  exerciseCount?: number | null;
+  referenceTemplate?: boolean;
+}
+
 
 export interface CreateTemplateRequest {
   name: string;
@@ -255,6 +266,8 @@ export interface DayExercise {
   repsMax?: number | null;            // tope del rango (opcional)
   weightSuggestion?: number | null;   // kg
   restSeconds: number | null;
+  /** Ejercicio por tiempo: segundos por serie (viene con reps = 0) */
+  durationSeconds?: number | null;
   notes?: string;
   orderIndex: number;
 }
@@ -267,6 +280,7 @@ export interface AddExerciseToDayRequest {
   reps?: number;
   repsMax?: number;
   restSeconds?: number;
+  durationSeconds?: number;
   weightSuggestion?: number;
   orderIndex?: number;
   notes?: string;

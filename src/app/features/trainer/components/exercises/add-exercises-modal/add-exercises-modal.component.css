@@ -239,3 +239,8 @@
   .exercise-skeleton { animation: none; background: #1C1C26; }
 }
 .params-hint { font-weight: 400; color: var(--color-muted); }
+
+.param-field--wide { grid-column: 1 / -1; }
+.mode-toggle { display: inline-flex; border: 1px solid var(--color-border); border-radius: 10px; overflow: hidden; }
+.mode-toggle button { background: transparent; border: 0; color: var(--color-muted-light); padding: 8px 14px; font: 500 13px var(--font-body, inherit); cursor: pointer; }
+.mode-toggle button.on { background: var(--color-accent); color: #fff; }

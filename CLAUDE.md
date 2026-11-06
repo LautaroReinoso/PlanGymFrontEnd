@@ -677,6 +677,7 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /trainer/students               → StudentsPageComponent
 /trainer/students/:id           → StudentDetailPageComponent
 /trainer/templates              → TemplatesListPageComponent
+/trainer/templates/referencia   → ReferenceTemplatesPageComponent (planes de PlanGym → "Usar este plan" copia)
 /trainer/templates/new          → TemplateCreatePageComponent
 /trainer/templates/:id          → TemplateDetailPageComponent
 /trainer/exercises              → ExercisesPageComponent (COMPLETADO)
@@ -703,7 +704,7 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /trainer/turnos/disponibilidad  → TrainerAvailabilityPage (franjas y cupos + días sin clase) — unsavedChangesGuard
 /trainer/turnos/servicios       → TrainerServicesPage (Mis servicios: activos + eliminados con Reactivar)
 ```
-⚠️ `templates/new` debe ir ANTES que `templates/:id` en el array de rutas.
+⚠️ `templates/referencia` y `templates/new` deben ir ANTES que `templates/:id` en el array de rutas.
 ⚠️ El guard de `/trainer` deja pasar ADMIN y GYM_ADMIN; las rutas de suscripción suman
 `roleGuard('ROLE_TRAINER')` porque el billing es solo del entrenador.
 
@@ -788,6 +789,15 @@ Ahora: `[errorMessage]`, `[isSaving]` y `[showPlansLink]` al modal, el botón us
 el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite del plan).
 
 ---
+
+## Planes de referencia y ejercicios por tiempo (nov-2026, backend V24)
+- `GET /workout-templates/reference` → `ReferenceTemplate[]` (name, description, level, daysPerWeek, exerciseCount);
+  `GET /workout-templates/reference/:id` → `WorkoutTemplate` con días; `POST /workout-templates/reference/:id/copy` → la copia
+  (201). Los originales no se editan ni se asignan. Página `/trainer/templates/referencia` (botón "Planes de referencia" en
+  Plantillas): ver días (solo lectura, `app-template-day [readonly]`) y "Usar este plan" → copia y abre la plantilla nueva.
+- `DayExercise.durationSeconds` (y en `AddExerciseToDayRequest`): ejercicio por tiempo, viene con `reps = 0`.
+  `dayExerciseSummary` muestra "3 × 20 seg" y suma `notes` cortas ("Por pierna"); `setsRepsLabel` / `durationLabel` en
+  `exercise-meta.util.ts`. El modal "Agregar ejercicio" tiene el selector Repeticiones / Por tiempo.
 
 ## Suscripciones del entrenador (nov-2026)
 Quien paga es el TRAINER: suscripción mensual a la plataforma con Mercado Pago (preapproval).

@@ -112,3 +112,4 @@
   .templates-grid { grid-template-columns: 1fr; }
   .page-header { flex-direction: column; }
 }
+.header-actions { display: flex; gap: 10px; flex-wrap: wrap; }

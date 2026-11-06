@@ -245,6 +245,7 @@ export class TemplateDetailPageComponent implements OnInit {
       reps: selection.reps,
       repsMax: selection.repsMax,
       restSeconds: selection.restSeconds,
+      durationSeconds: selection.durationSeconds,
       weightSuggestion: selection.weight,
       orderIndex: order,
       notes: selection.notes

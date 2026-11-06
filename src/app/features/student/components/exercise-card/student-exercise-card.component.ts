@@ -15,7 +15,7 @@ import { CommonModule } from '@angular/common';
 
 import { DayExercise } from '../../../trainer/models/trainer.models';
 import { muscleGroupLabel } from '../../../trainer/models/muscle-group.util';
-import { repsRangeLabel, restLabel } from '../../../trainer/models/exercise-meta.util';
+import { repsRangeLabel, restLabel, setsRepsLabel } from '../../../trainer/models/exercise-meta.util';
 import { MuscleIconComponent } from '../../../../shared/components/muscle-icon/muscle-icon.component';
 
 @Component({
@@ -35,6 +35,8 @@ export class StudentExerciseCardComponent {
   readonly toggleDone = output<void>();
 
   readonly expanded = signal(false);
+
+  setsReps(): string { return setsRepsLabel(this.exercise()); }
 
   repsLabel(): string {
     const ex = this.exercise();

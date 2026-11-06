@@ -81,6 +81,8 @@ export class TemplatesListPageComponent implements OnInit {
     this.router.navigate(['/trainer/templates', id]);
   }
 
+  goToReferences(): void { this.router.navigate(['/trainer/templates/referencia']); }
+
   goToCreate(): void {
     this.router.navigate(['/trainer/templates/new']);
   }
