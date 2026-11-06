@@ -228,13 +228,16 @@ export interface ScheduleSlot {
 /** GET /recoveries/mine */
 export interface RecoverySummary {
   month: string;          // "YYYY-MM"
-  limit: number;          // tope del entrenador (0 = sin recuperación)
+  limit: number;          // tope de las AUSENCIAS (0 = sin recuperación por ausencia)
   absences: number;       // ausencias avisadas a tiempo en el mes
+  professionalCancels?: number; // clases de horario fijo que canceló el profe/sitio (sin tope)
   used: number;
   available: number;
   expiresAt: string;      // instante en que vencen (inicio del mes siguiente)
   items: {
     absenceBookingId: number;
+    source?: 'ABSENCE' | 'PROFESSIONAL_CANCEL';
+    cancelReason?: string | null;
     serviceId: number;
     serviceName: string;
     professionalId: number;

@@ -9,14 +9,14 @@
 
   <!-- Recuperaciones -->
   @if (summary(); as s) {
-    @if (!recoveryEnabled()) {
+    @if (!recoveryEnabled() && available() === 0) {
       <p class="bk-note">Tu entrenador no tiene habilitado recuperar clases.</p>
     } @else if (available() > 0) {
       <section class="rec rec--on">
         <strong>Te {{ available() === 1 ? 'queda 1 clase' : 'quedan ' + available() + ' clases' }} para recuperar</strong>
         <span>Usalas hasta el {{ deadline() }}. Tocá un horario con lugar de este mes.</span>
         @for (i of pendingItems(); track i.absenceBookingId) {
-          <span class="rec__item">Por la de {{ missedLabel(i.startAt, i.serviceName) }}</span>
+          <span class="rec__item">{{ i.source === 'PROFESSIONAL_CANCEL' ? 'Cancelada por tu profe:' : 'Avisaste que no ibas:' }} {{ missedLabel(i.startAt, i.serviceName) }}</span>
         }
       </section>
     } @else {

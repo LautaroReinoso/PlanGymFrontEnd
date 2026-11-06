@@ -240,7 +240,7 @@ export class StudentAgendaPageComponent {
   readonly freeSlotState = computed<'ok' | 'none' | 'disabled' | 'otherMonth'>(() => {
     const s = this.freeSlot(), r = this.recovery();
     if (!s || !r) return 'none';
-    if (r.limit <= 0 && r.available <= 0) return 'disabled';
+    if (r.limit <= 0 && r.available <= 0 && !(r.professionalCancels ?? 0)) return 'disabled';
     if (!s.startAt.startsWith(r.month)) return 'otherMonth';
     return r.available > 0 ? 'ok' : 'none';
   });
