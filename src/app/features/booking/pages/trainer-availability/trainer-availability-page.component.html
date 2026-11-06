@@ -21,53 +21,41 @@
   @if (tab() === 'rules') {
     <section class="bk-card">
       <div class="bk-row bk-row--between">
-        <h2>Franjas semanales</h2>
-        <gp-button size="sm" variant="secondary" (click)="addRule()">+ Agregar franja</gp-button>
-      </div>
-      @if (isLoadingRules()) {
-        <app-page-loader [size]="40" [compact]="true" message="Cargando franjas…" />
-      } @else {
-        <ul class="bk-list">
-          @for (row of sortedRules(); track row.i) {
-            <li class="bk-item">
-              <div class="bk-rule">
-                <label class="bk-field">
-                  Día
-                  <select [ngModel]="row.r.dayOfWeek" (ngModelChange)="updateDay(row.i, $event)">
-                    @for (d of dayOptions; track d.value) { <option [ngValue]="d.value">{{ d.label }}</option> }
-                  </select>
-                </label>
-                <label class="bk-field">
-                  Desde
-                  <input type="time" [ngModel]="row.r.startTime" (ngModelChange)="updateRule(row.i, { startTime: $event })" />
-                </label>
-                <label class="bk-field">
-                  Hasta
-                  <input type="time" [ngModel]="row.r.endTime" (ngModelChange)="updateRule(row.i, { endTime: $event })" />
-                </label>
-                <label class="bk-field">
-                  Cupo
-                  <input type="number" min="1" [ngModel]="row.r.capacity" (ngModelChange)="updateRule(row.i, { capacity: +$event })" />
-                </label>
-              </div>
-              <div class="bk-item__actions">
-                <gp-button variant="ghost" size="sm" (click)="duplicateRule(row.i)">Copiar al día siguiente</gp-button>
-                <gp-button variant="ghost" size="sm" (click)="removeRule(row.i)">Quitar</gp-button>
-              </div>
-            </li>
-          } @empty {
-            <li class="bk-muted">No tenés franjas. Agregá la primera (ej.: lunes 18:00 a 19:00, cupo 10).</li>
+        <h2>Tu semana</h2>
+        <span class="save-state">
+          @switch (saveState()) {
+            @case ('saving') { Guardando… }
+            @case ('saved') { ✓ Guardado }
           }
-        </ul>
-      }
-      @if (!rulesValid()) { <p class="bk-error">Revisá las franjas: el fin tiene que ser después del inicio y el cupo al menos 1.</p> }
-      @if (rulesError()) { <p class="bk-error">{{ rulesError() }}</p> }
-      <div class="bk-row">
-        <gp-button [disabled]="!dirty() || !rulesValid() || isSaving()" (click)="confirmSave.set(true)">Guardar franjas</gp-button>
-        @if (dirty()) {
-          <gp-button variant="ghost" [disabled]="isSaving()" (click)="loadRules()">Descartar cambios</gp-button>
-        }
+        </span>
       </div>
+      <p class="bk-muted">Tocá "+ Agregar" en un día para cargar un horario, o tocá uno para editarlo. Los cambios se guardan solos.</p>
+
+      @if (isLoadingRules()) {
+        <app-page-loader [size]="40" [compact]="true" message="Cargando horarios…" />
+      } @else {
+        <div class="week">
+          @for (col of rulesByDay(); track col.day) {
+            <div class="week__day">
+              <span class="week__name">{{ dayLabels[col.day] }}</span>
+              <div class="week__items">
+                @for (x of col.items; track x.i) {
+                  <div class="slot">
+                    <button type="button" class="slot__main" [disabled]="isSaving()" (click)="openEdit(x.i)" title="Editar">
+                      <span class="slot__time">{{ x.r.startTime }}–{{ x.r.endTime }}</span>
+                      <span class="slot__cap">cupo {{ x.r.capacity }}@if (enrolledIn(x.r)) { · {{ enrolledIn(x.r) }} fijos }</span>
+                    </button>
+                    <button type="button" class="slot__x" [disabled]="isSaving()" (click)="askRemove(x.i)"
+                            [attr.aria-label]="'Eliminar ' + dayLabels[col.day] + ' ' + x.r.startTime">✕</button>
+                  </div>
+                }
+                <button type="button" class="week__add" [disabled]="isSaving()" (click)="openAdd(col.day)">+ Agregar</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      @if (rulesError()) { <p class="bk-error">{{ rulesError() }}</p> }
     </section>
   }
 
@@ -154,14 +142,77 @@
   </div>
 </gp-modal>
 
-<gp-modal [isOpen]="confirmSave()" title="Guardar franjas" size="sm" (closed)="confirmSave.set(false)">
-  <div class="bk-page" style="padding-bottom:0">
-    <p class="bk-note">Esto reemplaza todas tus franjas por las que ves en pantalla. Las que quitaste dejan de existir.</p>
-    <div class="bk-row">
-      <gp-button [loading]="isSaving()" (click)="saveRules()">Sí, guardar</gp-button>
-      <gp-button variant="ghost" [disabled]="isSaving()" (click)="confirmSave.set(false)">Volver</gp-button>
+<!-- Agregar / editar horario -->
+<gp-modal [isOpen]="!!editor()" [title]="editor()?.mode === 'edit' ? 'Editar horario' : 'Agregar horario'" size="sm"
+          (closed)="editor.set(null)">
+  @if (editor(); as e) {
+    <div class="bk-page ed" style="padding-bottom:0">
+      @if (e.mode === 'edit') { <p class="bk-muted">{{ dayLabels[e.days[0]] }}</p> }
+      <div class="bk-grid2">
+        <label class="bk-field">
+          Desde
+          <input type="time" [ngModel]="e.start" (ngModelChange)="patchEditor({ start: $event })" />
+        </label>
+        <label class="bk-field">
+          Cupo
+          <input type="number" min="1" max="200" [ngModel]="e.capacity" (ngModelChange)="patchEditor({ capacity: +$event })" />
+        </label>
+      </div>
+
+      <div class="ed__group">
+        <span class="ed__label">Duración</span>
+        <div class="pills">
+          @for (d of durations; track d) {
+            <button type="button" class="pill" [class.on]="!e.customDuration && e.duration === d"
+                    (click)="patchEditor({ duration: d, customDuration: false })">{{ d }} min</button>
+          }
+          <button type="button" class="pill" [class.on]="e.customDuration" (click)="patchEditor({ customDuration: true })">Otra</button>
+          @if (e.customDuration) {
+            <input class="pill-input" type="number" min="10" step="5" [ngModel]="e.duration"
+                   (ngModelChange)="patchEditor({ duration: +$event })" aria-label="Minutos" />
+            <span class="bk-muted">min</span>
+          }
+        </div>
+        <span class="bk-muted">Termina a las {{ editorEnd() }}</span>
+      </div>
+
+      @if (e.mode === 'add') {
+        <div class="ed__group">
+          <span class="ed__label">Repetir en</span>
+          <div class="pills">
+            @for (d of days; track d) {
+              <button type="button" class="pill pill--day" [class.on]="e.days.includes(d)" (click)="toggleDay(d)">{{ dayShort[d] }}</button>
+            }
+          </div>
+          <div class="pills">
+            <button type="button" class="link" (click)="setDays('weekdays')">Lunes a viernes</button>
+            <button type="button" class="link" (click)="setDays('all')">Todos los días</button>
+          </div>
+        </div>
+      }
+
+      <div class="bk-row">
+        <gp-button [loading]="isSaving()" [disabled]="!editorValid()" (click)="saveEditor()">
+          {{ e.mode === 'edit' ? 'Guardar' : (e.days.length > 1 ? 'Agregar en ' + e.days.length + ' días' : 'Agregar') }}
+        </gp-button>
+        <gp-button variant="ghost" [disabled]="isSaving()" (click)="editor.set(null)">Cancelar</gp-button>
+      </div>
     </div>
-  </div>
+  }
+</gp-modal>
+
+<!-- Borrar horario con alumnos -->
+<gp-modal [isOpen]="!!deleteTarget()" title="Eliminar horario" size="sm" (closed)="deleteTarget.set(null)">
+  @if (deleteTarget(); as d) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p><strong>{{ dayLabels[d.rule.dayOfWeek] }} {{ d.rule.startTime }}–{{ d.rule.endTime }}</strong></p>
+      <p class="bk-note">Tiene {{ d.enrolled }} {{ d.enrolled === 1 ? 'alumno' : 'alumnos' }} con horario fijo. Si lo eliminás, ya no vas a ofrecer ese horario.</p>
+      <div class="bk-row">
+        <gp-button variant="danger" [loading]="isSaving()" (click)="remove(d.index)">Eliminar igual</gp-button>
+        <gp-button variant="ghost" [disabled]="isSaving()" (click)="deleteTarget.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
 </gp-modal>
 
 <gp-modal [isOpen]="!!openSlot()" [title]="openSlot() ? dayLabels[openSlot()!.dayOfWeek] + ' ' + hhmm(openSlot()!.startTime) : ''"
