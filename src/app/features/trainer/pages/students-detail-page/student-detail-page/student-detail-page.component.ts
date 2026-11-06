@@ -95,19 +95,19 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
       if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
       return parts[0].slice(0, 2).toUpperCase();
     }
-    return s.dni.toString().slice(0, 2);
+    return s.dni ? String(s.dni).slice(0, 2) : '?';
   });
 
   readonly displayName = computed(() => {
     const s = this.student();
     if (!s) return '';
-    return s.fullName ?? `DNI ${this.dniFormatted()}`;
+    return s.fullName?.trim() || (s.dni ? `DNI ${this.dniFormatted()}` : 'Sin nombre ni DNI');
   });
 
   readonly dniFormatted = computed(() => {
     const s = this.student();
     if (!s) return '';
-    return s.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return s.dni ? String(s.dni).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
   });
 
   readonly adherenceColor = computed(() => {

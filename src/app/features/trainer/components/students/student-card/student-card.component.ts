@@ -46,8 +46,8 @@ export class StudentCardComponent {
       }
       return parts[0].slice(0, 2).toUpperCase();
     }
-    // Sin nombre: primeros 2 dígitos del DNI
-    return s.dni.toString().slice(0, 2);
+    // Sin nombre: primeros 2 dígitos del DNI (o "?" si tampoco hay DNI)
+    return s.dni ? String(s.dni).slice(0, 2) : '?';
   });
 
 
@@ -55,14 +55,16 @@ export class StudentCardComponent {
 
   // DNI formateado: 35456123 → 35.456.123
   readonly dniFormatted = computed(() => {
-    const dni = this.student().dni.toString();
-    return dni.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const dni = this.student().dni;
+    if (!dni) return '';
+    return String(dni).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   });
 
   // Nombre para mostrar
   readonly displayName = computed(() => {
     const s = this.student();
-    return s.fullName ?? `DNI ${this.dniFormatted()}`;
+    if (s.fullName?.trim()) return s.fullName;
+    return s.dni ? `DNI ${this.dniFormatted()}` : 'Sin nombre ni DNI';
   });
 
   // Días por semana — texto

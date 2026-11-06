@@ -36,7 +36,7 @@ export interface ChangePasswordRequest {
 export interface StudentSummary {
  id: number;
   fullName: string | null;        // sin ?, el campo siempre viene (puede ser null)
-  dni: string;                    // string no number, el DNI puede tener ceros a la izquierda
+  dni: string | null;             // string no number (ceros a la izquierda); null si se registró con mail
   active: boolean;                // faltaba este campo
   activeWorkout: {
     startDate: string;
