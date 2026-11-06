@@ -8,6 +8,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, map, of, catchError, shareReplay, switchMap, tap } from 'rxjs';
 import { BookingStudentService } from './booking-student.service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { Booking } from '../models/booking.models';
 import { DateRange, addDays, isPast, isoDateKey, todayKey } from '../utils/booking-date.util';
 
@@ -21,11 +22,20 @@ export class StudentClassesService {
   /** false hasta que el probe confirme que el módulo responde */
   readonly enabled = signal(false);
 
-  /** Probe único por sesión (se comparte entre barra, Inicio, Semana y Día). */
-  private readonly ready$ = this.api.probe().pipe(
-    tap(ok => this.enabled.set(ok)),
-    shareReplay(1),
-  );
+  private readonly auth = inject(AuthService);
+  /** Probe compartido por usuario (barra, Inicio, Semana y Día); se rehace si cambia el usuario. */
+  private probe$: Observable<boolean> | null = null;
+  private probeToken: string | null = null;
+
+  private get ready$(): Observable<boolean> {
+    const token = this.auth.getToken();
+    if (!this.probe$ || token !== this.probeToken) {
+      this.probeToken = token;
+      this.enabled.set(false);
+      this.probe$ = this.api.probe().pipe(tap(ok => this.enabled.set(ok)), shareReplay(1));
+    }
+    return this.probe$;
+  }
 
   /** Dispara el chequeo (la barra inferior lo llama al montarse). */
   init(): void { this.ready$.subscribe(); }

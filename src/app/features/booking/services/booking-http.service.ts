@@ -11,6 +11,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, of, tap, catchError, throwError, shareReplay, map } from 'rxjs';
 import { ENVIRONMENT } from '../../../../environments/tokens/environment.token';
+import { AuthService } from '../../../core/auth/services/auth.service';
 
 const CACHE_MS = 60_000;
 
@@ -26,8 +27,24 @@ export class BookingHttp {
   readonly enabled = this._enabled.asReadonly();
 
   private readonly cache = new Map<string, { at: number; obs: Observable<unknown> }>();
+  private readonly auth = inject(AuthService);
+  /** Token del usuario para el que vale el estado (enabled + cache) */
+  private ownerToken: string | null = null;
+
+  /**
+   * Si cambió el usuario (logout/login en la misma pestaña), olvidar todo:
+   * que Turnos esté prendido para un alumno no dice nada del entrenador.
+   */
+  syncUser(): void {
+    const token = this.auth.getToken();
+    if (token === this.ownerToken) return;
+    this.ownerToken = token;
+    this._enabled.set(undefined);
+    this.cache.clear();
+  }
 
   get<T>(path: string, params?: Params, useCache = true): Observable<T> {
+    this.syncUser();
     const httpParams = this.toParams(params);
     const key = `${path}?${httpParams.toString()}`;
     const hit = this.cache.get(key);
@@ -65,11 +82,13 @@ export class BookingHttp {
    * Devuelve true/false; nunca falla.
    */
   probe(path: string): Observable<boolean> {
+    this.syncUser();
     if (this._enabled() !== undefined) return of(this._enabled()!);
     return this.get<unknown>(path).pipe(map(() => true), catchError(() => of(this._enabled() ?? false)));
   }
 
   private mutate<T>(obs: Observable<T>): Observable<T> {
+    this.syncUser();
     return obs.pipe(
       tap(() => this.invalidate()),
       catchError(err => { this.invalidate(); return this.fail(err); }),

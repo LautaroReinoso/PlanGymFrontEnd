@@ -81,6 +81,12 @@ export class DashboardPageComponent implements OnInit {
         this.isLoading.set(false);
       },
       error: err => {
+        // 404 = no tiene rutina asignada: no es un error, es el estado "sin plan"
+        if (err?.status === 404) {
+          this.detail.set(null);
+          this.isLoading.set(false);
+          return;
+        }
         // Mostrar el motivo real del backend (403 sin suscripción, 500, sin conexión…)
         console.error('[Dashboard] my-workout falló', err);
         this.error.set(apiErrorText(err, 'No pudimos cargar tu entrenamiento. Intentá nuevamente.'));

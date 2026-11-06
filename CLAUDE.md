@@ -830,6 +830,12 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   del navegador. Bloqueos: el `datetime-local` se manda con offset `-03:00`.
 - **Recarga, no parcheo:** a diferencia del resto de la app, después de cada acción se recarga el rango
   visible (el backend genera/borra clases solo). La cache de 60 s se invalida entera en cada POST/PUT/PATCH/DELETE.
+- **Por usuario:** `BookingHttp.syncUser()` y `StudentClassesService` comparan el token actual: si cambió
+  (logout/login en la misma pestaña) se olvida `enabled` y la cache. Antes, un alumno dejaba "Turnos"
+  prendido y el entrenador entraba a pantallas que le daban 403.
+- **Entrenador sin acceso:** para `/professional/**` el backend exige una fila activa en `bk_professionals`
+  (alta por GLOBAL_ADMIN: `POST /booking/plangym/admin/professionals { userId, displayName }`). Sin eso → 403 y
+  "Turnos" no aparece en el menú.
 - **Módulo apagado:** el primer 403 (antes de cualquier 2xx) pone `enabled = false`. El sidebar del trainer,
   la tarjeta "Mis turnos" del Dashboard del alumno y la oferta de horario fijo en "Mis alumnos" dependen de `probe()`.
 - **Alumno — integración en su vista** (`StudentClassesService`, root: probe único + `classesIn(range)` + `upcoming()`):
