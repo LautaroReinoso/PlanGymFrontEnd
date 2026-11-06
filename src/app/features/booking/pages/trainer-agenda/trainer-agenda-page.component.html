@@ -56,6 +56,7 @@
               <span class="bk-muted">
                 {{ statusLabels[i.status] }}
                 @if (i.enrollmentId) { · horario fijo }
+                @if (i.recoveryOfBookingId) { · <span class="tag-rec">recupera</span> }
                 @if (i.cancelReason) { · {{ i.cancelReason }} }
               </span>
             </div>

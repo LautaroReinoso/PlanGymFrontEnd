@@ -9,7 +9,7 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { StudentClassesService } from '../../services/student-classes.service';
 import { BookingStudentService } from '../../services/booking-student.service';
-import { Booking, BookingService } from '../../models/booking.models';
+import { Booking, BookingService, RecoverySummary } from '../../models/booking.models';
 import { addDays, isoDateKey, isoTime, longDate, todayKey } from '../../utils/booking-date.util';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
 import { ToastService } from '../../../../shared/services/toast.service';
@@ -34,6 +34,7 @@ export class NextClassCardComponent {
   readonly confirming = signal(false);
   readonly isWorking  = signal(false);
   readonly blockedMsg = signal<string | null>(null);
+  readonly recovery   = signal<RecoverySummary | null>(null);
 
   readonly next = computed(() => this.upcoming()[0] ?? null);
   /** Clases de la semana que viene después de la próxima (para el "y 2 más") */
@@ -63,9 +64,11 @@ export class NextClassCardComponent {
     forkJoin({
       upcoming: this.classes.upcoming(),
       services: this.api.services().pipe(catchError(() => of([] as BookingService[]))),
-    }).subscribe(({ upcoming, services }) => {
+      recovery: this.api.recoveries().pipe(catchError(() => of(null))),
+    }).subscribe(({ upcoming, services, recovery }) => {
       this.upcoming.set(upcoming);
       this.services.set(services);
+      this.recovery.set(recovery);
       this.isLoading.set(false);
     });
   }
@@ -78,7 +81,7 @@ export class NextClassCardComponent {
       next: () => {
         this.isWorking.set(false);
         this.confirming.set(false);
-        this.toast.success('Listo, avisamos que no vas. Tu lugar quedó libre.');
+        this.toast.success('Listo, avisamos que no vas. Ganaste una clase para recuperar este mes.');
         this.load();
       },
       error: err => {

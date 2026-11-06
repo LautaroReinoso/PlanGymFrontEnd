@@ -9,7 +9,7 @@ import { RouterLink } from '@angular/router';
 
 import { BookingTrainerService } from '../../services/booking-trainer.service';
 import {
-  BookingMode, BookingService, BookingServiceRequest, Enrollment, EnrollmentStatus,
+  BookingMode, BookingService, BookingServiceRequest, Enrollment, EnrollmentStatus, ProfessionalMe,
 } from '../../models/booking.models';
 import { DAY_LABELS, hhmm } from '../../utils/booking-date.util';
 import { EnrollStudentModalComponent } from '../../components/enroll-modal/enroll-student-modal.component';
@@ -67,6 +67,12 @@ export class TrainerEnrollmentsPageComponent {
   readonly isSavingService = signal(false);
   readonly deleteTarget   = signal<BookingService | null>(null);
 
+  // recuperaciones (tope por mes, del entrenador)
+  readonly me = signal<ProfessionalMe | null>(null);
+  readonly recoveriesValue = signal<number>(0);
+  readonly isSavingMe = signal(false);
+  readonly recoveriesDirty = computed(() => (this.me()?.recoveriesPerMonth ?? 0) !== this.recoveriesValue());
+
   readonly filtered = computed(() => {
     const q = this.search().trim().toLowerCase();
     return this.enrollments()
@@ -81,6 +87,7 @@ export class TrainerEnrollmentsPageComponent {
   });
 
   constructor() {
+    this.loadMe();
     this.loadServices();
     this.load();
   }
@@ -97,6 +104,29 @@ export class TrainerEnrollmentsPageComponent {
     this.api.services().subscribe({
       next: list => this.services.set(list),
       error: err => this.toast.error(apiErrorText(err)),
+    });
+  }
+
+  loadMe(): void {
+    this.api.me().subscribe({
+      next: me => { this.me.set(me); this.recoveriesValue.set(me.recoveriesPerMonth ?? 0); },
+      error: () => this.me.set(null),
+    });
+  }
+
+  saveRecoveries(): void {
+    const me = this.me();
+    const n = Math.max(0, Math.min(31, Math.round(this.recoveriesValue() || 0)));
+    if (!me) return;
+    this.isSavingMe.set(true);
+    this.api.updateMe({ displayName: me.displayName, recoveriesPerMonth: n }).subscribe({
+      next: updated => {
+        this.isSavingMe.set(false);
+        this.me.set(updated);
+        this.recoveriesValue.set(updated.recoveriesPerMonth ?? n);
+        this.toast.success(n === 0 ? 'Tus alumnos ya no pueden recuperar clases.' : `Listo: hasta ${n} por mes.`);
+      },
+      error: err => { this.isSavingMe.set(false); this.toast.error(apiErrorText(err)); },
     });
   }
 

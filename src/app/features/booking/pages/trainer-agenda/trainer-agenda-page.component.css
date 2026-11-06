@@ -16,3 +16,4 @@
 .mark--on-no { color: #fff; background: var(--color-warning); border-color: var(--color-warning); }
 .mark:disabled { opacity: .5; cursor: default; }
 .cancel-box { width: 100%; display: flex; flex-direction: column; gap: var(--space-2); }
+.tag-rec { color: var(--color-celeste); font-weight: 600; }

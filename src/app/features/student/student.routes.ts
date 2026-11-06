@@ -86,6 +86,12 @@ export const STUDENT_ROUTES: Routes = [
             title: 'Elegir horarios — PlanGym',
           },
           {
+            path: 'horarios',
+            loadComponent: () =>
+              import('../booking/pages/student-schedule/student-schedule-page.component').then(m => m.StudentSchedulePageComponent),
+            title: 'Horarios — PlanGym',
+          },
+          {
             path: 'reservar',
             loadComponent: () =>
               import('../booking/pages/student-book/student-book-page.component').then(m => m.StudentBookPageComponent),

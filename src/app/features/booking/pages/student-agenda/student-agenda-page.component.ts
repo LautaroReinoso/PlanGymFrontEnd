@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 
 import { BookingStudentService } from '../../services/booking-student.service';
-import { Booking, BookingService, DayOfWeek, Enrollment } from '../../models/booking.models';
+import { Booking, BookingService, DayOfWeek, Enrollment, RecoverySummary } from '../../models/booking.models';
 import { BookingCalendarComponent } from '../../components/calendar/calendar.component';
 import { CalEntry } from '../../components/calendar/calendar.models';
 import { CalendarView, loadView, saveView } from '../../services/calendar-prefs';
@@ -47,6 +47,7 @@ export class StudentAgendaPageComponent {
   readonly bookings    = signal<Booking[]>([]);
   readonly enrollments = signal<Enrollment[]>([]);
   readonly services    = signal<BookingService[]>([]);
+  readonly recovery    = signal<RecoverySummary | null>(null);
   readonly isLoading   = signal(false);
   readonly loadError   = signal<string | null>(null);
 
@@ -70,7 +71,7 @@ export class StudentAgendaPageComponent {
         time: isoTime(b.startAt),
         endTime: isoTime(b.endAt),
         title: b.serviceName,
-        subtitle: [b.professionalName, b.location].filter(Boolean).join(' · '),
+        subtitle: [b.recoveryOfBookingId ? 'Recuperación' : null, b.professionalName, b.location].filter(Boolean).join(' · '),
         tone: toneOf(b.status),
         past: isPast(b.endAt),
         fixed: b.enrollmentId != null,
@@ -130,6 +131,11 @@ export class StudentAgendaPageComponent {
   private loadFixed(): void {
     this.api.myEnrollments().pipe(catchError(() => of([]))).subscribe(list => this.enrollments.set(list));
     this.api.services().pipe(catchError(() => of([]))).subscribe(list => this.services.set(list));
+    this.loadRecovery();
+  }
+
+  private loadRecovery(): void {
+    this.api.recoveries().pipe(catchError(() => of(null))).subscribe(r => this.recovery.set(r));
   }
 
   onView(v: CalendarView): void { this.view.set(v); saveView(VIEW_KEY, v); this.load(); }
@@ -151,9 +157,10 @@ export class StudentAgendaPageComponent {
     this.api.absence(b.id).subscribe({
       next: () => {
         this.isWorking.set(false);
-        this.toast.success('Listo, avisamos que no vas. Tu lugar quedó libre.');
+        this.toast.success('Listo, avisamos que no vas. Si avisaste a tiempo, ganaste una clase para recuperar este mes.');
         this.close();
         this.load();
+        this.loadRecovery();
       },
       error: err => this.onActionError(b.id, err),
     });
@@ -167,7 +174,7 @@ export class StudentAgendaPageComponent {
     this.api.cancellationPreview(b.id).subscribe({
       next: p => {
         this.isWorking.set(false);
-        if (p.allowed === false) { this.blockId(b.id, p.message); return; }
+        if (!p.canCancel) { this.blockId(b.id, p.message); return; }
         this.preview.set(p.message);
         this.confirming.set(true);
       },
@@ -182,9 +189,10 @@ export class StudentAgendaPageComponent {
     this.api.cancel(b.id).subscribe({
       next: () => {
         this.isWorking.set(false);
-        this.toast.success('Clase cancelada.');
+        this.toast.success(b.recoveryOfBookingId ? 'Recuperación cancelada: la volvés a tener disponible.' : 'Clase cancelada.');
         this.close();
         this.load();
+        this.loadRecovery();
       },
       error: err => this.onActionError(b.id, err),
     });

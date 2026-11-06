@@ -6,6 +6,20 @@
     </div>
   </header>
 
+  <!-- Recuperar / ver horarios -->
+  <a class="rec-link" [class.rec-link--on]="(recovery()?.available ?? 0) > 0" routerLink="/student/turnos/horarios">
+    <span class="rec-link__text">
+      @if ((recovery()?.available ?? 0) > 0) {
+        <strong>Tenés {{ recovery()!.available }} {{ recovery()!.available === 1 ? 'clase' : 'clases' }} para recuperar</strong>
+        <span>Elegí un horario con lugar de este mes</span>
+      } @else {
+        <strong>Horarios del día</strong>
+        <span>Mirá las clases de tu entrenador y los lugares libres</span>
+      }
+    </span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+  </a>
+
   <section class="bk-card">
     <div class="bk-row bk-row--between">
       <h2>Mis horarios fijos</h2>
@@ -53,6 +67,7 @@
           {{ statusLabels[b.status] }}
         </span>
         @if (b.enrollmentId) { <span class="bk-chip bk-chip--acc">Horario fijo</span> }
+        @if (b.recoveryOfBookingId) { <span class="bk-chip bk-chip--acc">Recuperación</span> }
       </p>
       @if (b.cancelReason) { <p class="bk-muted">Motivo: {{ b.cancelReason }}</p> }
 
@@ -60,12 +75,12 @@
         @if (blocked()[b.id]; as msg) {
           <p class="bk-note">{{ msg }}</p>
         } @else if (b.enrollmentId) {
-          <p class="bk-note">Si avisás que no vas, tu lugar queda libre para otro alumno. Tu horario fijo sigue igual.</p>
+          <p class="bk-note">Si avisás que no vas, tu lugar queda libre para otro alumno y, si avisás a tiempo, ganás una clase para recuperar este mes. Tu horario fijo sigue igual.</p>
           <gp-button variant="secondary" [fullWidth]="true" [loading]="isWorking()" (click)="notifyAbsence()">
             Avisar que no voy
           </gp-button>
         } @else if (confirming()) {
-          <p class="bk-note">{{ preview() }}</p>
+          <p class="bk-note">{{ preview() }}@if (b.recoveryOfBookingId) { Si la cancelás a tiempo, la recuperación vuelve a quedar disponible.}</p>
           <div class="bk-row">
             <gp-button variant="danger" [loading]="isWorking()" (click)="confirmCancel()">Sí, cancelar</gp-button>
             <gp-button variant="ghost" [disabled]="isWorking()" (click)="confirming.set(false)">Volver</gp-button>

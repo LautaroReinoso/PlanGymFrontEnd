@@ -8,7 +8,7 @@ import { Observable, forkJoin, map } from 'rxjs';
 import { BookingHttp } from './booking-http.service';
 import {
   AgendaItem, Block, BookingService, BookingServiceRequest, BookingStudentSummary,
-  EnrollBatchRequest, Enrollment, EnrollmentStatus, Rule, ScheduleOverviewItem,
+  EnrollBatchRequest, Enrollment, EnrollmentStatus, ProfessionalMe, Rule, ScheduleOverviewItem,
 } from '../models/booking.models';
 import { DateRange, splitRange } from '../utils/booking-date.util';
 
@@ -45,8 +45,9 @@ export class BookingTrainerService {
     return this.api.get<Block[]>('/professional/blocks');
   }
 
-  createBlock(body: { startAt: string; endAt: string; reason: string }): Observable<Block> {
-    return this.api.post<Block>('/professional/blocks', body);
+  /** 409 si pisa turnos activos; con confirm=true los cancela y avisa a los alumnos. */
+  createBlock(body: { startAt: string; endAt: string; reason: string }, confirm = false): Observable<Block> {
+    return this.api.post<Block>(`/professional/blocks${confirm ? '?confirm=true' : ''}`, body);
   }
 
   deleteBlock(id: number): Observable<void> {
@@ -89,6 +90,16 @@ export class BookingTrainerService {
 
   deleteService(id: number): Observable<void> {
     return this.api.delete<void>(`/professional/services/${id}`);
+  }
+
+  // ── Mis datos (tope de recuperaciones) ──────
+  me(): Observable<ProfessionalMe> {
+    return this.api.get<ProfessionalMe>('/professional/me', undefined, false);
+  }
+
+  /** El PUT exige displayName: se manda el actual junto con el cambio. */
+  updateMe(body: { displayName: string; recoveriesPerMonth: number }): Observable<ProfessionalMe> {
+    return this.api.put<ProfessionalMe>('/professional/me', body);
   }
 
   /** ¿Está prendido el módulo? (para mostrar "Turnos" en el menú) */

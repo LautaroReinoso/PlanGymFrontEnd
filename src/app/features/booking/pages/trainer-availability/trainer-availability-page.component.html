@@ -143,6 +143,17 @@
   }
 </div>
 
+<gp-modal [isOpen]="!!blockConflict()" title="Hay clases en ese horario" size="sm" (closed)="blockConflict.set(null)">
+  <div class="bk-page" style="padding-bottom:0">
+    <p class="bk-note">{{ blockConflict() }}</p>
+    <p class="bk-muted">Si bloqueás igual, esas clases se cancelan y se avisa a los alumnos.</p>
+    <div class="bk-row">
+      <gp-button variant="danger" [loading]="busyBlock() === 'new'" (click)="createBlock(true)">Bloquear y cancelar clases</gp-button>
+      <gp-button variant="ghost" [disabled]="busyBlock() === 'new'" (click)="blockConflict.set(null)">Volver</gp-button>
+    </div>
+  </div>
+</gp-modal>
+
 <gp-modal [isOpen]="confirmSave()" title="Guardar franjas" size="sm" (closed)="confirmSave.set(false)">
   <div class="bk-page" style="padding-bottom:0">
     <p class="bk-note">Esto reemplaza todas tus franjas por las que ves en pantalla. Las que quitaste dejan de existir.</p>

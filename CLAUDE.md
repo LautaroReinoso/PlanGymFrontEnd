@@ -816,6 +816,7 @@ features/booking/
     ├── trainer-availability/         → /trainer/turnos/disponibilidad — franjas (PUT reemplaza todo), cupos, bloqueos
     ├── student-agenda/               → /student/turnos — mis clases + mis horarios fijos, ausencia / cancelar
     ├── student-choose/               → /student/turnos/elegir — elegir/cambiar/dejar horarios (selfEnrollment)
+    ├── student-schedule/             → /student/turnos/horarios — horarios día por día + Recuperar
     └── student-book/                 → /student/turnos/reservar — clase suelta (SELF/BOTH)
 core/http/api-error.util.ts           → apiErrorText(err, fallback): `message` del backend para cualquier status
 shared/services/toast.service.ts + shared/components/toast → <gp-toast /> montado en app.component
@@ -844,10 +845,26 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - **Alta de alumno:** al crear un alumno, si el módulo está prendido se abre el modal de horario fijo con su DNI.
 - **Admin (GYM_ADMIN):** no implementado; no existe panel de GYM_ADMIN en este front.
 
-### ⚠️ Formas supuestas (verificar contra el backend / Postman carpeta 8)
-- `BookingService` (servicio): `{ id, name, description?, durationMinutes, bookingMode, selfEnrollment?, weeklyLimit?, price?, active? }`
-- `Block`: `{ id, startAt, endAt, reason }` · `FreeSlot` (`GET /services/{id}/slots`): `{ startAt, endAt, professionalName?, free? }`
-- `CancellationPreview`: `{ message, allowed? }` — si `allowed === false` se deshabilita cancelar.
+### Recuperar clases (backend V21, carpeta 13 de Postman)
+- Avisar a tiempo que no va → gana 1 clase para recuperar **en el mismo mes**, en cualquier horario con lugar
+  de su entrenador (cualquier servicio). Avisar tarde o faltar no da recuperación. Lo no usado vence a fin de mes.
+- Tope **por entrenador**: `GET/PUT /professional/me { displayName, recoveriesPerMonth }` (0 = no). El PUT exige
+  `displayName`, por eso se manda el actual. Se edita en "Horarios fijos → Recuperar clases".
+- `GET /schedule?from=&to=` (máx. **42** días; `schedule()` parte en tramos) → `ScheduleSlot[]` con `capacity/booked/free/myBookingId`.
+- `GET /recoveries/mine?month=` → `RecoverySummary { month, limit, absences, used, available, expiresAt, items }`.
+- `POST /recoveries/mine { serviceId, professionalId, startAt }` → `Booking` con `recoveryOfBookingId`. 409 sin lugar · 400 sin
+  recuperaciones / otro mes. La recuperación es clase suelta: se cancela con preview + cancel y vuelve a estar disponible.
+- UI alumno: `/student/turnos/horarios` (tira de 21 días, franjas con Tu clase / Completo / Recuperar · N libres / otro mes),
+  banner en Mis turnos y línea en la tarjeta de próxima clase del Inicio. Entrenador: "recupera" en el detalle de la clase.
+
+### Formas verificadas contra el backend (`elytra-platform`, rama `feature/booking`)
+- Servicio = `ServiceAdminResponse` (trae además precio, modalidad, avisos mínimos, abonos…; el front ignora lo que no usa).
+- Bloqueos = `ExceptionResponse { id, professionalId, professionalName, startAt, endAt, type, reason }`.
+  `POST /professional/blocks` da **409 si pisa clases**; con `?confirm=true` las cancela y avisa (el front pide confirmación).
+- `GET /services/{id}/slots` → `SlotsResponse { serviceId, timezone, slots: [{ startAt, endAt, professionals: [{ id, displayName, capacity, spotsLeft }] }] }`;
+  `BookingStudentService.slots()` lo aplana a `FreeSlot` (una opción por horario + profesional con lugar).
+- `POST /bookings { serviceId, professionalId, startAt, acceptPolicy: true }`.
+- `CancellationPreview { canCancel, canReschedule, reschedulesLeft, losesPayment, message }` — si `!canCancel` se deshabilita cancelar.
 - Respuestas 400/409 en ausencia/cancelación se toman como "fuera de término" → se muestra `message` y se deshabilita el botón.
 
 ---
@@ -909,7 +926,8 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] Disponibilidad, bloqueos y resumen de cupos
 - [x] Turnos en la vista del alumno: pestaña (Perfil al header), próxima clase en Inicio, clases en Semana y Día
 - [ ] Detalles: contador en la pestaña, puntos de clase en Mes
-- [ ] Verificar contra el backend las formas supuestas (ver sección Turnos)
+- [x] Formas verificadas contra el backend (servicio, bloqueos, slots, preview de cancelación)
+- [x] Recuperar clases: horarios día por día, recuperar, tope del entrenador, "recupera" en su agenda
 - [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)
 
 ### Backend pendiente

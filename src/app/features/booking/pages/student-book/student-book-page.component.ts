@@ -89,7 +89,7 @@ export class StudentBookPageComponent {
     const s = this.chosen(), id = this.serviceId();
     if (!s || !id) return;
     this.isSaving.set(true);
-    this.api.book(id, s.startAt).subscribe({
+    this.api.book(id, s.startAt, s.professionalId).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.chosen.set(null);

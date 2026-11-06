@@ -27,6 +27,8 @@ export interface Booking {
   cancelReason: string | null;
   /** != null → viene de un horario fijo */
   enrollmentId: number | null;
+  /** != null → es la recuperación de esa ausencia (clase suelta) */
+  recoveryOfBookingId?: number | null;
 }
 
 export interface AgendaClient {
@@ -49,6 +51,8 @@ export interface AgendaItem {
   note: string | null;
   enrollmentId: number | null;
   cancelReason: string | null;
+  /** != null → el alumno vino a recuperar */
+  recoveryOfBookingId?: number | null;
 }
 
 export interface Enrollment {
@@ -147,21 +151,35 @@ export interface BookingService {
 }
 export type BookingServiceRequest = Omit<BookingService, 'id'>;
 
-/** ⚠️ Forma supuesta: verificar. */
+/** Bloqueo propio (ExceptionResponse del backend) */
 export interface Block {
   id: number;
+  professionalId?: number;
+  professionalName?: string;
   startAt: string;
   endAt: string;
+  type?: string;
   reason: string | null;
 }
 
-/** ⚠️ Forma supuesta de GET /services/{id}/slots: verificar. */
+/** GET /services/{id}/slots → SlotsResponse (verificado contra el backend) */
+export interface SlotsResponse {
+  serviceId: number;
+  timezone: string;
+  slots: {
+    startAt: string;
+    endAt: string;
+    professionals: { id: number; displayName: string; capacity: number; spotsLeft: number }[];
+  }[];
+}
+
+/** Una opción reservable (aplanada: un horario con un profesional) */
 export interface FreeSlot {
   startAt: string;
   endAt: string;
-  professionalId?: number;
-  professionalName?: string;
-  free?: number;
+  professionalId: number;
+  professionalName: string;
+  free: number;
 }
 
 export interface SlotRef {
@@ -178,6 +196,61 @@ export interface EnrollBatchRequest {
 }
 
 export interface CancellationPreview {
+  canCancel: boolean;
+  canReschedule: boolean;
+  reschedulesLeft: number;
+  losesPayment: boolean;
   message: string;
-  allowed?: boolean;
+}
+
+// ── Recuperar clases ──────────────────────────
+/** GET /schedule — horarios del entrenador con cupo (incluye completos). Máx. 42 días. */
+export interface ScheduleSlot {
+  serviceId: number;
+  serviceName: string;
+  professionalId: number;
+  professionalName: string;
+  startAt: string;
+  endAt: string;
+  capacity: number;
+  booked: number;
+  free: number;
+  /** != null → el alumno ya está en esa clase */
+  myBookingId: number | null;
+}
+
+/** GET /recoveries/mine */
+export interface RecoverySummary {
+  month: string;          // "YYYY-MM"
+  limit: number;          // tope del entrenador (0 = sin recuperación)
+  absences: number;       // ausencias avisadas a tiempo en el mes
+  used: number;
+  available: number;
+  expiresAt: string;      // instante en que vencen (inicio del mes siguiente)
+  items: {
+    absenceBookingId: number;
+    serviceId: number;
+    serviceName: string;
+    professionalId: number;
+    professionalName: string;
+    startAt: string;
+    recoveredByBookingId: number | null;
+    recoveredAt: string | null;
+  }[];
+}
+
+export interface RecoveryRequest {
+  serviceId: number;
+  professionalId: number;
+  startAt: string;
+}
+
+/** GET/PUT /professional/me */
+export interface ProfessionalMe {
+  id: number;
+  userId: number;
+  displayName: string;
+  mail: string | null;
+  active: boolean;
+  recoveriesPerMonth: number | null;
 }

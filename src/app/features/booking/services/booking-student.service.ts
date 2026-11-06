@@ -7,8 +7,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, forkJoin, map } from 'rxjs';
 import { BookingHttp } from './booking-http.service';
 import {
-  Booking, BookingService, CancellationPreview, Enrollment, FreeSlot,
-  SelfEnrollmentOptions, SlotRef,
+  Booking, BookingService, CancellationPreview, Enrollment, FreeSlot, RecoveryRequest,
+  RecoverySummary, ScheduleSlot, SelfEnrollmentOptions, SlotRef, SlotsResponse,
 } from '../models/booking.models';
 import { DateRange, splitRange } from '../utils/booking-date.util';
 
@@ -61,12 +61,35 @@ export class BookingStudentService {
     return this.api.get<BookingService[]>('/services');
   }
 
+  /** Aplana SlotsResponse a una opción por horario + profesional con lugar. */
   slots(serviceId: number, range: DateRange): Observable<FreeSlot[]> {
-    return this.api.get<FreeSlot[]>(`/services/${serviceId}/slots`, range);
+    return this.api.get<SlotsResponse>(`/services/${serviceId}/slots`, range).pipe(
+      map(res => (res?.slots ?? []).flatMap(s => s.professionals
+        .filter(p => p.spotsLeft > 0)
+        .map(p => ({
+          startAt: s.startAt, endAt: s.endAt,
+          professionalId: p.id, professionalName: p.displayName, free: p.spotsLeft,
+        })))));
   }
 
-  book(serviceId: number, startAt: string): Observable<Booking> {
-    return this.api.post<Booking>('/bookings', { serviceId, startAt, acceptPolicy: true });
+  book(serviceId: number, startAt: string, professionalId?: number): Observable<Booking> {
+    return this.api.post<Booking>('/bookings', { serviceId, professionalId, startAt, acceptPolicy: true });
+  }
+
+  // ── Recuperar ───────────────────────────────
+  /** Horarios del entrenador con cupo (incluye completos). Tramos de ≤42 días. */
+  schedule(range: DateRange): Observable<ScheduleSlot[]> {
+    const calls = splitRange(range, 42).map(r => this.api.get<ScheduleSlot[]>('/schedule', r));
+    return forkJoin(calls).pipe(map(parts => parts.flat().sort((a, b) => a.startAt.localeCompare(b.startAt))));
+  }
+
+  /** Resumen de recuperaciones del mes (por defecto el actual). */
+  recoveries(month?: string): Observable<RecoverySummary> {
+    return this.api.get<RecoverySummary>('/recoveries/mine', { month });
+  }
+
+  recover(body: RecoveryRequest): Observable<Booking> {
+    return this.api.post<Booking>('/recoveries/mine', body);
   }
 
   probe(): Observable<boolean> { return this.api.probe('/enrollments/mine'); }

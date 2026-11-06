@@ -20,7 +20,7 @@
       @if (blockedMsg()) {
         <p class="nc__note">{{ blockedMsg() }}</p>
       } @else if (confirming()) {
-        <p class="nc__note">Tu lugar queda libre para otro alumno. Tu horario fijo sigue igual.</p>
+        <p class="nc__note">Tu lugar queda libre para otro alumno y ganás una clase para recuperar este mes (si avisás a tiempo).</p>
         <div class="nc__actions">
           <gp-button size="sm" variant="secondary" [loading]="isWorking()" (click)="absence()">Sí, no voy</gp-button>
           <gp-button size="sm" variant="ghost" [disabled]="isWorking()" (click)="confirming.set(false)">Volver</gp-button>
@@ -50,5 +50,11 @@
       <p class="nc__muted">Tu entrenador todavía no te asignó horarios.</p>
     }
   }
+  }
+
+  @if (!isLoading() && (recovery()?.available ?? 0) > 0) {
+    <a class="nc__rec" routerLink="/student/turnos/horarios">
+      Tenés {{ recovery()!.available }} {{ recovery()!.available === 1 ? 'clase' : 'clases' }} para recuperar · <strong>Elegir horario</strong>
+    </a>
   }
 </section>

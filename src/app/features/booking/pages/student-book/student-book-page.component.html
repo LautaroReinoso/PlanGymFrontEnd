@@ -30,7 +30,7 @@
         <section class="bk-card">
           <h3>{{ longDate(d.day) }}</h3>
           <div class="bk-row">
-            @for (s of d.list; track s.startAt) {
+            @for (s of d.list; track s.startAt + '-' + s.professionalId) {
               <button type="button" class="bk-slot" (click)="chosen.set(s)">
                 {{ isoTime(s.startAt) }}
                 @if (s.professionalName) { <small>{{ s.professionalName }}</small> }

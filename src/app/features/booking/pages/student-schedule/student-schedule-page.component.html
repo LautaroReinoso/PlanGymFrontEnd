@@ -1,0 +1,92 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <a class="bk-muted" routerLink="/student/turnos">‹ Mis turnos</a>
+      <h1 class="bk-title">Horarios</h1>
+      <p class="bk-subtitle">Las clases de tu entrenador, día por día.</p>
+    </div>
+  </header>
+
+  <!-- Recuperaciones -->
+  @if (summary(); as s) {
+    @if (!recoveryEnabled()) {
+      <p class="bk-note">Tu entrenador no tiene habilitado recuperar clases.</p>
+    } @else if (available() > 0) {
+      <section class="rec rec--on">
+        <strong>Te {{ available() === 1 ? 'queda 1 clase' : 'quedan ' + available() + ' clases' }} para recuperar</strong>
+        <span>Usalas hasta el {{ deadline() }}. Tocá un horario con lugar de este mes.</span>
+        @for (i of pendingItems(); track i.absenceBookingId) {
+          <span class="rec__item">Por la de {{ missedLabel(i.startAt, i.serviceName) }}</span>
+        }
+      </section>
+    } @else {
+      <section class="rec">
+        <strong>No tenés clases para recuperar</strong>
+        <span>Si avisás a tiempo que no vas a una clase, ganás una para recuperar en el mes (hasta {{ s.limit }} por mes).</span>
+      </section>
+    }
+  }
+
+  @if (error()) { <p class="bk-error">{{ error() }}</p> }
+
+  @if (isLoading()) {
+    <app-page-loader message="Cargando horarios…" />
+  } @else {
+    <!-- Tira de días -->
+    <div class="days" role="tablist" aria-label="Días">
+      @for (d of days(); track d.key) {
+        <button type="button" role="tab" class="days__btn" [class.on]="d.key === selected()"
+                [class.empty]="d.count === 0" (click)="selected.set(d.key)">
+          <span class="days__dow">{{ d.dow }}</span>
+          <span class="days__num">{{ d.num }}</span>
+          <span class="days__dot" [class.has]="d.free > 0"></span>
+        </button>
+      }
+    </div>
+
+    <section class="bk-card">
+      <h2 class="day-title">{{ dayTitle() }}</h2>
+      <ul class="bk-list">
+        @for (s of daySlots(); track s.startAt + s.serviceId + s.professionalId) {
+          @let st = stateOf(s);
+          <li>
+            <button type="button" class="slot slot--{{ st }}" [disabled]="st !== 'recover'" (click)="pick(s)">
+              <span class="slot__time">{{ isoTime(s.startAt) }}</span>
+              <span class="slot__body">
+                <span class="slot__title">{{ s.serviceName }}</span>
+                <span class="slot__sub">{{ s.professionalName }} · {{ isoTime(s.startAt) }} a {{ isoTime(s.endAt) }}</span>
+              </span>
+              <span class="slot__state">
+                @switch (st) {
+                  @case ('mine') { Tu clase }
+                  @case ('full') { Completo }
+                  @case ('otherMonth') { {{ s.free }} libres · otro mes }
+                  @case ('recover') { Recuperar · {{ s.free }} libres }
+                  @default { {{ s.free }} {{ s.free === 1 ? 'libre' : 'libres' }} }
+                }
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="bk-muted">No hay clases este día.</li>
+        }
+      </ul>
+    </section>
+  }
+</div>
+
+<gp-modal [isOpen]="!!chosen()" title="Recuperar clase" size="sm" (closed)="chosen.set(null)">
+  @if (chosen(); as s) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p><strong>{{ s.serviceName }}</strong> con {{ s.professionalName }}<br />{{ chosenLabel(s) }}</p>
+      <p class="bk-note">
+        Usás 1 de tus {{ available() }} {{ available() === 1 ? 'clase' : 'clases' }} para recuperar.
+        Si después la cancelás a tiempo, la recuperás de nuevo.
+      </p>
+      <div class="bk-row">
+        <gp-button [loading]="isSaving()" (click)="confirm()">Recuperar acá</gp-button>
+        <gp-button variant="ghost" [disabled]="isSaving()" (click)="chosen.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>

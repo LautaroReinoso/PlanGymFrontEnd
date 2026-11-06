@@ -77,6 +77,24 @@
     }
   </section>
 
+  <!-- ── Recuperaciones ─────────────────────── -->
+  @if (me()) {
+    <section class="bk-card">
+      <h2>Recuperar clases</h2>
+      <p class="bk-muted">
+        Cuando un alumno avisa a tiempo que no viene, gana una clase para recuperar dentro del mismo mes,
+        en cualquier horario con lugar. Avisar tarde o faltar sin avisar no da recuperación.
+      </p>
+      <div class="bk-row">
+        <label class="bk-field" style="max-width:200px">
+          Recuperaciones por mes (0 = no)
+          <input type="number" min="0" max="31" [ngModel]="recoveriesValue()" (ngModelChange)="recoveriesValue.set(+$event)" />
+        </label>
+        <gp-button size="sm" [loading]="isSavingMe()" [disabled]="!recoveriesDirty()" (click)="saveRecoveries()">Guardar</gp-button>
+      </div>
+    </section>
+  }
+
   <!-- ── Servicios ──────────────────────────── -->
   <section class="bk-card">
     <div class="bk-row bk-row--between">

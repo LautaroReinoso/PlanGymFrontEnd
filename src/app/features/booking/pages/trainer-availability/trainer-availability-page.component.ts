@@ -64,6 +64,8 @@ export class TrainerAvailabilityPageComponent {
   readonly blockReason = signal('');
   readonly blockError = signal<string | null>(null);
   readonly busyBlock = signal<number | 'new' | null>(null);
+  /** 409: el bloqueo pisa clases → pedir confirmación (cancela y avisa) */
+  readonly blockConflict = signal<string | null>(null);
 
   readonly sortedRules = computed(() =>
     this.rules().map((r, i) => ({ r, i }))
@@ -178,20 +180,25 @@ export class TrainerAvailabilityPageComponent {
       : `${shortDate(from)} ${isoTime(b.startAt)} → ${shortDate(to)} ${isoTime(b.endAt)}`;
   }
 
-  createBlock(): void {
+  createBlock(confirm = false): void {
     const from = this.blockFrom(), to = this.blockTo();
     if (!from || !to) return;
     if (to <= from) { this.blockError.set('El fin tiene que ser después del inicio.'); return; }
     this.busyBlock.set('new');
     this.blockError.set(null);
-    this.api.createBlock({ startAt: toArgIso(from), endAt: toArgIso(to), reason: this.blockReason().trim() }).subscribe({
+    this.api.createBlock({ startAt: toArgIso(from), endAt: toArgIso(to), reason: this.blockReason().trim() }, confirm).subscribe({
       next: () => {
         this.busyBlock.set(null);
+        this.blockConflict.set(null);
         this.blockFrom.set(''); this.blockTo.set(''); this.blockReason.set('');
         this.toast.success('Bloqueo creado.');
         this.loadBlocks();
       },
-      error: err => { this.busyBlock.set(null); this.blockError.set(apiErrorText(err)); },
+      error: err => {
+        this.busyBlock.set(null);
+        if (err?.status === 409 && !confirm) this.blockConflict.set(apiErrorText(err));
+        else this.blockError.set(apiErrorText(err));
+      },
     });
   }
 
