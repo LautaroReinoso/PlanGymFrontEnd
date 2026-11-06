@@ -10,7 +10,7 @@ import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 
 import { BookingStudentService } from '../../services/booking-student.service';
-import { Booking, BookingService, DayOfWeek, Enrollment, RecoverySummary } from '../../models/booking.models';
+import { Booking, BookingService, DayOfWeek, Enrollment, RecoverySummary, ScheduleSlot } from '../../models/booking.models';
 import { BookingCalendarComponent } from '../../components/calendar/calendar.component';
 import { CalEntry } from '../../components/calendar/calendar.models';
 import { CalendarView, loadView, saveView } from '../../services/calendar-prefs';
@@ -43,11 +43,19 @@ export class StudentAgendaPageComponent {
   readonly view   = signal<CalendarView>(loadView(VIEW_KEY, 'week'));
   readonly anchor = signal(todayKey());
   readonly showCancelled = signal(false);
+  /** Mostrar en el calendario los horarios con lugar (para recuperar) */
+  readonly showFree = signal(true);
 
   readonly bookings    = signal<Booking[]>([]);
   readonly enrollments = signal<Enrollment[]>([]);
   readonly services    = signal<BookingService[]>([]);
   readonly recovery    = signal<RecoverySummary | null>(null);
+  /** Horarios del entrenador en el rango visible (con cupo) */
+  readonly slots       = signal<ScheduleSlot[]>([]);
+
+  // ── Recuperar desde el calendario ──
+  readonly freeSlot    = signal<ScheduleSlot | null>(null);
+  readonly isRecovering = signal(false);
   readonly isLoading   = signal(false);
   readonly loadError   = signal<string | null>(null);
 
@@ -75,7 +83,29 @@ export class StudentAgendaPageComponent {
         tone: toneOf(b.status),
         past: isPast(b.endAt),
         fixed: b.enrollmentId != null,
-      })));
+      } as CalEntry))
+      .concat(this.freeEntries()));
+
+  /** Horarios libres futuros donde no está anotado (tenues; se tocan para recuperar) */
+  private readonly freeEntries = computed<CalEntry[]>(() => {
+    if (!this.showFree()) return [];
+    return this.slots()
+      .filter(s => !s.myBookingId && s.free > 0 && !isPast(s.startAt))
+      .map(s => ({
+        key: 'free|' + s.startAt + '|' + s.serviceId + '|' + s.professionalId,
+        dateKey: isoDateKey(s.startAt),
+        time: isoTime(s.startAt),
+        endTime: isoTime(s.endAt),
+        title: s.serviceName,
+        subtitle: 'Libre',
+        meta: s.free + (s.free === 1 ? ' lugar' : ' lugares'),
+        tone: 'free',
+        past: false,
+        free: true,
+      } as CalEntry));
+  });
+
+  readonly available = computed(() => this.recovery()?.available ?? 0);
 
   /** "Lunes y miércoles 18:00 con Juan" — agrupado por servicio + hora + profe */
   readonly fixedLines = computed(() => {
@@ -119,6 +149,8 @@ export class StudentAgendaPageComponent {
   load(): void {
     this.isLoading.set(true);
     this.loadError.set(null);
+    this.api.schedule(this.range()).pipe(catchError(() => of([] as ScheduleSlot[])))
+      .subscribe(list => this.slots.set(list));
     this.api.myBookings(this.range()).subscribe({
       next: list => { this.bookings.set(list); this.isLoading.set(false); },
       error: err => {
@@ -142,6 +174,11 @@ export class StudentAgendaPageComponent {
   onAnchor(a: string): void { this.anchor.set(a); this.load(); }
 
   openEntry(e: CalEntry): void {
+    if (e.free) {
+      const slot = this.slots().find(s => 'free|' + s.startAt + '|' + s.serviceId + '|' + s.professionalId === e.key);
+      if (slot) this.freeSlot.set(slot);
+      return;
+    }
     this.openId.set(Number(e.key));
     this.preview.set(null);
     this.confirming.set(false);
@@ -195,6 +232,41 @@ export class StudentAgendaPageComponent {
         this.loadRecovery();
       },
       error: err => this.onActionError(b.id, err),
+    });
+  }
+
+  // ── Recuperar en un horario libre ──
+  /** ¿Puede recuperar en ese horario? (le quedan y es del mes del resumen) */
+  readonly freeSlotState = computed<'ok' | 'none' | 'disabled' | 'otherMonth'>(() => {
+    const s = this.freeSlot(), r = this.recovery();
+    if (!s || !r) return 'none';
+    if (r.limit <= 0 && r.available <= 0) return 'disabled';
+    if (!s.startAt.startsWith(r.month)) return 'otherMonth';
+    return r.available > 0 ? 'ok' : 'none';
+  });
+
+  freeSlotLabel(s: ScheduleSlot): string {
+    return `${longDate(isoDateKey(s.startAt))}, ${isoTime(s.startAt)} a ${isoTime(s.endAt)}`;
+  }
+
+  recoverHere(): void {
+    const s = this.freeSlot();
+    if (!s) return;
+    this.isRecovering.set(true);
+    this.api.recover({ serviceId: s.serviceId, professionalId: s.professionalId, startAt: s.startAt }).subscribe({
+      next: () => {
+        this.isRecovering.set(false);
+        this.freeSlot.set(null);
+        this.toast.success('¡Listo! Quedaste anotado para recuperar.');
+        this.load();
+        this.loadRecovery();
+      },
+      error: err => {
+        this.isRecovering.set(false);
+        this.freeSlot.set(null);
+        this.toast.error(apiErrorText(err));
+        this.load();
+      },
     });
   }
 

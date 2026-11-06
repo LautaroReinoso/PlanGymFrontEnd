@@ -22,16 +22,22 @@ export class BottomNavComponent {
   constructor() { this.classes.init(); }
 
   /**
-   * 5.ª pestaña: "Turnos" si el módulo está prendido; si no, "Perfil".
-   * El Perfil siempre está además en el avatar del header del Inicio.
+   * Con Turnos prendido: Inicio · Hoy · Semana · Turnos (Turnos tiene la vista Mes;
+   * el Perfil está en el avatar del Inicio).
+   * Sin Turnos: Inicio · Hoy · Semana · Mes · Perfil (como siempre).
    */
-  readonly items = computed<NavItem[]>(() => [
-    { label: 'Inicio', path: '/student/dashboard', icon: 'home' },
-    { label: 'Hoy',    path: '/student/daily',     icon: 'today' },
-    { label: 'Semana', path: '/student/weekly',    icon: 'week' },
-    { label: 'Mes',    path: '/student/monthly',   icon: 'month' },
-    this.classes.enabled()
-      ? { label: 'Turnos', path: '/student/turnos',  icon: 'turnos' }
-      : { label: 'Perfil', path: '/student/profile', icon: 'profile' },
-  ]);
+  readonly items = computed<NavItem[]>(() => this.classes.enabled()
+    ? [
+        { label: 'Inicio', path: '/student/dashboard', icon: 'home' },
+        { label: 'Hoy',    path: '/student/daily',     icon: 'today' },
+        { label: 'Semana', path: '/student/weekly',    icon: 'week' },
+        { label: 'Turnos', path: '/student/turnos',    icon: 'turnos' },
+      ]
+    : [
+        { label: 'Inicio', path: '/student/dashboard', icon: 'home' },
+        { label: 'Hoy',    path: '/student/daily',     icon: 'today' },
+        { label: 'Semana', path: '/student/weekly',    icon: 'week' },
+        { label: 'Mes',    path: '/student/monthly',   icon: 'month' },
+        { label: 'Perfil', path: '/student/profile',   icon: 'profile' },
+      ]);
 }

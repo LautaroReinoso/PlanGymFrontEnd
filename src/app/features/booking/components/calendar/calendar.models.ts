@@ -1,4 +1,4 @@
-export type CalTone = 'confirmed' | 'completed' | 'noshow' | 'cancelled';
+export type CalTone = 'confirmed' | 'completed' | 'noshow' | 'cancelled' | 'free';
 
 /** Entrada genérica del calendario (una clase o un turno). */
 export interface CalEntry {
@@ -13,4 +13,6 @@ export interface CalEntry {
   tone: CalTone;
   past: boolean;
   fixed?: boolean;      // horario fijo
+  /** horario libre (no es una clase del usuario): se muestra tenue y se toca para recuperar */
+  free?: boolean;
 }

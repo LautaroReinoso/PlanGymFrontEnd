@@ -839,8 +839,16 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - **Módulo apagado:** el primer 403 (antes de cualquier 2xx) pone `enabled = false`. El sidebar del trainer,
   la tarjeta "Mis turnos" del Dashboard del alumno y la oferta de horario fijo en "Mis alumnos" dependen de `probe()`.
 - **Alumno — integración en su vista** (`StudentClassesService`, root: probe único + `classesIn(range)` + `upcoming()`):
-  - Bottom-nav: 5.ª pestaña = **Turnos** si el módulo está prendido, si no **Perfil**. El Perfil vive además
-    en el avatar del header del Inicio (con punto naranja si falta completar el nombre).
+  - Bottom-nav con Turnos prendido: **Inicio · Hoy · Semana · Turnos** (Turnos tiene vista Semana y Mes; la página
+    Mes de entrenamientos queda en "Ver mi mes" dentro de Semana). Sin Turnos: Inicio · Hoy · Semana · Mes · Perfil.
+    El Perfil vive en el avatar del header del Inicio (punto naranja si falta completar el nombre).
+  - **Mis turnos (calendario):** además de sus clases muestra los **horarios libres** del entrenador (`GET /schedule`
+    del rango visible, tenues y punteados, "3 lugares"). Tocar una clase suya → avisar que no va / cancelar; tocar un
+    horario libre → recuperar ahí (si le quedan y es del mes). Filtros "Horarios libres" y "Canceladas".
+  - **Aviso de cancelación del profe:** `app-cancel-notice` (en el layout del alumno) muestra un popup con las clases
+    canceladas por el profe (`Booking.cancelledBy === 'PROFESSIONAL'`) y botón "Elegir horario". Se muestra una vez por
+    clase (ids vistos en localStorage). ⚠️ `cancelledBy` / `grantsRecovery` están **pendientes en el backend**
+    (prompt `PROMPT_BACKEND_CANCELA_PROFE.md`): hasta que lleguen, el popup no aparece.
   - Inicio: `app-next-class-card` — próxima clase ("Hoy · 20:00"), "y N más en 7 días", "Avisar que no voy"
     en horario fijo; sin clases → atajos a Elegir horarios / Reservar clase.
   - Semana: hora de la clase en la tira de días + tarjeta "Tus clases" de la semana mostrada.
@@ -943,7 +951,9 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] Elegir horarios del alumno + clase suelta
 - [x] Disponibilidad, bloqueos y resumen de cupos
 - [x] Turnos en la vista del alumno: pestaña (Perfil al header), próxima clase en Inicio, clases en Semana y Día
-- [ ] Detalles: contador en la pestaña, puntos de clase en Mes
+- [ ] Detalles: contador en la pestaña
+- [ ] Backend: la cancelación del profe da recuperación (sin tope, mismo mes) + `cancelledBy`/`grantsRecovery` en Booking
+- [ ] Cambiar la hora de una franja deja a los alumnos fijos en la hora vieja (el editor lo avisa); decidir si se mueven solos
 - [x] Formas verificadas contra el backend (servicio, bloqueos, slots, preview de cancelación)
 - [x] Recuperar clases: horarios día por día, recuperar, tope del entrenador, "recupera" en su agenda
 - [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)

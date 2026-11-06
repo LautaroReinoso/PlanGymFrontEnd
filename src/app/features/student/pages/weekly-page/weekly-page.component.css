@@ -99,3 +99,5 @@
 .classes__day { color: var(--color-muted-light); }
 .classes__time { font-weight: 700; color: var(--color-celeste); }
 .classes__row--past { opacity: .5; }
+.month-link { align-self: flex-end; font-size: 13px; color: var(--color-muted-light); text-decoration: none; }
+.month-link:hover { color: var(--color-text); }

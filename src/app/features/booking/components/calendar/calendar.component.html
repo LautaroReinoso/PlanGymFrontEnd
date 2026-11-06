@@ -1,5 +1,5 @@
 <ng-template #entryTpl let-e>
-  <button type="button" class="cal-entry cal-entry--{{ e.tone }}" [class.cal-entry--past]="e.past"
+  <button type="button" class="cal-entry cal-entry--{{ e.tone }}" [class.cal-entry--past]="e.past" [class.cal-entry--free]="e.free"
           (click)="entryClick.emit(e)">
     <span class="cal-entry__time">{{ e.time }}</span>
     <span class="cal-entry__body">
@@ -60,6 +60,7 @@
             <span class="cal-month__count">{{ c.classes }} {{ c.classes === 1 ? 'clase' : 'clases' }}</span>
             @if (showPeople() && c.people > 0) { <span class="cal-month__people">{{ c.people }} al.</span> }
           }
+          @if (c.freeSlots > 0) { <span class="cal-month__free">{{ c.freeSlots }} libres</span> }
         </button>
       }
     </div>

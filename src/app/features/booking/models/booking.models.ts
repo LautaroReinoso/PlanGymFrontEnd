@@ -29,6 +29,10 @@ export interface Booking {
   enrollmentId: number | null;
   /** != null → es la recuperación de esa ausencia (clase suelta) */
   recoveryOfBookingId?: number | null;
+  /** Quién canceló (pendiente en el backend; si no viene, no se muestra el aviso) */
+  cancelledBy?: 'STUDENT' | 'PROFESSIONAL' | 'SYSTEM' | null;
+  /** true si esa cancelación le dio una clase para recuperar */
+  grantsRecovery?: boolean;
 }
 
 export interface AgendaClient {

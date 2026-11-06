@@ -65,10 +65,12 @@ export class BookingCalendarComponent {
   readonly monthCells = computed(() => {
     const month = this.anchor().slice(0, 7);
     return listDays(monthGridRange(this.anchor())).map(key => {
-      const entries = (this.byDay().get(key) ?? []).filter(e => e.tone !== 'cancelled');
+      const all = this.byDay().get(key) ?? [];
+      const entries = all.filter(e => e.tone !== 'cancelled' && !e.free);
       return {
         key, num: fromKey(key).getDate(), inMonth: key.startsWith(month),
         classes: entries.length,
+        freeSlots: all.filter(e => e.free).length,
         people: entries.reduce((s, e) => s + (e.people ?? 0), 0),
       };
     });

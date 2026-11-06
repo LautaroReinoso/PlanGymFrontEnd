@@ -40,6 +40,9 @@ export class StudentClassesService {
   /** Dispara el chequeo (la barra inferior lo llama al montarse). */
   init(): void { this.ready$.subscribe(); }
 
+  /** true si el módulo responde para este usuario */
+  ready(): Observable<boolean> { return this.ready$; }
+
   /** Clases no canceladas del rango, ordenadas. Módulo apagado o error → lista vacía. */
   classesIn(range: DateRange): Observable<Booking[]> {
     return this.ready$.pipe(

@@ -42,10 +42,17 @@
     }
   </section>
 
-  <label class="bk-check">
-    <input type="checkbox" [ngModel]="showCancelled()" (ngModelChange)="showCancelled.set($event)" />
-    Mostrar canceladas
-  </label>
+  <div class="bk-row">
+    <label class="bk-check">
+      <input type="checkbox" [ngModel]="showFree()" (ngModelChange)="showFree.set($event)" />
+      Horarios libres
+    </label>
+    <label class="bk-check">
+      <input type="checkbox" [ngModel]="showCancelled()" (ngModelChange)="showCancelled.set($event)" />
+      Canceladas
+    </label>
+  </div>
+  <p class="bk-muted hint">Tocá una clase tuya para avisar que no vas o cancelarla. Tocá un horario libre para recuperar.</p>
 
   @if (loadError()) { <p class="bk-error">{{ loadError() }}</p> }
 
@@ -89,6 +96,34 @@
           <gp-button variant="secondary" [fullWidth]="true" [loading]="isWorking()" (click)="askCancel()">
             Cancelar clase
           </gp-button>
+        }
+      }
+    </div>
+  }
+</gp-modal>
+
+<!-- Recuperar en un horario libre -->
+<gp-modal [isOpen]="!!freeSlot()" title="Horario libre" size="sm" (closed)="freeSlot.set(null)">
+  @if (freeSlot(); as s) {
+    <div class="detail">
+      <p class="line"><strong>{{ s.serviceName }}</strong> con {{ s.professionalName }}</p>
+      <p class="bk-muted">{{ freeSlotLabel(s) }} · {{ s.free }} {{ s.free === 1 ? 'lugar libre' : 'lugares libres' }}</p>
+      @switch (freeSlotState()) {
+        @case ('ok') {
+          <p class="bk-note">Usás 1 de tus {{ available() }} {{ available() === 1 ? 'clase' : 'clases' }} para recuperar. Si después la cancelás a tiempo, la recuperás de nuevo.</p>
+          <div class="bk-row">
+            <gp-button [loading]="isRecovering()" (click)="recoverHere()">Recuperar acá</gp-button>
+            <gp-button variant="ghost" [disabled]="isRecovering()" (click)="freeSlot.set(null)">Volver</gp-button>
+          </div>
+        }
+        @case ('otherMonth') {
+          <p class="bk-note">Solo podés recuperar en horarios de este mes.</p>
+        }
+        @case ('disabled') {
+          <p class="bk-note">Tu entrenador no tiene habilitado recuperar clases.</p>
+        }
+        @default {
+          <p class="bk-note">No tenés clases para recuperar. Si avisás a tiempo que no vas a una clase, ganás una para usar este mes.</p>
         }
       }
     </div>

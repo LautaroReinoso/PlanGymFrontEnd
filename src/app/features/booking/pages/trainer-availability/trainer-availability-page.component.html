@@ -143,6 +143,9 @@
         @if (e.index !== null && overviewOf(rules()[e.index]); as ov) {
           <div class="ed__group">
             <span class="ed__label">Alumnos fijos ({{ ov.enrolled }}/{{ ov.capacity }} · {{ ov.free }} libres)</span>
+            @if (ov.enrolled > 0) {
+              <p class="bk-note">Si cambiás la hora, estos alumnos siguen en el horario anterior ({{ rules()[e.index!].startTime }}). Para moverlos, cambialos desde "Horarios fijos".</p>
+            }
             @if (ov.clients.length) {
               <ul class="ed__clients">
                 @for (c of ov.clients; track c.enrollmentId) { <li>{{ clientName(c.name) }}</li> }
