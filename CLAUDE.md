@@ -893,6 +893,13 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - **Horarios fijos:** filtro por defecto **Vigentes (activos y en pausa)** — el mismo criterio que usa el backend para el 409
   de franjas (antes se veían solo los activos y un horario en pausa bloqueaba guardar sin que se viera). Una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
   tiene fin). Tocar un chip abre sus acciones; "+" agrega otro día a ese alumno.
+- **Cambiar plan** (backend `feature/booking-change-service`): las filas de Horarios fijos son por **alumno + plan**
+  ("Funcional 2 veces · 2/2 por semana"). "Cambiar plan" abre un modal: plan actual, plan nuevo (activos, ENROLLMENT/BOTH,
+  distinto del actual), "Desde" (hoy por defecto, sin fechas pasadas) y aviso ámbar si el plan nuevo tiene menos
+  `weeklyLimit` que los horarios del grupo (deshabilita Confirmar). `POST /professional/students/{userId}/change-service
+  { fromServiceId, toServiceId, from }` → mismos días/horas/estado en el plan nuevo, todo o nada; errores en el modal.
+  Si el plan nuevo deja lugar, el "+" dice "Agregar horario". Al anotar, el 409 de "ya tiene todos los días de su plan"
+  suma la sugerencia de "Cambiar plan".
 - **Franjas y cupos (una sola vista):** grilla lun–dom; cada franja muestra "3/10 fijos" con barra (naranja si está
   completa) y al tocarla se ve la lista de alumnos fijos y se edita. "+ Agregar": Desde + Duración (45/60/90/Otra) + Cupo +
   "Repetir en" (L–D, atajos Lunes a viernes / Todos los días). ✕ quita (confirma si tiene alumnos fijos).

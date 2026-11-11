@@ -11,7 +11,9 @@ import { BookingTrainerService } from '../../services/booking-trainer.service';
 import {
   BookingService, Enrollment, EnrollmentStatus, ProfessionalMe,
 } from '../../models/booking.models';
-import { DAY_LABELS, DAY_SHORT, hhmm } from '../../utils/booking-date.util';
+import { DAY_LABELS, DAY_SHORT, hhmm, todayKey } from '../../utils/booking-date.util';
+
+interface PlanGroup { key: string; userId: number; name: string; serviceId: number; serviceName: string; items: Enrollment[]; }
 import { EnrollStudentModalComponent } from '../../components/enroll-modal/enroll-student-modal.component';
 import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 import { ButtonComponent } from '../../../../shared/components/button-component/button-component.component';
@@ -74,19 +76,82 @@ export class TrainerEnrollmentsPageComponent {
         || a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime));
   });
 
-  /** Una fila por alumno: "Ana López — Lun 07:00 · Mié 07:00 · Vie 07:00" */
+  /** Una fila por alumno y plan: "Ana López · Funcional 2 veces — Lun 07:00 · Jue 07:00" */
   readonly grouped = computed(() => {
-    const map = new Map<number, { userId: number; name: string; services: string[]; items: Enrollment[] }>();
+    const map = new Map<string, PlanGroup>();
     for (const e of this.filtered()) {
-      const g = map.get(e.userId) ?? { userId: e.userId, name: this.nameOf(e), services: [], items: [] };
+      const key = e.userId + '|' + e.serviceId;
+      const g = map.get(key) ?? { key, userId: e.userId, name: this.nameOf(e), serviceId: e.serviceId, serviceName: e.serviceName, items: [] };
       g.items.push(e);
-      if (!g.services.includes(e.serviceName)) g.services.push(e.serviceName);
-      map.set(e.userId, g);
+      map.set(key, g);
     }
     return [...map.values()]
       .map(g => ({ ...g, items: g.items.sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime)) }))
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => a.name.localeCompare(b.name) || a.serviceName.localeCompare(b.serviceName));
   });
+
+  /** Horarios vigentes (activos o en pausa) del grupo: los que cuenta el tope semanal */
+  liveCount(g: PlanGroup): number { return g.items.filter(e => e.status !== 'ENDED').length; }
+  weeklyLimitOf(serviceId: number): number | null {
+    return this.services().find(s => s.id === serviceId)?.weeklyLimit ?? null;
+  }
+  /** Días que le quedan por elegir según su plan (para ofrecer "Agregar horario") */
+  freeDays(g: PlanGroup): number {
+    const w = this.weeklyLimitOf(g.serviceId);
+    return w ? Math.max(0, w - this.liveCount(g)) : 0;
+  }
+
+  // ── Cambiar plan ──
+  readonly changeTarget = signal<PlanGroup | null>(null);
+  readonly changeTo     = signal<number | null>(null);
+  readonly changeFrom   = signal(todayKey());
+  readonly changeError  = signal<string | null>(null);
+  readonly isChanging   = signal(false);
+  readonly today = todayKey();
+
+  /** Planes activos de horario fijo, distintos del actual */
+  readonly changeOptions = computed(() => {
+    const g = this.changeTarget();
+    return this.services().filter(s => s.active !== false
+      && (s.bookingMode === 'ENROLLMENT' || s.bookingMode === 'BOTH')
+      && s.id !== g?.serviceId);
+  });
+  /** Aviso preventivo si el plan elegido no alcanza para los horarios que tiene */
+  readonly changeShortfall = computed(() => {
+    const g = this.changeTarget(), to = this.services().find(s => s.id === this.changeTo());
+    if (!g || !to?.weeklyLimit) return null;
+    const n = this.liveCount(g);
+    return n > to.weeklyLimit
+      ? `Este plan es de ${to.weeklyLimit} por semana y el alumno tiene ${n} horarios: quitale ${n - to.weeklyLimit} antes de cambiarlo.`
+      : null;
+  });
+  readonly canConfirmChange = computed(() =>
+    !!this.changeTo() && !this.changeShortfall() && !!this.changeFrom() && this.changeFrom() >= this.today && !this.isChanging());
+
+  openChange(g: PlanGroup): void {
+    this.changeTarget.set(g);
+    this.changeTo.set(null);
+    this.changeFrom.set(this.today);
+    this.changeError.set(null);
+  }
+
+  confirmChange(): void {
+    const g = this.changeTarget(), to = this.changeTo();
+    if (!g || !to || !this.canConfirmChange()) return;
+    this.isChanging.set(true);
+    this.changeError.set(null);
+    this.api.changeService(g.userId, { fromServiceId: g.serviceId, toServiceId: to, from: this.changeFrom() }).subscribe({
+      next: list => {
+        this.isChanging.set(false);
+        this.changeTarget.set(null);
+        const name = list[0]?.serviceName ?? this.services().find(s => s.id === to)?.name ?? '';
+        const w = this.weeklyLimitOf(to), n = list.filter(e => e.status !== 'ENDED').length;
+        this.toast.success(`Plan cambiado a ${name}` + (w && w > n ? `. Le ${w - n === 1 ? 'queda 1 día' : 'quedan ' + (w - n) + ' días'} por agregar.` : '.'));
+        this.load();   // la cache de turnos se invalida en el POST → la agenda también se recarga
+      },
+      error: err => { this.isChanging.set(false); this.changeError.set(apiErrorText(err, 'No se pudo cambiar el plan.')); },
+    });
+  }
 
   constructor() {
     this.loadMe();

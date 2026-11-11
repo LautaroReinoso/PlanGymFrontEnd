@@ -47,11 +47,15 @@
       <app-page-loader [size]="40" [compact]="true" message="Cargando horarios…" />
     } @else {
       <div class="grid">
-        @for (g of grouped(); track g.userId) {
+        @for (g of grouped(); track g.key) {
           <div class="grid__row">
             <div class="grid__who">
               <span class="grid__name">{{ g.name }}</span>
-              <span class="bk-muted">{{ g.services.join(' · ') }}</span>
+              <span class="bk-muted">
+                {{ g.serviceName }}
+                @if (weeklyLimitOf(g.serviceId); as w) { · {{ liveCount(g) }}/{{ w }} por semana }
+              </span>
+              <button type="button" class="link-btn" (click)="openChange(g)">Cambiar plan</button>
             </div>
             <div class="grid__chips">
               @for (e of g.items; track e.id) {
@@ -62,7 +66,9 @@
                   @if (e.validTo && e.status !== 'ENDED') { <span class="chip__flag">hasta {{ e.validTo.slice(8, 10) }}/{{ e.validTo.slice(5, 7) }}</span> }
                 </button>
               }
-              <button type="button" class="chip chip--add" (click)="openEnroll(g.userId)" title="Agregar otro día">+</button>
+              <button type="button" class="chip chip--add" (click)="openEnroll(g.userId)" title="Agregar otro día">
+                + @if (freeDays(g) > 0) { Agregar horario }
+              </button>
             </div>
           </div>
         } @empty {
@@ -130,6 +136,42 @@
           {{ endDate() ? 'Guardar fecha de fin' : 'Terminar ahora' }}
         </gp-button>
         <gp-button variant="ghost" (click)="endTarget.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>
+
+<!-- Cambiar plan -->
+<gp-modal [isOpen]="!!changeTarget()" title="Cambiar plan" size="sm" (closed)="changeTarget.set(null)">
+  @if (changeTarget(); as g) {
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <p class="bk-muted" style="margin:0">{{ g.name }}</p>
+      <label class="bk-field">
+        Plan actual
+        <input type="text" [value]="g.serviceName + ' · ' + liveCount(g) + (liveCount(g) === 1 ? ' horario' : ' horarios')" disabled />
+      </label>
+      <label class="bk-field">
+        Plan nuevo
+        <select [ngModel]="changeTo()" (ngModelChange)="changeTo.set($event); changeError.set(null)">
+          <option [ngValue]="null" disabled>Elegí un plan</option>
+          @for (s of changeOptions(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}@if (s.weeklyLimit) { · {{ s.weeklyLimit }} por semana }</option>
+          }
+        </select>
+      </label>
+      @if (!changeOptions().length) {
+        <p class="bk-note">No tenés otros planes de horario fijo activos. Creá uno en la pestaña Servicios.</p>
+      }
+      <label class="bk-field">
+        Desde
+        <input type="date" [min]="today" [ngModel]="changeFrom()" (ngModelChange)="changeFrom.set($event)" />
+        <span class="bk-muted" style="font-size:12px">Las clases desde esta fecha pasan al plan nuevo. Mismos días, horas y estado.</span>
+      </label>
+      @if (changeShortfall()) { <p class="bk-note cap-warn">{{ changeShortfall() }}</p> }
+      @if (changeError()) { <p class="bk-error">{{ changeError() }}</p> }
+      <div class="bk-row" style="justify-content:flex-end">
+        <gp-button variant="ghost" size="sm" (click)="changeTarget.set(null)">Cancelar</gp-button>
+        <gp-button size="sm" [loading]="isChanging()" [disabled]="!canConfirmChange()" (click)="confirmChange()">Confirmar</gp-button>
       </div>
     </div>
   }

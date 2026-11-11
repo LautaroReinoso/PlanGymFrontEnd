@@ -72,6 +72,11 @@ export class BookingTrainerService {
     return this.api.get<Enrollment[]>('/professional/enrollments', filter);
   }
 
+  /** Cambia el plan de un alumno (todo o nada): mismos días, horas y estado en el plan nuevo desde `from`. */
+  changeService(userId: number, body: { fromServiceId: number; toServiceId: number; from?: string }): Observable<Enrollment[]> {
+    return this.api.post<Enrollment[]>(`/professional/students/${userId}/change-service`, body);
+  }
+
   enrollBatch(body: EnrollBatchRequest): Observable<Enrollment[]> {
     return this.api.post<Enrollment[]>('/professional/enrollments/batch', body);
   }

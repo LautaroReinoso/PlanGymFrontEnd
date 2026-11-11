@@ -176,7 +176,14 @@ export class EnrollStudentModalComponent {
         this.toast.success('Alumno anotado. Sus clases ya están en el calendario.');
         this.saved.emit();
       },
-      error: err => { this.isSaving.set(false); this.error.set(apiErrorText(err)); },
+      error: err => {
+        this.isSaving.set(false);
+        const msg = apiErrorText(err);
+        // 409: ya tiene todos los días de su plan → sugerir cambiar el plan
+        this.error.set(err?.status === 409 && /permite|por semana/i.test(msg)
+          ? msg + ' Si necesita más días, usá "Cambiar plan" en su fila de Horarios fijos.'
+          : msg);
+      },
     });
   }
 }
