@@ -100,5 +100,6 @@
 >
   @if (selectedExercise(); as ex) {
     <app-exercise-detail [exercise]="toDetailView(ex)" />
+    @if (loadingDetail()) { <p class="detail-loading">Cargando técnica…</p> }
   }
 </gp-modal>

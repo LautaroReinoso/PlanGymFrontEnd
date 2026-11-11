@@ -12,7 +12,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, switchMap, of } from 'rxjs';
 
 import { ENVIRONMENT } from '../../../../environments/tokens/environment.token';
-import { WorkoutTemplate } from '../../trainer/models/trainer.models';
+import { ExerciseDetail, WorkoutTemplate } from '../../trainer/models/trainer.models';
 import {
   StudentDayResponse,
   StudentWorkoutDetail,
@@ -54,5 +54,13 @@ export class StudentWorkoutService {
         );
       })
     );
+  }
+
+  /**
+   * Detalle completo de un ejercicio de SU plan activo (técnica, secundarios, video…).
+   * GET /student-workouts/my-workout/exercises/{exerciseId} → ExerciseDetail (404 si no está en su plan).
+   */
+  exerciseDetail(exerciseId: number): Observable<ExerciseDetail> {
+    return this.http.get<ExerciseDetail>(`${this.api}/student-workouts/my-workout/exercises/${exerciseId}`);
   }
 }

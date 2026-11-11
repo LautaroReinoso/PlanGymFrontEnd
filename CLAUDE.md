@@ -1004,8 +1004,9 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] `WeeklyPage` — estado de la semana calculado en backend (WeekStatus)
 - [x] `MonthlyPage` — calendario con días entrenados, racha y adherencia
 - [x] `ProfilePage` + cerrar sesión
-- [ ] Detalle rico de ejercicio para el alumno (técnica, secundarios, video): requiere habilitar
-      `GET /api/exercises/:id` para STUDENT solo con ejercicios de su plan activo
+- [~] Detalle rico de ejercicio para el alumno: el front ya llama `GET /student-workouts/my-workout/exercises/{exerciseId}`
+      (→ `ExerciseDetail`) al tocar un ejercicio en el Día y muestra técnica, secundarios, video, etc., con las series/reps/
+      descanso **de su plan** (no los sugeridos). Si el endpoint no existe o da 403/404, queda la vista mínima. **Falta backend.**
 - [ ] "Semana N de M": agregar `durationWeeks` a `WorkoutTemplate` (V9) + campo en el form de plantilla
 - [ ] Registro de pesos/reps reales por ejercicio (tabla `workout_log_sets` colgada del log)
 

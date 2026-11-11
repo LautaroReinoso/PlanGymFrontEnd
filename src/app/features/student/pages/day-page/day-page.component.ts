@@ -9,6 +9,7 @@
 //  Trainer— dentro de un gp-modal, sin salir de esta pantalla.
 // ─────────────────────────────────────────────
 
+import { ExerciseDetail } from '../../../trainer/models/trainer.models';
 import { TodayClassesComponent } from '../../../booking/components/today-classes/today-classes.component';
 import { dayExerciseSummary } from '../../../trainer/models/exercise-meta.util';
 import {
@@ -138,12 +139,31 @@ export class DayPageComponent implements OnInit {
     });
   }
 
+  /** Detalle completo (técnica, secundarios, video) — null mientras carga o si el backend no lo da */
+  readonly fullDetail = signal<ExerciseDetail | null>(null);
+  readonly loadingDetail = signal(false);
+  private detailCache = new Map<number, ExerciseDetail>();
+
   openDetail(ex: DayExercise): void {
     this.selectedExercise.set(ex);
+    const cached = this.detailCache.get(ex.exerciseId);
+    this.fullDetail.set(cached ?? null);
+    if (cached) return;
+    this.loadingDetail.set(true);
+    this.workoutService.exerciseDetail(ex.exerciseId).subscribe({
+      next: d => {
+        this.detailCache.set(ex.exerciseId, d);
+        if (this.selectedExercise()?.exerciseId === ex.exerciseId) this.fullDetail.set(d);
+        this.loadingDetail.set(false);
+      },
+      // Backend sin el endpoint (o 403/404): queda la vista mínima, sin error visible
+      error: () => this.loadingDetail.set(false),
+    });
   }
 
   closeDetail(): void {
     this.selectedExercise.set(null);
+    this.fullDetail.set(null);
   }
 
   /**
@@ -155,11 +175,32 @@ export class DayPageComponent implements OnInit {
    * cuando el backend no las mandaba.
    */
   toDetailView(ex: DayExercise): ExerciseDetailViewModel {
+    const d = this.fullDetail();
+    // Los números son los de SU plan (lo que le indicó el entrenador), no los sugeridos del catálogo.
+    const plan = {
+      defaultSets: ex.sets,
+      defaultRepsMin: ex.durationSeconds ? null : ex.reps,
+      defaultRepsMax: ex.durationSeconds ? null : ex.repsMax ?? null,
+      defaultRestSeconds: ex.restSeconds,
+    };
+    if (!d) {
+      return { name: ex.exerciseName, primaryMuscle: ex.primaryMuscle, imageUrl: ex.imageUrl, difficulty: ex.difficulty, ...plan };
+    }
     return {
-      name: ex.exerciseName,
-      primaryMuscle: ex.primaryMuscle,
-      imageUrl: ex.imageUrl,
-      difficulty: ex.difficulty,
+      name: d.name,
+      primaryMuscle: d.primaryMuscle,
+      secondaryMuscles: d.secondaryMuscles,
+      imageUrl: d.imageUrl ?? ex.imageUrl,
+      videoUrl: d.videoUrl,
+      difficulty: d.difficulty,
+      description: d.description,
+      techniqueSteps: d.techniqueSteps,
+      exerciseType: d.exerciseType,
+      equipment: d.equipment,
+      laterality: d.laterality,
+      parentExerciseName: d.parentExerciseName,
+      ...plan,
+      // sin `global`: el alumno no necesita el badge Global/Personal
     };
   }
 
