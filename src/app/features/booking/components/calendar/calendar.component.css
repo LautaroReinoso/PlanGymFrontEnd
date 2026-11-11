@@ -100,3 +100,16 @@
 .cal-entry--free:hover { border-color: var(--color-celeste); }
 .cal-month__free { font-size: 10px; color: var(--color-muted-light); }
 @container (max-width: 520px) { .cal-month__free { display: none; } }
+
+/* Completo: rojo PlanGym, suave (tinte + borde), sin gritar sobre el fondo oscuro */
+.cal-entry--full {
+  border-left-color: var(--color-danger);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--color-danger) 14%, transparent), transparent 75%), var(--color-card);
+}
+.cal-entry--full .cal-entry__meta { color: var(--color-danger); font-weight: 700; }
+.cal-entry--full.cal-entry--free { border-style: solid; border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); border-left-color: var(--color-danger); }
+.cal-entry--full.cal-entry--free .cal-entry__title { color: var(--color-text); }
+.cal-entry--full:hover { border-color: var(--color-danger); }
+.cal-month__full { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; color: var(--color-danger); }
+.cal-month__full i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 6px color-mix(in srgb, var(--color-danger) 60%, transparent); }
+@container (max-width: 520px) { .cal-month__full { font-size: 0; gap: 0; } .cal-month__full i { width: 7px; height: 7px; } }

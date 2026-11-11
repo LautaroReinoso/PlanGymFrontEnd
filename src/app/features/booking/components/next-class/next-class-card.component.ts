@@ -1,4 +1,4 @@
-import { ddmm } from '../../utils/recovery.util';
+import { absenceCapNotice, ddmm } from '../../utils/recovery.util';
 // ─────────────────────────────────────────────
 //  PlanGym — app-next-class-card (Inicio del alumno)
 //  Próxima clase con acción rápida. Sin clases: atajos a elegir/reservar.
@@ -61,6 +61,10 @@ export class NextClassCardComponent {
     const withCap = this.services().filter(s => s.monthlyCap);
     const mine = withCap.filter(s => used.has(s.id));
     return (mine.length ? mine : withCap.length === 1 ? withCap : []);
+  });
+  readonly capNotice = computed(() => {
+    const b = this.next();
+    return b ? absenceCapNotice(this.recovery(), b.startAt) : null;
   });
   readonly earliestExpiry = computed(() => ddmm(this.recovery()?.expiresAt));
 

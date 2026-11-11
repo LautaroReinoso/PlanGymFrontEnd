@@ -107,6 +107,7 @@ export class TrainerAgendaPageComponent {
           tone: allCancelled ? 'cancelled' : this.groupTone(active),
           past: isPast(g.endAt),
           fixed: g.items.some(i => i.enrollmentId != null),
+          full: !allCancelled && !!g.capacity && active.length >= g.capacity,
         } as CalEntry;
       })
       .filter(e => this.showCancelled() || e.tone !== 'cancelled'));

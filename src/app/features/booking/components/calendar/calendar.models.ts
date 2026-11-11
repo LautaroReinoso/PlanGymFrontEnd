@@ -15,4 +15,6 @@ export interface CalEntry {
   fixed?: boolean;      // horario fijo
   /** horario libre (no es una clase del usuario): se muestra tenue y se toca para recuperar */
   free?: boolean;
+  /** clase sin lugares (cupo lleno): se pinta en rojo PlanGym */
+  full?: boolean;
 }

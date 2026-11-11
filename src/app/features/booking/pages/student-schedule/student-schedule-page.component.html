@@ -25,6 +25,7 @@
     } @else {
       <section class="rec">
         <strong>No tenés clases para recuperar</strong>
+        @if (capNotice(); as cap) { <span class="cap-warn">{{ cap }}</span> }
         <span>Si avisás con 12 horas o más que no vas a una clase, ganás una para recuperar en los 30 días siguientes (hasta {{ s.limit }} por mes).</span>
       </section>
     }

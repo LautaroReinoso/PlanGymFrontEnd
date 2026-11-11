@@ -31,3 +31,5 @@
   font-size: 13px; color: var(--color-muted-light); text-decoration: none;
 }
 .nc__rec strong { color: var(--color-celeste); }
+
+.cap-warn { border-left: 3px solid var(--color-warning); padding-left: 10px; color: var(--color-text); }

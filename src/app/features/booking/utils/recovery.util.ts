@@ -48,3 +48,22 @@ export function plus30(iso: string): string {
   const dt = new Date(Date.UTC(y, m - 1, d + 30));
   return `${String(dt.getUTCDate()).padStart(2, '0')}/${String(dt.getUTCMonth() + 1).padStart(2, '0')}`;
 }
+
+const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+  'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+/**
+ * Tope de ausencias del mes de esa clase ya usado: el backend cuenta, por profesional y mes de la
+ * clase faltada, las ausencias que ya se recuperaron. Si llegó al tope, una ausencia nueva de ese
+ * mes no da recuperación. Devuelve el texto del aviso o null. (Las cancelaciones del profe no cuentan.)
+ */
+export function absenceCapNotice(r: RecoverySummary | null | undefined, classStartAt: string): string | null {
+  if (!r) return null;
+  const month = classStartAt.slice(0, 7);
+  const name = MONTH_NAMES[Number(month.slice(5, 7)) - 1] ?? '';
+  if (r.limit <= 0) return 'Tu entrenador no tiene habilitado recuperar las clases que avisás que no vas.';
+  const usedThisMonth = r.items.filter(i =>
+    (i.source ?? 'ABSENCE') === 'ABSENCE' && !!i.recoveredByBookingId && i.startAt.slice(0, 7) === month).length;
+  if (usedThisMonth < r.limit) return null;
+  return `Ya usaste tus ${r.limit} recuperaciones de ${name}. Si avisás que no vas a una clase de ${name}, esa no se recupera.`;
+}

@@ -1,4 +1,4 @@
-import { ddmm, expiresSoon, latestRecoveryDeadline, pendingRecoveries, withinRecoveryWindow } from '../../utils/recovery.util';
+import { absenceCapNotice, ddmm, expiresSoon, latestRecoveryDeadline, pendingRecoveries, withinRecoveryWindow } from '../../utils/recovery.util';
 // ─────────────────────────────────────────────
 //  PlanGym — StudentAgendaPage (/student/turnos)
 //  Mis clases (semana/mes) + mis horarios fijos.
@@ -91,18 +91,19 @@ export class StudentAgendaPageComponent {
   private readonly freeEntries = computed<CalEntry[]>(() => {
     if (!this.showFree()) return [];
     return this.slots()
-      .filter(s => !s.myBookingId && s.free > 0 && !isPast(s.startAt))
+      .filter(s => !s.myBookingId && !isPast(s.startAt))
       .map(s => ({
         key: 'free|' + s.startAt + '|' + s.serviceId + '|' + s.professionalId,
         dateKey: isoDateKey(s.startAt),
         time: isoTime(s.startAt),
         endTime: isoTime(s.endAt),
         title: s.serviceName,
-        subtitle: 'Libre',
-        meta: s.free + (s.free === 1 ? ' lugar' : ' lugares'),
+        subtitle: s.free > 0 ? 'Libre' : 'Completo',
+        meta: s.free > 0 ? s.free + (s.free === 1 ? ' lugar' : ' lugares') : 'Completo',
         tone: 'free',
         past: false,
         free: true,
+        full: s.free <= 0,
       } as CalEntry));
   });
 
@@ -238,13 +239,22 @@ export class StudentAgendaPageComponent {
 
   // ── Recuperar en un horario libre ──
   /** ¿Puede recuperar en ese horario? (le quedan y cae antes del vencimiento más lejano) */
-  readonly freeSlotState = computed<'ok' | 'none' | 'disabled' | 'expired'>(() => {
+  readonly freeSlotState = computed<'ok' | 'none' | 'disabled' | 'expired' | 'full'>(() => {
     const s = this.freeSlot(), r = this.recovery();
+    if (s && s.free <= 0) return 'full';
     if (!s || !r) return 'none';
     if (r.limit <= 0 && r.available <= 0 && !(r.professionalCancels ?? 0)) return 'disabled';
     if (r.available <= 0) return 'none';
     return withinRecoveryWindow(r, s.startAt) ? 'ok' : 'expired';
   });
+  /** Aviso "ya usaste tus 3 de noviembre" para la clase abierta (antes de avisar que no va) */
+  readonly openCapNotice = computed(() => {
+    const b = this.open();
+    return b ? absenceCapNotice(this.recovery(), b.startAt) : null;
+  });
+  /** Mismo aviso para el mes de hoy (estado vacío de recuperaciones) */
+  readonly monthCapNotice = computed(() => absenceCapNotice(this.recovery(), todayKey()));
+
   readonly recoveryDeadline = computed(() => ddmm(latestRecoveryDeadline(this.recovery())));
   readonly pendingItems = computed(() => pendingRecoveries(this.recovery()));
   readonly earliestExpiry = computed(() => ddmm(this.recovery()?.expiresAt));

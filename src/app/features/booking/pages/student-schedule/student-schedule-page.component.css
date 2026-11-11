@@ -39,10 +39,13 @@
 .slot__state { font-size: 12px; font-weight: 700; color: var(--color-muted-light); text-align: right; flex-shrink: 0; }
 .slot--mine { border-color: var(--color-accent); background: var(--color-accent-dim); }
 .slot--mine .slot__state { color: var(--color-accent); }
-.slot--full { opacity: .5; }
+.slot--full { opacity: .85; border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); border-left: 3px solid var(--color-danger); background: linear-gradient(90deg, color-mix(in srgb, var(--color-danger) 12%, transparent), transparent 70%); }
+.slot--full .slot__state { color: var(--color-danger); font-weight: 700; }
 .slot--recover { cursor: pointer; border-color: var(--color-celeste);
   transition: transform var(--duration-fast) var(--ease-spring); }
 .slot--recover:hover { transform: translateY(-1px); }
 .slot--recover .slot__state { color: var(--color-celeste); }
 
 .rec__item--soon { color: var(--color-warning) !important; }
+
+.cap-warn { border-left: 3px solid var(--color-warning); padding-left: 10px; color: var(--color-text); }

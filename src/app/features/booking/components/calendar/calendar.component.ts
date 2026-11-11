@@ -70,7 +70,8 @@ export class BookingCalendarComponent {
       return {
         key, num: fromKey(key).getDate(), inMonth: key.startsWith(month),
         classes: entries.length,
-        freeSlots: all.filter(e => e.free).length,
+        freeSlots: all.filter(e => e.free && !e.full).length,
+        fullSlots: all.filter(e => e.full && e.tone !== 'cancelled').length,
         people: entries.reduce((s, e) => s + (e.people ?? 0), 0),
       };
     });

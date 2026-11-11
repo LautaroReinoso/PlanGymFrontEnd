@@ -20,6 +20,7 @@
       @if (blockedMsg()) {
         <p class="nc__note">{{ blockedMsg() }}</p>
       } @else if (confirming()) {
+        @if (capNotice(); as cap) { <p class="nc__note cap-warn">{{ cap }}</p> }
         <p class="nc__note">Tu lugar queda libre para otro alumno y si avisás con 12 horas o más, ganás una clase para recuperar en los próximos 30 días.</p>
         <div class="nc__actions">
           <gp-button size="sm" variant="secondary" [loading]="isWorking()" (click)="absence()">Sí, no voy</gp-button>

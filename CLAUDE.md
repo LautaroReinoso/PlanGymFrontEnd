@@ -940,6 +940,13 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - Textos: "Listo. Podés recuperar esta clase hasta el dd/MM" (`absenceWithMessage`, busca el item recién creado),
   "Tenés N para recuperar · la primera vence el dd/MM" + lista con vencimiento en Mis turnos y Horarios, popup del profe
   "La podés recuperar hasta el {día + 30}". `changesLeft` (cambios de horario fijo) **sigue siendo mensual**.
+- **Tope de ausencias del mes usado** (`absenceCapNotice`): si ya se recuperaron `limit` ausencias de clases de ese mes, se
+  avisa "Ya usaste tus 3 recuperaciones de noviembre…" antes de "Avisar que no voy" (detalle de la clase y tarjeta del Inicio)
+  y en el estado vacío. El backend cuenta por profesional y mes de la clase faltada; el front lo aproxima con `items`.
+- **Clases completas en el calendario** (`CalEntry.full` → `.cal-entry--full`, rojo `--color-danger` en tinte + borde):
+  entrenador = cupo lleno (`active ≥ capacity`); alumno = horarios de `/schedule` con `free = 0` (antes no se mostraban;
+  al tocarlos dicen "Esta clase está completa"). En Mes, cada día muestra "N completas" con punto rojo (solo el punto en
+  pantallas angostas). En Horarios (`/student/turnos/horarios`) la fila "Completo" usa el mismo rojo.
 
 ### Tope mensual de clases por plan (backend `feature/booking-cupos`)
 - Servicio: `monthlyLimit` (a mano, 1–62, o null) y `monthlyCap` (el que se aplica: `monthlyLimit` o `weeklyLimit × 4`;

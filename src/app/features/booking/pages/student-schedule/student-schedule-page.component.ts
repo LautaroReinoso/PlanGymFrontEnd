@@ -9,7 +9,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { catchError, forkJoin, of, switchMap } from 'rxjs';
-import { ddmm, expiresSoon, latestRecoveryDeadline, pendingRecoveries, withinRecoveryWindow } from '../../utils/recovery.util';
+import { absenceCapNotice, ddmm, expiresSoon, latestRecoveryDeadline, pendingRecoveries, withinRecoveryWindow } from '../../utils/recovery.util';
 
 import { BookingStudentService } from '../../services/booking-student.service';
 import { RecoverySummary, ScheduleSlot } from '../../models/booking.models';
@@ -87,6 +87,7 @@ export class StudentSchedulePageComponent {
   /** Recuperaciones pendientes (no usadas, no vencidas), la que vence antes primero */
   readonly pendingItems = computed(() => pendingRecoveries(this.summary()));
   readonly ddmm = ddmm;
+  readonly capNotice = computed(() => absenceCapNotice(this.summary(), todayKey()));
   readonly expiresSoon = expiresSoon;
 
   constructor() { this.load(); }

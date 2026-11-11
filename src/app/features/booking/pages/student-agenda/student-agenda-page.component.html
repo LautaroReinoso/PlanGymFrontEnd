@@ -101,6 +101,7 @@
         @if (blocked()[b.id]; as msg) {
           <p class="bk-note">{{ msg }}</p>
         } @else if (b.enrollmentId) {
+          @if (openCapNotice(); as cap) { <p class="bk-note cap-warn">{{ cap }}</p> }
           <p class="bk-note">Si avisás que no vas, tu lugar queda libre para otro alumno y, si avisás con 12 horas o más de anticipación, ganás una clase para recuperar en los próximos 30 días. Tu horario fijo sigue igual.</p>
           <gp-button variant="secondary" [fullWidth]="true" [loading]="isWorking()" (click)="notifyAbsence()">
             Avisar que no voy
@@ -135,6 +136,9 @@
             <gp-button variant="ghost" [disabled]="isRecovering()" (click)="freeSlot.set(null)">Volver</gp-button>
           </div>
         }
+        @case ('full') {
+          <p class="bk-note">Esta clase está completa: no quedan lugares.</p>
+        }
         @case ('expired') {
           <p class="bk-note">Este horario es después del vencimiento de tus clases para recuperar (hasta el {{ recoveryDeadline() }}).</p>
         }
@@ -142,6 +146,7 @@
           <p class="bk-note">Tu entrenador no tiene habilitado recuperar clases.</p>
         }
         @default {
+          @if (monthCapNotice(); as cap) { <p class="bk-note cap-warn">{{ cap }}</p> }
           <p class="bk-note">No tenés clases para recuperar. Si avisás con 12 horas o más que no vas a una clase, ganás una para recuperar en los próximos 30 días.</p>
         }
       }
