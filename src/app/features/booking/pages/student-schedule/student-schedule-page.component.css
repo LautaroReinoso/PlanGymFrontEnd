@@ -44,3 +44,5 @@
   transition: transform var(--duration-fast) var(--ease-spring); }
 .slot--recover:hover { transform: translateY(-1px); }
 .slot--recover .slot__state { color: var(--color-celeste); }
+
+.rec__item--soon { color: var(--color-warning) !important; }

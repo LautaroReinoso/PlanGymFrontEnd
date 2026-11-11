@@ -1,14 +1,15 @@
 // ─────────────────────────────────────────────
 //  PlanGym — StudentSchedulePage (/student/turnos/horarios)
 //  Horarios de su entrenador día por día (con cupo, incluidos completos)
-//  y "Recuperar" en un horario con lugar del mismo mes.
+//  y "Recuperar" en un horario con lugar antes de que venza (30 días desde la clase).
 //  Recuperar: avisó a tiempo que no iba → gana 1 clase para usar ese mes
 //  (tope por mes que pone el entrenador). Se recupera en cualquier servicio.
 // ─────────────────────────────────────────────
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, forkJoin, of, switchMap } from 'rxjs';
+import { ddmm, expiresSoon, latestRecoveryDeadline, pendingRecoveries, withinRecoveryWindow } from '../../utils/recovery.util';
 
 import { BookingStudentService } from '../../services/booking-student.service';
 import { RecoverySummary, ScheduleSlot } from '../../models/booking.models';
@@ -23,6 +24,8 @@ import { apiErrorText } from '../../../../core/http/api-error.util';
 
 /** Días que se muestran en la tira (el backend acepta hasta 42) */
 const DAYS_AHEAD = 21;
+/** Máximo que acepta GET /schedule (y el plazo de 30 días de una recuperación entra) */
+const MAX_DAYS = 42;
 
 interface DayTab { key: string; dow: string; num: number; count: number; free: number; }
 
@@ -56,7 +59,7 @@ export class StudentSchedulePageComponent {
       const k = isoDateKey(s.startAt);
       byDay.set(k, [...(byDay.get(k) ?? []), s]);
     }
-    return Array.from({ length: DAYS_AHEAD }, (_, i) => {
+    return Array.from({ length: this.daysAhead() }, (_, i) => {
       const key = addDays(this.today, i);
       const list = (byDay.get(key) ?? []).filter(s => !isPast(s.endAt));
       return {
@@ -72,28 +75,42 @@ export class StudentSchedulePageComponent {
   readonly dayTitle = computed(() =>
     this.selected() === this.today ? `Hoy, ${longDate(this.selected()).toLowerCase()}` : longDate(this.selected()));
 
-  /** "30 de noviembre" (último día para recuperar) */
-  readonly deadline = computed(() => {
-    const s = this.summary();
-    if (!s?.expiresAt) return '';
-    const last = addDays(isoDateKey(s.expiresAt), -1);
-    return longDate(last).split(' ').slice(1).join(' ');
-  });
+  /** Días que muestra la tira: 21, o hasta el vencimiento más lejano (tope 42) para poder pasar al mes siguiente. */
+  readonly daysAhead = signal(DAYS_AHEAD);
 
-  readonly recoveryEnabled = computed(() => (this.summary()?.limit ?? 0) > 0);
+  /** "dd/MM" del vencimiento más próximo y del más lejano */
+  readonly earliestExpiry = computed(() => ddmm(this.summary()?.expiresAt));
+  readonly latestDeadline = computed(() => latestRecoveryDeadline(this.summary()));
+
+  readonly recoveryEnabled = computed(() => (this.summary()?.limit ?? 0) > 0 || (this.summary()?.available ?? 0) > 0);
   readonly available = computed(() => this.summary()?.available ?? 0);
-  /** Recuperaciones pendientes con el detalle de qué clase faltó */
-  readonly pendingItems = computed(() => (this.summary()?.items ?? []).filter(i => !i.recoveredByBookingId));
+  /** Recuperaciones pendientes (no usadas, no vencidas), la que vence antes primero */
+  readonly pendingItems = computed(() => pendingRecoveries(this.summary()));
+  readonly ddmm = ddmm;
+  readonly expiresSoon = expiresSoon;
 
   constructor() { this.load(); }
 
   load(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    forkJoin({
-      slots: this.api.schedule({ from: this.today, to: addDays(this.today, DAYS_AHEAD - 1) }),
-      summary: this.api.recoveries().pipe(catchError(() => of(null))),
-    }).subscribe({
+    // Primero el resumen: el vencimiento más lejano define hasta dónde pedir horarios.
+    this.api.recoveries().pipe(
+      catchError(() => of(null)),
+      switchMap(summary => {
+        const last = latestRecoveryDeadline(summary);
+        let n = DAYS_AHEAD;
+        if (last && (summary?.available ?? 0) > 0) {
+          const diff = Math.ceil((fromKey(isoDateKey(last)).getTime() - fromKey(this.today).getTime()) / 86_400_000) + 1;
+          n = Math.min(MAX_DAYS, Math.max(DAYS_AHEAD, diff));
+        }
+        this.daysAhead.set(n);
+        return forkJoin({
+          slots: this.api.schedule({ from: this.today, to: addDays(this.today, n - 1) }),
+          summary: of(summary),
+        });
+      }),
+    ).subscribe({
       next: ({ slots, summary }) => {
         this.slots.set(slots);
         this.summary.set(summary);
@@ -107,12 +124,11 @@ export class StudentSchedulePageComponent {
   }
 
   /** Estado de una franja para el alumno */
-  stateOf(s: ScheduleSlot): 'mine' | 'full' | 'otherMonth' | 'recover' | 'free' {
+  stateOf(s: ScheduleSlot): 'mine' | 'full' | 'expired' | 'recover' | 'free' {
     if (s.myBookingId) return 'mine';
     if (s.free <= 0) return 'full';
-    const month = this.summary()?.month;
-    if (month && !s.startAt.startsWith(month)) return 'otherMonth';
-    return this.recoveryEnabled() && this.available() > 0 ? 'recover' : 'free';
+    if (this.available() <= 0) return 'free';
+    return withinRecoveryWindow(this.summary(), s.startAt) ? 'recover' : 'expired';
   }
 
   pick(s: ScheduleSlot): void {

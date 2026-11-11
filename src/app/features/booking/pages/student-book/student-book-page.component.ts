@@ -85,6 +85,9 @@ export class StudentBookPageComponent {
     });
   }
 
+  /** Aviso del tope mensual del plan (message del 409 del backend) */
+  readonly capNotice = signal<string | null>(null);
+
   book(): void {
     const s = this.chosen(), id = this.serviceId();
     if (!s || !id) return;
@@ -96,7 +99,18 @@ export class StudentBookPageComponent {
         this.toast.success('¡Clase reservada!');
         this.router.navigate(['/student/turnos']);
       },
-      error: err => { this.isSaving.set(false); this.toast.error(apiErrorText(err)); this.load(); },
+      error: err => {
+        this.isSaving.set(false);
+        const msg = apiErrorText(err);
+        // 409 por tope mensual del plan: aviso visible (no un error genérico)
+        if (err?.status === 409 && /por mes|clases por mes|tu plan/i.test(msg)) {
+          this.chosen.set(null);
+          this.capNotice.set(msg);
+          return;
+        }
+        this.toast.error(msg);
+        this.load();
+      },
     });
   }
 }

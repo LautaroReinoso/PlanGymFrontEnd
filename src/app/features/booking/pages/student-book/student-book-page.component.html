@@ -14,6 +14,13 @@
     </div>
   }
 
+  @if (capNotice()) {
+    <div class="bk-note cap-notice" role="status">
+      <strong>Llegaste al tope de tu plan</strong>
+      <p style="margin:4px 0 0">{{ capNotice() }}</p>
+      <button type="button" class="bk-tab" style="margin-top:8px" (click)="capNotice.set(null)">Entendido</button>
+    </div>
+  }
   @if (error()) { <p class="bk-error">{{ error() }}</p> }
 
   @if (serviceId()) {

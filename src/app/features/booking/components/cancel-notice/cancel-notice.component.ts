@@ -6,6 +6,7 @@
 //  campo todavía no viene, no aparece nada.
 // ─────────────────────────────────────────────
 
+import { plus30 } from '../../utils/recovery.util';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { StudentClassesService } from '../../services/student-classes.service';
@@ -38,10 +39,11 @@ function saveSeen(ids: Set<number>): void {
           <div class="cn__item">
             <strong>{{ b.serviceName }} · {{ when(b) }}</strong>
             @if (b.cancelReason) { <span class="cn__reason">“{{ b.cancelReason }}”</span> }
+            @if (b.grantsRecovery !== false) { <span class="cn__reason">La podés recuperar hasta el {{ until(b) }}.</span> }
           </div>
         }
         @if (anyRecovery()) {
-          <p class="cn__text">Podés recuperar {{ pending().length > 1 ? 'esas clases' : 'esa clase' }} en cualquier horario con lugar de este mes.</p>
+          <p class="cn__text">Podés recuperar {{ pending().length > 1 ? 'esas clases' : 'esa clase' }} en cualquier horario con lugar, hasta 30 días después.</p>
         }
         <div class="cn__actions">
           @if (anyRecovery()) {
@@ -84,6 +86,8 @@ export class CancelNoticeComponent {
         .sort((a, b) => a.startAt.localeCompare(b.startAt)));
     });
   }
+
+  until(b: Booking): string { return plus30(b.startAt); }
 
   when(b: Booking): string { return `${longDate(isoDateKey(b.startAt))}, ${isoTime(b.startAt)}`; }
 

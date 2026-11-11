@@ -1,3 +1,4 @@
+import { ddmm, expiresSoon, latestRecoveryDeadline, pendingRecoveries, withinRecoveryWindow } from '../../utils/recovery.util';
 // ─────────────────────────────────────────────
 //  PlanGym — StudentAgendaPage (/student/turnos)
 //  Mis clases (semana/mes) + mis horarios fijos.
@@ -191,10 +192,10 @@ export class StudentAgendaPageComponent {
     const b = this.open();
     if (!b) return;
     this.isWorking.set(true);
-    this.api.absence(b.id).subscribe({
-      next: () => {
+    this.api.absenceWithMessage(b.id).subscribe({
+      next: msg => {
         this.isWorking.set(false);
-        this.toast.success('Listo, avisamos que no vas. Si avisaste a tiempo, ganaste una clase para recuperar este mes.');
+        this.toast.success(msg);
         this.close();
         this.load();
         this.loadRecovery();
@@ -236,13 +237,25 @@ export class StudentAgendaPageComponent {
   }
 
   // ── Recuperar en un horario libre ──
-  /** ¿Puede recuperar en ese horario? (le quedan y es del mes del resumen) */
-  readonly freeSlotState = computed<'ok' | 'none' | 'disabled' | 'otherMonth'>(() => {
+  /** ¿Puede recuperar en ese horario? (le quedan y cae antes del vencimiento más lejano) */
+  readonly freeSlotState = computed<'ok' | 'none' | 'disabled' | 'expired'>(() => {
     const s = this.freeSlot(), r = this.recovery();
     if (!s || !r) return 'none';
     if (r.limit <= 0 && r.available <= 0 && !(r.professionalCancels ?? 0)) return 'disabled';
-    if (!s.startAt.startsWith(r.month)) return 'otherMonth';
-    return r.available > 0 ? 'ok' : 'none';
+    if (r.available <= 0) return 'none';
+    return withinRecoveryWindow(r, s.startAt) ? 'ok' : 'expired';
+  });
+  readonly recoveryDeadline = computed(() => ddmm(latestRecoveryDeadline(this.recovery())));
+  readonly pendingItems = computed(() => pendingRecoveries(this.recovery()));
+  readonly earliestExpiry = computed(() => ddmm(this.recovery()?.expiresAt));
+  readonly ddmm = ddmm;
+  readonly expiresSoon = expiresSoon;
+  /** "Tu plan: 12 clases por mes" (monthlyCap del backend; de los servicios en que está anotado) */
+  readonly planCaps = computed(() => {
+    const mine = new Set(this.enrollments().map(e => e.serviceId));
+    const withCap = this.services().filter(s => s.monthlyCap);
+    const list = withCap.filter(s => mine.has(s.id));
+    return list.length ? list : withCap.length === 1 ? withCap : [];
   });
 
   freeSlotLabel(s: ScheduleSlot): string {

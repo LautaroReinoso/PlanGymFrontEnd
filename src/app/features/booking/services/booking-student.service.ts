@@ -4,7 +4,8 @@
 // ─────────────────────────────────────────────
 
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, map } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { ddmm } from '../utils/recovery.util';
 import { BookingHttp } from './booking-http.service';
 import {
   Booking, BookingService, CancellationPreview, Enrollment, FreeSlot, RecoveryRequest,
@@ -29,6 +30,23 @@ export class BookingStudentService {
   /** Clase de horario fijo: "Avisar que no voy" (libera el lugar). */
   absence(id: number): Observable<unknown> {
     return this.api.post(`/bookings/${id}/absence`);
+  }
+
+  /**
+   * Avisa que no va y arma el texto de confirmación con el vencimiento real de esa clase:
+   * "Listo. Podés recuperar esta clase hasta el 14/12". Si no generó recuperación (o el
+   * resumen falla), un texto neutro. Los 400 (aviso tarde) se propagan con su message.
+   */
+  absenceWithMessage(id: number): Observable<string> {
+    return this.absence(id).pipe(
+      switchMap(() => this.recoveries().pipe(catchError(() => of(null)))),
+      map(r => {
+        const item = r?.items.find(i => i.absenceBookingId === id);
+        return item?.expiresAt
+          ? `Listo. Podés recuperar esta clase hasta el ${ddmm(item.expiresAt)}.`
+          : 'Listo, avisamos que no vas.';
+      }),
+    );
   }
 
   cancellationPreview(id: number): Observable<CancellationPreview> {
@@ -83,9 +101,9 @@ export class BookingStudentService {
     return forkJoin(calls).pipe(map(parts => parts.flat().sort((a, b) => a.startAt.localeCompare(b.startAt))));
   }
 
-  /** Resumen de recuperaciones del mes (por defecto el actual). */
-  recoveries(month?: string): Observable<RecoverySummary> {
-    return this.api.get<RecoverySummary>('/recoveries/mine', { month });
+  /** Recuperaciones vigentes (cada una vence 30 días después de la clase). Ya no recibe ?month. */
+  recoveries(): Observable<RecoverySummary> {
+    return this.api.get<RecoverySummary>('/recoveries/mine');
   }
 
   recover(body: RecoveryRequest): Observable<Booking> {

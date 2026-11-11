@@ -1,3 +1,4 @@
+import { ddmm } from '../../utils/recovery.util';
 // ─────────────────────────────────────────────
 //  PlanGym — app-next-class-card (Inicio del alumno)
 //  Próxima clase con acción rápida. Sin clases: atajos a elegir/reservar.
@@ -54,6 +55,15 @@ export class NextClassCardComponent {
 
   readonly canChoose = computed(() =>
     this.services().some(s => s.selfEnrollment && s.bookingMode !== 'SELF'));
+  /** "Tu plan: 12 clases por mes" — el tope lo calcula el backend (monthlyCap). */
+  readonly planCaps = computed(() => {
+    const used = new Set(this.upcoming().map(b => b.serviceId));
+    const withCap = this.services().filter(s => s.monthlyCap);
+    const mine = withCap.filter(s => used.has(s.id));
+    return (mine.length ? mine : withCap.length === 1 ? withCap : []);
+  });
+  readonly earliestExpiry = computed(() => ddmm(this.recovery()?.expiresAt));
+
   readonly canBookSingle = computed(() =>
     this.services().some(s => s.bookingMode === 'SELF' || s.bookingMode === 'BOTH'));
 
@@ -77,11 +87,11 @@ export class NextClassCardComponent {
     const b = this.next();
     if (!b) return;
     this.isWorking.set(true);
-    this.api.absence(b.id).subscribe({
-      next: () => {
+    this.api.absenceWithMessage(b.id).subscribe({
+      next: msg => {
         this.isWorking.set(false);
         this.confirming.set(false);
-        this.toast.success('Listo, avisamos que no vas. Ganaste una clase para recuperar este mes.');
+        this.toast.success(msg);
         this.load();
       },
       error: err => {

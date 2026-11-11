@@ -152,10 +152,14 @@ export interface BookingService {
   bookingMode: BookingMode;
   selfEnrollment?: boolean;
   weeklyLimit?: number | null;
+  /** Tope de clases por mes cargado a mano (1–62) o null */
+  monthlyLimit?: number | null;
+  /** Tope que se aplica (solo lectura): monthlyLimit, o weeklyLimit × 4; null = sin tope */
+  monthlyCap?: number | null;
   price?: number;
   active?: boolean;
 }
-export type BookingServiceRequest = Omit<BookingService, 'id'>;
+export type BookingServiceRequest = Omit<BookingService, 'id' | 'monthlyCap'>;
 
 /** Bloqueo propio (ExceptionResponse del backend) */
 export interface Block {
@@ -227,15 +231,15 @@ export interface ScheduleSlot {
   myBookingId: number | null;
 }
 
-/** GET /recoveries/mine */
+/** GET /recoveries/mine (sin ?month): créditos vigentes. Cada clase se recupera hasta 30 días después. */
 export interface RecoverySummary {
-  month: string;          // "YYYY-MM"
-  limit: number;          // tope de las AUSENCIAS (0 = sin recuperación por ausencia)
-  absences: number;       // ausencias avisadas a tiempo en el mes
+  month: string;          // "YYYY-MM" (informativo)
+  limit: number;          // tope mensual de las AUSENCIAS (0 = sin recuperación por ausencia)
+  absences: number;       // ausencias avisadas a tiempo
   professionalCancels?: number; // clases de horario fijo que canceló el profe/sitio (sin tope)
   used: number;
   available: number;
-  expiresAt: string;      // instante en que vencen (inicio del mes siguiente)
+  expiresAt: string | null; // vencimiento más próximo entre las disponibles
   items: {
     absenceBookingId: number;
     source?: 'ABSENCE' | 'PROFESSIONAL_CANCEL';
@@ -247,6 +251,8 @@ export interface RecoverySummary {
     startAt: string;
     recoveredByBookingId: number | null;
     recoveredAt: string | null;
+    /** Hasta cuándo se puede recuperar esta clase (30 días después) */
+    expiresAt?: string | null;
   }[];
 }
 

@@ -924,25 +924,31 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - **Mis alumnos:** con Turnos prendido, cada tarjeta muestra próxima clase y horarios fijos (`GET /professional/students?status=ALL`, cruce por `userId`).
 - **409 de franjas:** se explica que primero hay que cambiar o terminar esos horarios fijos, con link a Horarios fijos.
 
-### Recuperar clases (backend V21, carpeta 13 de Postman)
-- Avisar a tiempo que no va → gana 1 clase para recuperar **en el mismo mes**, en cualquier horario con lugar
-  de su entrenador (cualquier servicio). Avisar tarde o faltar no da recuperación. Lo no usado vence a fin de mes.
-- **El profe (o el sitio) cancela** una clase de horario fijo futura (cancelar turno, o bloqueo con `confirm=true`) →
-  el alumno gana 1 clase para recuperar **sin tope** (no cuenta para `recoveriesPerMonth`), mismo mes. El backend usa
-  primero estos créditos. Clases sueltas o recuperaciones ya tomadas no generan otra (al cancelar una recuperación
-  vuelve el crédito con el que se tomó). Backend V22; cancelaciones viejas (antes de V22) no dan recuperación.
-- Tope **por entrenador**: `GET/PUT /professional/me { displayName, recoveriesPerMonth }` (0 = no). El PUT exige
-  `displayName`, por eso se manda el actual. Se edita en "Horarios fijos → Recuperar clases".
-- `GET /schedule?from=&to=` (máx. **42** días; `schedule()` parte en tramos) → `ScheduleSlot[]` con `capacity/booked/free/myBookingId`.
-- `GET /recoveries/mine?month=` → `RecoverySummary { month, limit, absences, professionalCancels, used, available,
-  expiresAt, items: [{ absenceBookingId, source: ABSENCE | PROFESSIONAL_CANCEL, cancelReason, serviceId, serviceName,
-  professionalId, professionalName, startAt, recoveredByBookingId, recoveredAt }] }`. `limit` es solo el tope de ausencias.
-- `POST /recoveries/mine { serviceId, professionalId, startAt }` → `Booking` con `recoveryOfBookingId`. 409 sin lugar · 400 sin
-  recuperaciones / otro mes. La recuperación es clase suelta: se cancela con preview + cancel y vuelve a estar disponible.
-- UI alumno: en **Mis turnos** se toca un horario libre del calendario (semana o mes) → "Recuperar acá";
-  `/student/turnos/horarios` (tira de 21 días con Tu clase / Completo / Recuperar · N libres / otro mes);
-  banner en Mis turnos, línea en la tarjeta de próxima clase del Inicio y popup cuando el profe cancela.
-  Entrenador: "recupera" en el detalle de la clase y en Hoy.
+### Recuperar clases (plazo de 30 días — backend `feature/booking-cupos`)
+- Avisar que no va con **12 horas o más** (`POST /bookings/{id}/absence`) → gana 1 clase para recuperar **hasta 30 días
+  después de la clase**, aunque caiga en el mes siguiente. Avisar tarde → 400 con `message` ("Faltan menos de 12 horas…").
+- **El profe (o el sitio) cancela** una clase → también gana una, mismo plazo, sin gastar el tope `recoveriesPerMonth`.
+- Tope **por entrenador**: `GET/PUT /professional/me { displayName, recoveriesPerMonth }` (0 = no). Se edita en
+  "Horarios fijos → Recuperar clases".
+- `GET /recoveries/mine` **sin `?month`** → créditos vigentes `{ month, limit, absences, professionalCancels, used,
+  available, expiresAt (el más próximo), items[{ …, expiresAt }] }`. `utils/recovery.util.ts`: `pendingRecoveries`,
+  `latestRecoveryDeadline`, `withinRecoveryWindow`, `expiresSoon` (≤ 7 días → ámbar), `ddmm`, `plus30`.
+- `POST /recoveries/mine { serviceId, professionalId, startAt }`: el horario tiene que ser anterior al vencimiento (si no, 400
+  con la fecha); el backend usa la que vence antes. 409 sin lugar.
+- `GET /schedule?from=&to=` (máx. 42 días). La tira de `/student/turnos/horarios` se extiende hasta el vencimiento más lejano
+  (21 a 42 días); los horarios posteriores se ven "después del vencimiento" y no se pueden elegir.
+- Textos: "Listo. Podés recuperar esta clase hasta el dd/MM" (`absenceWithMessage`, busca el item recién creado),
+  "Tenés N para recuperar · la primera vence el dd/MM" + lista con vencimiento en Mis turnos y Horarios, popup del profe
+  "La podés recuperar hasta el {día + 30}". `changesLeft` (cambios de horario fijo) **sigue siendo mensual**.
+
+### Tope mensual de clases por plan (backend `feature/booking-cupos`)
+- Servicio: `monthlyLimit` (a mano, 1–62, o null) y `monthlyCap` (el que se aplica: `monthlyLimit` o `weeklyLimit × 4`;
+  null = sin tope). Suma horario fijo + sueltos; las recuperaciones no cuentan; el generador no crea la clase de más.
+- Formulario de Servicios: "Veces por semana" + "Clases por mes" (placeholder "12, según 3 por semana", en vivo). Listado:
+  "3 por semana · 12 por mes".
+- Alumno: "Tu plan: 12 clases por mes" en Mis turnos y en la tarjeta del Inicio (servicios en los que está anotado). El uso del
+  mes no se calcula en el front. Reservar clase suelta: el 409 del tope se muestra como aviso con su `message`.
+- No hay "reprogramar" en el front todavía (`POST /bookings/{id}/reschedule`).
 
 ### Formas verificadas contra el backend (`elytra-platform`, rama `feature/booking`)
 - Servicio = `ServiceAdminResponse` (trae además precio, modalidad, avisos mínimos, abonos…; el front ignora lo que no usa).
@@ -1044,7 +1050,7 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 
 ### Cerrar Turnos (cuando termine la prueba)
 - [ ] PR `feature/turnos-calendario` → `master` (front) y `feature/booking` → `main` (backend `elytra-platform`)
-- [ ] Deploy: backend a Railway (Flyway corre V21, V22 y V24) y `ng build` del front a HostGator
+- [ ] Deploy: backend a Railway (Flyway corre V21, V22, V24 y las de `feature/booking-cupos`) y `ng build` del front a HostGator
 - [ ] Producción: habilitar el módulo BOOKING para `plangym` y dar de alta como profesionales a los entrenadores que
       ya tenían TRAINER (los nuevos se dan de alta solos al recibir el rol)
 

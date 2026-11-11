@@ -22,7 +22,7 @@ const MODE_TEXT: Record<BookingMode, string> = {
 
 const EMPTY_SERVICE: BookingServiceRequest = {
   name: '', description: '', durationMinutes: 60, bookingMode: 'ENROLLMENT',
-  selfEnrollment: false, weeklyLimit: 2, price: 0,
+  selfEnrollment: false, weeklyLimit: 2, monthlyLimit: null, price: 0,
 };
 
 @Component({
@@ -56,6 +56,13 @@ export class TrainerServicesPageComponent {
     return !!f && (f.bookingMode === 'ENROLLMENT' || f.bookingMode === 'BOTH');
   });
 
+  /** "12, según 3 por semana" — se recalcula en vivo */
+  readonly monthlyPlaceholder = computed(() => {
+    const f = this.serviceForm();
+    const w = this.allowsEnrollment() ? f?.weeklyLimit : null;
+    return w ? `${w * 4}, según ${w} por semana` : 'Sin tope';
+  });
+
   constructor() { this.load(); }
 
   load(): void {
@@ -77,6 +84,7 @@ export class TrainerServicesPageComponent {
     return {
       name: s.name, description: s.description ?? '', durationMinutes: s.durationMinutes,
       bookingMode: s.bookingMode, selfEnrollment: !!s.selfEnrollment, weeklyLimit: s.weeklyLimit ?? 2,
+      monthlyLimit: s.monthlyLimit ?? null,
       price: 0, active: active ?? s.active,
     };
   }
@@ -106,6 +114,7 @@ export class TrainerServicesPageComponent {
       price: 0,
       selfEnrollment: this.allowsEnrollment() ? !!f.selfEnrollment : false,
       weeklyLimit: this.allowsEnrollment() ? f.weeklyLimit : null,
+      monthlyLimit: f.monthlyLimit && f.monthlyLimit > 0 ? Math.min(62, Math.round(f.monthlyLimit)) : null,
     };
     const editing = this.editingService();
     this.isSavingService.set(true);

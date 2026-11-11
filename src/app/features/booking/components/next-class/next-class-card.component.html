@@ -20,7 +20,7 @@
       @if (blockedMsg()) {
         <p class="nc__note">{{ blockedMsg() }}</p>
       } @else if (confirming()) {
-        <p class="nc__note">Tu lugar queda libre para otro alumno y ganás una clase para recuperar este mes (si avisás a tiempo).</p>
+        <p class="nc__note">Tu lugar queda libre para otro alumno y si avisás con 12 horas o más, ganás una clase para recuperar en los próximos 30 días.</p>
         <div class="nc__actions">
           <gp-button size="sm" variant="secondary" [loading]="isWorking()" (click)="absence()">Sí, no voy</gp-button>
           <gp-button size="sm" variant="ghost" [disabled]="isWorking()" (click)="confirming.set(false)">Volver</gp-button>
@@ -54,7 +54,16 @@
 
   @if (!isLoading() && (recovery()?.available ?? 0) > 0) {
     <a class="nc__rec" routerLink="/student/turnos/horarios">
-      Tenés {{ recovery()!.available }} {{ recovery()!.available === 1 ? 'clase' : 'clases' }} para recuperar · <strong>Elegir horario</strong>
+      Tenés {{ recovery()!.available }} para recuperar
+      @if (earliestExpiry()) { · la primera vence el {{ earliestExpiry() }} }
+      · <strong>Elegir horario</strong>
     </a>
+  }
+  @if (!isLoading() && planCaps().length) {
+    <p class="nc__muted">
+      @for (s of planCaps(); track s.id) {
+        Tu plan{{ planCaps().length > 1 ? ' ' + s.name : '' }}: {{ s.monthlyCap }} clases por mes@if (!$last) { · }
+      }
+    </p>
   }
 </section>
