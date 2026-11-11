@@ -100,12 +100,9 @@
           <input type="number" min="1" max="7" [ngModel]="f.weeklyLimit" (ngModelChange)="patchForm({ weeklyLimit: $event === '' || $event == null ? null : +$event })" />
         </label>
       }
-      <label class="bk-field">
-        Clases por mes
-        <input type="number" min="1" max="62" [placeholder]="monthlyPlaceholder()"
-               [ngModel]="f.monthlyLimit" (ngModelChange)="patchForm({ monthlyLimit: $event === '' || $event == null ? null : +$event })" />
-        <span class="bk-muted" style="font-size:12px">Si lo dejás vacío, se calcula como veces por semana × 4.</span>
-      </label>
+      @if (allowsEnrollment() && f.weeklyLimit) {
+        <p class="bk-muted" style="font-size:12px;margin:0">Son {{ f.weeklyLimit * 4 }} clases por mes ({{ f.weeklyLimit }} por semana × 4).</p>
+      }
       @if (serviceError()) { <p class="bk-error">{{ serviceError() }}</p> }
       <div class="bk-row">
         <gp-button [loading]="isSavingService()" [disabled]="!f.name.trim() || !f.durationMinutes" (click)="saveService()">Guardar</gp-button>

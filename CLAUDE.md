@@ -951,8 +951,10 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 ### Tope mensual de clases por plan (backend `feature/booking-cupos`)
 - Servicio: `monthlyLimit` (a mano, 1–62, o null) y `monthlyCap` (el que se aplica: `monthlyLimit` o `weeklyLimit × 4`;
   null = sin tope). Suma horario fijo + sueltos; las recuperaciones no cuentan; el generador no crea la clase de más.
-- Formulario de Servicios: "Veces por semana" + "Clases por mes" (placeholder "12, según 3 por semana", en vivo). Listado:
-  "3 por semana · 12 por mes".
+- Formulario de Servicios: solo "Veces por semana" + texto "Son 12 clases por mes (3 por semana × 4)". `monthlyLimit` se
+  manda siempre `null` (el backend calcula `monthlyCap`). Listado: "3 por semana · 12 por mes".
+- `modality` es obligatoria en el backend: PlanGym es solo presencial → el front manda siempre `IN_PERSON` (crear,
+  editar y reactivar).
 - Alumno: "Tu plan: 12 clases por mes" en Mis turnos y en la tarjeta del Inicio (servicios en los que está anotado). El uso del
   mes no se calcula en el front. Reservar clase suelta: el 409 del tope se muestra como aviso con su `message`.
 - No hay "reprogramar" en el front todavía (`POST /bookings/{id}/reschedule`).

@@ -154,6 +154,8 @@ export interface BookingService {
   weeklyLimit?: number | null;
   /** Tope de clases por mes cargado a mano (1–62) o null */
   monthlyLimit?: number | null;
+  /** PlanGym es siempre presencial: el front manda IN_PERSON (el backend la exige) */
+  modality?: 'IN_PERSON' | 'ONLINE';
   /** Tope que se aplica (solo lectura): monthlyLimit, o weeklyLimit × 4; null = sin tope */
   monthlyCap?: number | null;
   price?: number;
