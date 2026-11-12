@@ -80,7 +80,7 @@ src/app/
 │   │   └── storage.service.ts       → wrapper localStorage tipado
 │   ├── models/
 │   │   └── auth.models.ts           → AuthSession, JwtPayload, RoleType
-│   └── environment.token.ts         → InjectionToken para environment
+│   └── (token ENVIRONMENT: src/environments/tokens/environment.token.ts — única definición)
 │
 ├── shared/
 │   ├── components/
@@ -445,9 +445,7 @@ interface UpdateDayRequest {
   description: string
   orderIndex: number
 }
-// ⚠️ Duplicado: existe también un UpdateDayRequest local e idéntico dentro de
-//    edit-day-modal.component.ts. No rompe nada (misma forma), pero convendría
-//    que ese componente importe este tipo en vez de redeclararlo.
+// Fuente única: edit-day-modal.component.ts lo re-exporta desde acá (ya no lo redeclara).
 
 // Espejo de DayExerciseResponse
 interface DayExercise {
@@ -604,6 +602,12 @@ respuesta del backend → **las páginas no guardan estado propio**.
 ---
 
 ## Patrones Angular 19 usados
+
+### Suscripciones RxJS en componentes
+Todos los `.subscribe()` de componentes (`features/**/*.component.ts`) van con
+`.pipe(takeUntilDestroyed(this.destroyRef))` y el componente declara primero
+`private readonly destroyRef = inject(DestroyRef);`. Así una respuesta que llega tarde (celular lento) no pisa la
+pantalla a la que ya se fue el usuario. Los servicios no lo usan (son root). Sin `console.log` de debug en el código.
 
 ### Signals
 ```typescript
@@ -1013,11 +1017,17 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
       `WorkoutTemplateMapper.toExerciseDetail()`, que antes mandaba `.muscleGroup(...)`. Si sigue
       mandando `muscleGroup` en vez de `primaryMuscle`, se pierden los íconos y el resumen por músculo
       en la plantilla. Lo mismo para la vista del alumno (`studentWorkout`).
-- [ ] Posible **doble definición del token `ENVIRONMENT`**: existe `core/config/environment.ts` (no usado por `exercise.service.ts`/`template.service.ts`, que importan de `environments/tokens/environment.token.ts`) — confirmar cuál es el real y borrar el que sobre
-- [ ] `AddExerciseToDayRequest` — import sin usar en `add-exercises-modal.component.ts` (preexistente, no rompe nada)
-- [ ] `UpdateDayRequest` duplicado entre `trainer.models.ts` y `edit-day-modal.component.ts` (mismo shape, preexistente) — unificar para que `edit-day-modal` importe el de `trainer.models.ts`
+- [x] Token `ENVIRONMENT` duplicado: se borró `core/config/environment.ts` (sin uso); el real es `environments/tokens/environment.token.ts`
+- [x] Import sin usar de `AddExerciseToDayRequest` en `add-exercises-modal` — sacado
+- [x] `UpdateDayRequest` unificado en `trainer.models.ts`
 - [x] `MUSCLE_GROUP_LABELS` — fuente única en `muscle-group.util.ts`
-- [ ] Sin tests nuevos para lo agregado (`.spec.ts` del proyecto son boilerplate default de Angular CLI, sin adaptar)
+- [x] Tests de lógica pura: `recovery.util.spec.ts` (vencimientos, ventana de 30 días, tope del mes) y
+      `exercise-meta.util.spec.ts` (por tiempo / reps). El resto de los `.spec.ts` sigue siendo boilerplate del CLI.
+      Correr solo esos: `ng test --watch=false --include='**/recovery.util.spec.ts' --include='**/exercise-meta.util.spec.ts'`
+      (en Linux como root, Chrome necesita `--no-sandbox` → karma config con customLauncher).
+- [ ] Tests del cálculo "le toca" de `/trainer/hoy` (hoy vive dentro del componente: extraerlo a un util para testearlo)
+- [ ] CSS de componentes que pasan el budget de aviso (4 kB): login, register, template-detail, student-detail — mover
+      estilos repetidos a `styles.css` / `booking.css`
 
 ### Student
 - [x] `DashboardPage` — plan activo + lista de días (el alumno elige)
@@ -1061,8 +1071,7 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] Recuperar tocando un horario libre del calendario (semana y mes)
 - [ ] Cambiar la hora de una franja deja a los alumnos fijos en la hora vieja (el editor avisa, el backend da 409);
       decidir si se mueven solos
-- [ ] Probado contra el backend real: entrenador (horarios y cupos, horarios fijos, calendario, Hoy) y recuperación
-      por cancelación del profe ✔ — falta: límites de recuperación, bloqueos con alumnos, celular en general
+- [x] Probado contra el backend real (nov-2026): turnos, recuperar (30 días, topes), cambiar plan, un solo plan, celular
 - [x] Formas verificadas contra el backend (servicio, bloqueos, slots, preview de cancelación)
 - [x] Recuperar clases: horarios día por día, recuperar, tope del entrenador, "recupera" en su agenda
 - [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)
