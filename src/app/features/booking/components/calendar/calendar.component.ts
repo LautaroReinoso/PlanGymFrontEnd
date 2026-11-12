@@ -6,7 +6,7 @@
 //  Mes: solo contadores por día; al tocar un día se lista abajo.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CalEntry } from './calendar.models';
 import { CalendarView } from '../../services/calendar-prefs';
@@ -83,6 +83,23 @@ export class BookingCalendarComponent {
   });
 
   readonly isEmpty = computed(() => !this.loading() && this.entries().length === 0);
+
+  private readonly host = inject(ElementRef<HTMLElement>);
+
+  constructor() {
+    // En el celular la semana se desliza de costado: arrancar mostrando hoy.
+    effect(() => {
+      if (this.view() !== 'week' || this.loading()) return;
+      this.weekDays();
+      setTimeout(() => {
+        const week = this.host.nativeElement.querySelector('.cal-week') as HTMLElement | null;
+        const today = week?.querySelector('.cal-week__day--today') as HTMLElement | null;
+        if (week && today && week.scrollWidth > week.clientWidth) {
+          week.scrollTo({ left: today.offsetLeft - week.offsetLeft, behavior: 'auto' });
+        }
+      });
+    });
+  }
 
   setView(v: CalendarView): void { if (v !== this.view()) this.viewChange.emit(v); }
 
