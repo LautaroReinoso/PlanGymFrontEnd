@@ -6,19 +6,16 @@
     </div>
   </header>
 
-  <!-- Recuperar / ver horarios -->
-  <a class="rec-link" [class.rec-link--on]="(recovery()?.available ?? 0) > 0" routerLink="/student/turnos/horarios">
-    <span class="rec-link__text">
-      @if ((recovery()?.available ?? 0) > 0) {
+  <!-- Recuperar: solo si tiene clases para recuperar (los horarios ya se ven en el calendario de abajo) -->
+  @if ((recovery()?.available ?? 0) > 0) {
+    <a class="rec-link rec-link--on" routerLink="/student/turnos/horarios">
+      <span class="rec-link__text">
         <strong>Tenés {{ recovery()!.available }} para recuperar@if (earliestExpiry()) { · la primera vence el {{ earliestExpiry() }}}</strong>
         <span>Elegí un horario con lugar antes de que venza</span>
-      } @else {
-        <strong>Horarios del día</strong>
-        <span>Mirá las clases de tu entrenador y los lugares libres</span>
-      }
-    </span>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
-  </a>
+      </span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+    </a>
+  }
 
   @if (pendingItems().length) {
     <ul class="rec-items">
