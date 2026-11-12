@@ -1,3 +1,4 @@
+import { catchError, forkJoin, of } from 'rxjs';
 // ─────────────────────────────────────────────
 //  PlanGym — StudentChoosePage (/student/turnos/elegir)
 //  El alumno elige sus horarios fijos (servicios con selfEnrollment).
@@ -52,8 +53,12 @@ export class StudentChoosePageComponent {
   readonly changing = signal(false);
   readonly pending  = signal<Pending | null>(null);
 
+  /** Un alumno tiene un solo plan: si ya tiene horarios, solo se le muestra ese */
+  readonly myPlanId = signal<number | null>(null);
+
   readonly choosable = computed(() => this.services().filter(s =>
-    s.selfEnrollment && (s.bookingMode === 'ENROLLMENT' || s.bookingMode === 'BOTH')));
+    s.selfEnrollment && (s.bookingMode === 'ENROLLMENT' || s.bookingMode === 'BOTH')
+    && (this.myPlanId() == null || s.id === this.myPlanId())));
 
   readonly remaining = computed(() => {
     const o = this.options();
@@ -69,8 +74,13 @@ export class StudentChoosePageComponent {
   })));
 
   constructor() {
-    this.api.services().subscribe({
-      next: list => {
+    forkJoin({
+      list: this.api.services(),
+      mine: this.api.myEnrollments().pipe(catchError(() => of([]))),
+    }).subscribe({
+      next: ({ list, mine }) => {
+        const live = mine.find(e => e.status !== 'ENDED');
+        this.myPlanId.set(live?.serviceId ?? null);
         this.services.set(list);
         const first = this.choosable()[0];
         if (first) this.selectService(first.id);

@@ -32,7 +32,8 @@
     <section class="step">
       <span class="step__label">2. Servicio</span>
       @if (currentPlanName()) {
-        <p class="bk-muted limit-line">Ya está en <strong>{{ currentPlanName() }}</strong>. Un alumno tiene un solo plan: para pasarlo a otro, usá "Cambiar plan" en Horarios fijos.</p>
+        <p class="bk-muted limit-line">Ya está en <strong>{{ currentPlanName() }}</strong>. Un alumno tiene un solo plan.
+          <button type="button" class="link-btn" (click)="requestChangePlan()">Cambiar plan</button></p>
       }
       <div class="bk-grid2">
         <label class="bk-field">
@@ -89,7 +90,10 @@
       }
     </section>
 
-    @if (error()) { <p class="bk-error">{{ error() }}</p> }
+    @if (error()) {
+      <p class="bk-error">{{ error() }}</p>
+      @if (planConflict()) { <button type="button" class="link-btn" (click)="requestChangePlan()">Cambiar plan</button> }
+    }
 
     <div class="bk-row">
       <gp-button [loading]="isSaving()" [disabled]="!canSave()" (click)="save()">

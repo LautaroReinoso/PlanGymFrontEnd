@@ -45,6 +45,15 @@ export class EnrollStudentModalComponent {
   readonly studentId = input<number | null>(null);
   readonly closed = output<void>();
   readonly saved  = output<void>();
+  /** El alumno ya tiene plan: pedirle a la página que abra "Cambiar plan" */
+  readonly changePlan = output<{ userId: number; serviceId: number }>();
+  /** 409 "ya está en otro plan": mostrar botón Cambiar plan */
+  readonly planConflict = signal(false);
+
+  requestChangePlan(): void {
+    const u = this.selectedId(), s = this.currentPlanId() ?? this.serviceId();
+    if (u && s) this.changePlan.emit({ userId: u, serviceId: s });
+  }
 
   readonly days = [1, 2, 3, 4, 5, 6, 7] as DayOfWeek[];
   readonly dayShort = DAY_SHORT;
@@ -117,6 +126,7 @@ export class EnrollStudentModalComponent {
         this.validFrom.set('');
         this.validTo.set('');
         this.error.set(null);
+    this.planConflict.set(false);
         this.loadData(dni);
         if (id) this.loadAlreadyIn(id);
         else this.alreadyIn.set(new Set());
@@ -191,7 +201,7 @@ export class EnrollStudentModalComponent {
       const w = this.weeklyLimit()!, had = this.existingInPlan();
       this.limitNotice.set(`${svc?.name ?? 'Este plan'} es de ${w} ${w === 1 ? 'vez' : 'veces'} por semana: solo podés elegir ${w} ${w === 1 ? 'día' : 'días'}`
         + (had ? ` y ya tiene ${had}.` : '.')
-        + ' Para sumar más, cambiale el plan en Horarios fijos.');
+        + ' Para sumar más días, usá Cambiar plan.');
       return;
     }
     this.picked.update(p => [...p, k]);
@@ -212,6 +222,7 @@ export class EnrollStudentModalComponent {
     });
     this.isSaving.set(true);
     this.error.set(null);
+    this.planConflict.set(false);
     this.api.enrollBatch({
       userId: this.selectedId()!,
       serviceId: this.serviceId()!,
@@ -228,9 +239,8 @@ export class EnrollStudentModalComponent {
         this.isSaving.set(false);
         const msg = apiErrorText(err);
         // 409: ya tiene todos los días de su plan → sugerir cambiar el plan
-        this.error.set(err?.status === 409 && /permite|por semana/i.test(msg)
-          ? msg + ' Si necesita más días, usá "Cambiar plan" en su fila de Horarios fijos.'
-          : msg);
+        this.planConflict.set(err?.status === 409);
+        this.error.set(msg);
       },
     });
   }

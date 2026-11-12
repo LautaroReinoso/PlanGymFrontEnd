@@ -894,8 +894,10 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
   días que `weeklyLimit − horarios vigentes del alumno en ese plan`; si lo intenta, aviso ámbar que sugiere "Cambiar plan".
   Cambiar el plan en el select limpia los días elegidos. El backend igual valida (409).
   **Un solo plan por alumno:** si el alumno ya tiene horarios vigentes, el select de plan queda fijo en ese plan ("Ya está en
-  X… usá Cambiar plan"). En Horarios fijos, los alumnos con horarios en 2 planes (datos viejos) se marcan "Está en 2 planes".
-  Falta que el backend lo bloquee (409 al anotar en otro plan).
+  X…" + link **Cambiar plan**, que cierra el modal y abre el de cambio de plan de Horarios fijos vía output `changePlan`).
+  Un 409 al anotar muestra el `message` + botón "Cambiar plan". En Horarios fijos, el alumno con horarios en dos planes
+  (datos viejos) se marca en ámbar: "Tiene horarios en dos planes: unificalos con Cambiar plan" (el backend unifica).
+  Alumno (`/student/turnos/elegir`): si ya tiene horarios vigentes, solo ve su plan; un 409 se muestra con su `message`.
 - **Horarios fijos:** filtro por defecto **Vigentes (activos y en pausa)** — el mismo criterio que usa el backend para el 409
   de franjas (antes se veían solo los activos y un horario en pausa bloqueaba guardar sin que se viera). Una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
   tiene fin). Tocar un chip abre sus acciones; "+" agrega otro día a ese alumno.

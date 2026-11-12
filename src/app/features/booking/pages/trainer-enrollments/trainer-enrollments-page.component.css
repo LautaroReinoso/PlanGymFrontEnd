@@ -29,3 +29,4 @@
 .link-btn:hover { text-decoration: underline; }
 .cap-warn { border-left: 3px solid var(--color-warning); padding-left: 10px; color: var(--color-text); }
 .multi-plan { display: inline-block; margin: 2px 0; font-size: 11px; font-weight: 600; color: var(--color-warning); }
+.grid__row:has(.multi-plan) { border-left: 3px solid var(--color-warning); padding-left: 10px; }

@@ -139,6 +139,19 @@ export class TrainerEnrollmentsPageComponent {
   readonly canConfirmChange = computed(() =>
     !!this.changeTo() && !this.changeShortfall() && !!this.changeFrom() && this.changeFrom() >= this.today && !this.isChanging());
 
+  /** Desde el modal de anotar: cierra ese modal y abre Cambiar plan con los horarios del alumno en ese plan */
+  changeFromEnroll(ev: { userId: number; serviceId: number }): void {
+    this.showEnroll.set(false);
+    const items = this.enrollments().filter(e => e.userId === ev.userId && e.serviceId === ev.serviceId && e.status !== 'ENDED');
+    const first = items[0];
+    this.openChange({
+      key: ev.userId + '|' + ev.serviceId, userId: ev.userId,
+      name: first ? this.nameOf(first) : '', serviceId: ev.serviceId,
+      serviceName: first?.serviceName ?? this.services().find(s => s.id === ev.serviceId)?.name ?? '',
+      items,
+    });
+  }
+
   openChange(g: PlanGroup): void {
     this.changeTarget.set(g);
     this.changeTo.set(null);

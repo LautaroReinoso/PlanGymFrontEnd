@@ -52,7 +52,7 @@
             <div class="grid__who">
               <span class="grid__name">{{ g.name }}</span>
               @if (multiPlan().has(g.userId)) {
-                <span class="multi-plan" title="Un alumno tiene un solo plan: pasá estos horarios al plan que corresponde con Cambiar plan, o terminá los que sobran">Está en 2 planes</span>
+                <span class="multi-plan">Tiene horarios en dos planes: unificalos con Cambiar plan</span>
               }
               <span class="bk-muted">
                 {{ g.serviceName }}
@@ -104,7 +104,7 @@
 </div>
 
 <app-enroll-student-modal [isOpen]="showEnroll()" [studentId]="enrollStudentId()"
-  (closed)="showEnroll.set(false)" (saved)="onEnrolled()" />
+  (closed)="showEnroll.set(false)" (saved)="onEnrolled()" (changePlan)="changeFromEnroll($event)" />
 
 <!-- Acciones de un horario fijo -->
 <gp-modal [isOpen]="!!actionTarget()" [title]="actionTarget() ? dayLabels[actionTarget()!.dayOfWeek] + ' ' + hhmm(actionTarget()!.startTime) : ''"
