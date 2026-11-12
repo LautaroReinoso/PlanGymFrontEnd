@@ -13,7 +13,8 @@ import { catchError, forkJoin, of } from 'rxjs';
 
 import { BookingTrainerService } from '../../services/booking-trainer.service';
 import { AgendaItem } from '../../models/booking.models';
-import { isPast, isoTime, longDate, startOfWeek, addDays, todayKey } from '../../utils/booking-date.util';
+import { isPast, isoTime, longDate, todayKey } from '../../utils/booking-date.util';
+import { todayPlan } from '../../utils/today-plan.util';
 import { TrainerWorkoutLog, TrainerWorkoutLogService } from '../../../trainer/services/trainer-workout-log.service';
 import { StudentDetail } from '../../../trainer/models/student.models';
 import { WorkoutTemplateDay } from '../../../trainer/models/trainer.models';
@@ -151,20 +152,7 @@ export class TrainerTodayPageComponent {
     const s = this.students()[userId];
     if (!s || s.loading) return { kind: 'loading', day: null, label: '…' };
     if (s.error) return { kind: 'error', day: null, label: 'Sin datos' };
-    const days = [...(s.detail?.activeTemplate?.days ?? [])].sort((a, b) => a.orderIndex - b.orderIndex);
-    if (!days.length) return { kind: 'noPlan', day: null, label: 'Sin plan' };
-
-    const doneTodayLog = s.logs.find(l => l.completedAt === this.today && l.completed);
-    if (doneTodayLog) {
-      const d = days.find(x => x.workoutDayId === doneTodayLog.workoutDayId) ?? null;
-      return { kind: 'doneToday', day: d, label: `Entrenó · ${d?.name ?? doneTodayLog.workoutDayName}` };
-    }
-    const from = startOfWeek(this.today), to = addDays(from, 6);
-    const doneWeek = new Set(s.logs.filter(l => l.completed && l.completedAt >= from && l.completedAt <= to).map(l => l.workoutDayId));
-    const next = days.find(d => !doneWeek.has(d.workoutDayId));
-    return next
-      ? { kind: 'next', day: next, label: `Toca: ${next.name}` }
-      : { kind: 'weekDone', day: days[0], label: 'Semana completa' };
+    return todayPlan(s.detail?.activeTemplate?.days ?? [], s.logs, this.today);
   }
 
   open(i: AgendaItem): void {

@@ -822,7 +822,7 @@ Si el backend no los manda (versión vieja), cae al método anterior: filtra por
 
 ### Política de colores y tokens
 - **Ningún color literal fuera de `src/styles/token.css`.** Ni hex ni `rgba()` de la paleta en CSS, TS o HTML.
-  Excepción: el SVG del logo (sidebar, layout, register). Sombras `rgba(0,0,0,…)` y reflejos `rgba(255,255,255,…)` sí.
+  Única excepción: los archivos de `public/` (favicon). Sombras `rgba(0,0,0,…)` y reflejos `rgba(255,255,255,…)` sí.
   Verificar: `grep -rnoiE "#[0-9a-f]{3,8}\b" src/app src/styles.css src/styles/booking.css --include=*.css --include=*.ts --include=*.html`
 - Variantes: `--color-border-strong`, `--color-surface-raised` (capa sobre card), `--color-surface-sunken` (inputs),
   `--color-accent-hover`, `--color-*-soft` (texto claro sobre tinte), `--color-danger-strong` (relleno rojo con texto blanco),
@@ -880,12 +880,33 @@ Rellenos: blanco sobre accent 4,6 · sobre danger-strong 4,8 · `--color-bg` sob
   baja de línea en vez de cortarse.
 - Nombres largos (alumno, plantilla, día, ejercicio) **bajan de línea** (`overflow-wrap: anywhere`), no usan ellipsis.
 
-### Verificación visual
-Capturas con datos simulados (Playwright interceptando `api.plangympro.com`, sesión en localStorage) en 360 / 390 / 768:
-Mis alumnos, detalle de alumno, detalle de plantilla, Ejercicios, modal Agregar ejercicio, Inicio del alumno (con plan,
-sin plan, semana completa). Sin scroll horizontal.
-- `angular.json`: aviso `anyComponentStyle` en 4,5 kB (los `var(--…)` pesan más que los hex). Siguen avisando login,
-  register, template-detail, student-detail, weekly y calendar (ya lo hacían).
+### Verificación visual — `npm run visual`
+`tools/visual/visual-check.mjs` hace `ng build`, sirve `dist/`, simula el backend (`tools/visual/mocks.mjs`, Playwright
+interceptando `api.plangympro.com`, sesión fake en localStorage) y saca capturas en 360 / 390 / 768 / 1280 px de: Mis alumnos
+(con y sin Turnos), detalle de alumno, detalle de plantilla, modal Agregar ejercicio, Ejercicios, Inicio del alumno (con plan,
+sin plan, semana completa), Semana, login y registro. **Falla si hay scroll horizontal o errores de JS.** Capturas en
+`visual-output/` (ignorado por git). `node tools/visual/visual-check.mjs inicio` corre solo las que contienen "inicio".
+Primera vez en una máquina: `npx playwright install chromium`. Si cambia un DTO, actualizar `mocks.mjs`.
+
+### Tamaño de CSS por componente
+- `angular.json`: aviso `anyComponentStyle` en **4,5 kB** (los `var(--…)` pesan más que los hex). Hoy **ningún componente
+  avisa**. El límite es por hoja: un componente puede tener varias en `styleUrls`.
+- Hojas compartidas (van PRIMERO en `styleUrls`): `features/auth/auth-shared.css` (fondo, logo y error de login / registro /
+  recuperar), `features/student/pages/student-pages.css` (flechas de Semana/Mes, tarjeta de error),
+  `features/trainer/pages/detail-pages.css` (`.back-btn` con 44 px y `.error-banner` de los detalles de alumno, plantilla y
+  ejercicio). Solo se incluyen en los componentes que usan esas clases.
+- `app-booking-calendar` usa tres hojas en orden: `calendar.component.css` (base + Semana), `calendar-entries.css`,
+  `calendar-month.css`. **El orden importa** (es el orden original de las reglas).
+- La página Semana del alumno usa `app-next-day-card` (igual que el Inicio) en vez de su propia tarjeta "Te toca".
+
+### Modal (`gp-modal`) accesible
+Al abrir enfoca el primer campo del contenido (en pantallas táctiles, el panel, para no abrir el teclado), Tab / Shift+Tab
+quedan dentro, Escape cierra solo el modal de arriba (pila estática) y al cerrar el foco vuelve al botón que lo abrió.
+`aria-labelledby` apunta al título. El scroll del body se libera cuando no queda ningún modal abierto.
+
+### Logo
+El SVG del logo (sidebar, layout, registro) usa `style="fill: var(--color-accent)"`. `public/favicon.svg`,
+`favicon.ico` y `apple-touch-icon.png` están en #4A68F2 (no pueden usar tokens).
 
 ## Suscripciones del entrenador (nov-2026)
 Quien paga es el TRAINER: suscripción mensual a la plataforma con Mercado Pago (preapproval).
@@ -1105,11 +1126,10 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] `MUSCLE_GROUP_LABELS` — fuente única en `muscle-group.util.ts`
 - [x] Tests de lógica pura: `recovery.util.spec.ts` (vencimientos, ventana de 30 días, tope del mes) y
       `exercise-meta.util.spec.ts` (por tiempo / reps). El resto de los `.spec.ts` sigue siendo boilerplate del CLI.
-      Correr solo esos: `ng test --watch=false --include='**/recovery.util.spec.ts' --include='**/exercise-meta.util.spec.ts'`
-      (en Linux como root, Chrome necesita `--no-sandbox` → karma config con customLauncher).
-- [ ] Tests del cálculo "le toca" de `/trainer/hoy` (hoy vive dentro del componente: extraerlo a un util para testearlo)
-- [ ] CSS de componentes que pasan el budget de aviso (4 kB): login, register, template-detail, student-detail — mover
-      estilos repetidos a `styles.css` / `booking.css`
+      Correr todos los de lógica: `npm run test:ci` (usa `karma.ci.cjs`: Chrome sin ventana y con `--no-sandbox`, sirve en
+      Linux como root y en CI; si Chrome no está en el PATH, `CHROME_BIN=/ruta/a/chrome`). Hoy 19 tests, todos pasan.
+- [x] Tests del cálculo "le toca" de `/trainer/hoy`: `booking/utils/today-plan.util.ts` + spec (10 casos)
+- [x] CSS de componentes bajo el límite de aviso (ver "Tamaño de CSS por componente")
 
 ### Student
 - [x] `DashboardPage` — plan activo + lista de días (el alumno elige)

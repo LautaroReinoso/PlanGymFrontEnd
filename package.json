@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "visual": "ng build && node tools/visual/visual-check.mjs",
+    "test:ci": "ng test --watch=false --karma-config=karma.ci.cjs --include='**/*.util.spec.ts'"
   },
   "private": true,
   "dependencies": {
@@ -33,6 +35,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "playwright": "^1.63.0",
     "typescript": "~5.7.2"
   }
 }
