@@ -28,21 +28,58 @@
   @if (loading()) {
     <app-page-loader [size]="40" [compact]="true" message="Cargando clases…" />
   } @else if (view() === 'week') {
-    <div class="cal-week">
+    <!-- Ancho: grilla por hora (días en columnas, horas en filas) -->
+    <div class="cal-grid" role="table" aria-label="Semana por hora">
+      <div class="cal-grid__corner"></div>
       @for (d of weekDays(); track d.key) {
-        <div class="cal-week__day" [class.cal-week__day--today]="d.key === today"
-             [class.cal-week__day--empty]="d.entries.length === 0">
-          <div class="cal-week__head">
-            <span class="cal-week__dow">{{ dayShort[d.dow] }}</span>
-            <span class="cal-week__num">{{ d.num }}</span>
-          </div>
-          <div class="cal-week__list">
-            @for (e of d.entries; track e.key) {
+        <button type="button" class="cal-grid__dayhead" [class.today]="d.key === today" (click)="pickDay(d.key)">
+          <span class="cal-week__dow">{{ dayShort[d.dow] }}</span>
+          <span class="cal-week__num">{{ d.num }}</span>
+        </button>
+      }
+      @for (h of weekHours(); track h) {
+        <div class="cal-grid__hour">{{ h }}:00</div>
+        @for (d of weekDays(); track d.key) {
+          @let items = cell(d.key, h);
+          @let ck = d.key + '|' + h;
+          <div class="cal-grid__cell" [class.today]="d.key === today">
+            @for (e of (openCell() === ck ? items : items.slice(0, cellMax)); track e.key) {
               <ng-container *ngTemplateOutlet="entryTpl; context: { $implicit: e }" />
-            } @empty {
-              <span class="cal-week__none">Sin clases</span>
+            }
+            @if (items.length > cellMax) {
+              <button type="button" class="cal-grid__more" (click)="toggleCell(ck)">
+                {{ openCell() === ck ? 'Ver menos' : '+' + (items.length - cellMax) + ' más' }}
+              </button>
             }
           </div>
+        }
+      }
+    </div>
+
+    <!-- Celular: tira de días + lista del día elegido -->
+    <div class="cal-strip">
+      <div class="cal-strip__days" role="tablist">
+        @for (d of weekDays(); track d.key) {
+          <button type="button" role="tab" class="cal-strip__day"
+                  [class.today]="d.key === today" [class.on]="d.key === weekSel()"
+                  [attr.aria-selected]="d.key === weekSel()" (click)="pickWeekDay(d.key)">
+            <span class="cal-strip__dow">{{ dayShort[d.dow].charAt(0) }}</span>
+            <span class="cal-strip__num">{{ d.num }}</span>
+            <span class="cal-strip__mark">
+              @if (dayCount(d)) { <b [class.full]="dayHasFull(d)">{{ dayCount(d) }}</b> }
+              @else if (dayFree(d)) { <i></i> }
+            </span>
+          </button>
+        }
+      </div>
+      @if (weekSelDay(); as d) {
+        <p class="cal-strip__title">{{ longDate(d.key) }}</p>
+        <div class="cal-strip__list">
+          @for (e of d.entries; track e.key) {
+            <ng-container *ngTemplateOutlet="entryTpl; context: { $implicit: e }" />
+          } @empty {
+            <p class="cal__hint">No hay clases este día.</p>
+          }
         </div>
       }
     </div>

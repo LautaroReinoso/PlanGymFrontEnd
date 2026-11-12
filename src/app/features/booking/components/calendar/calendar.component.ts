@@ -6,7 +6,7 @@
 //  Mes: solo contadores por día; al tocar un día se lista abajo.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, ElementRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { CalEntry } from './calendar.models';
 import { CalendarView } from '../../services/calendar-prefs';
@@ -82,24 +82,38 @@ export class BookingCalendarComponent {
     return d ? this.byDay().get(d) ?? [] : [];
   });
 
+  // ── Semana: grilla por hora (pantalla ancha) ──
+  /** Solo las horas que tienen clases esa semana, en orden ("07", "08", "18"…) */
+  readonly weekHours = computed(() => {
+    const set = new Set<string>();
+    for (const d of this.weekDays()) for (const e of d.entries) set.add(e.time.slice(0, 2));
+    return [...set].sort();
+  });
+  /** Celda abierta con "+N más" (dateKey|HH) */
+  readonly openCell = signal<string | null>(null);
+  readonly cellMax = 2;
+  cell(dayKey: string, hour: string): CalEntry[] {
+    return (this.byDay().get(dayKey) ?? []).filter(e => e.time.startsWith(hour));
+  }
+  toggleCell(k: string): void { this.openCell.update(c => c === k ? null : k); }
+
+  // ── Semana: tira de días + lista (celular) ──
+  private readonly pickedWeekDay = signal<string | null>(null);
+  /** Día elegido en la tira: el tocado, o hoy si es de esta semana, o el primero con clases */
+  readonly weekSel = computed(() => {
+    const days = this.weekDays(), picked = this.pickedWeekDay();
+    if (picked && days.some(d => d.key === picked)) return picked;
+    if (days.some(d => d.key === this.today)) return this.today;
+    return (days.find(d => d.entries.length) ?? days[0])?.key ?? null;
+  });
+  readonly weekSelDay = computed(() => this.weekDays().find(d => d.key === this.weekSel()) ?? null);
+  pickWeekDay(k: string): void { this.pickedWeekDay.set(k); }
+  dayCount(d: { entries: CalEntry[] }): number { return d.entries.filter(e => !e.free).length; }
+  dayHasFull(d: { entries: CalEntry[] }): boolean { return d.entries.some(e => e.full && e.tone !== 'cancelled'); }
+  dayFree(d: { entries: CalEntry[] }): number { return d.entries.filter(e => e.free && !e.full).length; }
+
   readonly isEmpty = computed(() => !this.loading() && this.entries().length === 0);
 
-  private readonly host = inject(ElementRef<HTMLElement>);
-
-  constructor() {
-    // En el celular la semana se desliza de costado: arrancar mostrando hoy.
-    effect(() => {
-      if (this.view() !== 'week' || this.loading()) return;
-      this.weekDays();
-      setTimeout(() => {
-        const week = this.host.nativeElement.querySelector('.cal-week') as HTMLElement | null;
-        const today = week?.querySelector('.cal-week__day--today') as HTMLElement | null;
-        if (week && today && week.scrollWidth > week.clientWidth) {
-          week.scrollTo({ left: today.offsetLeft - week.offsetLeft, behavior: 'auto' });
-        }
-      });
-    });
-  }
 
   setView(v: CalendarView): void { if (v !== this.view()) this.viewChange.emit(v); }
 

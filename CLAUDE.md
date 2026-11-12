@@ -857,8 +857,11 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 
 ### Decisiones
 - **Calendario propio** (sin FullCalendar/angular-calendar): agrupación por clase, contadores en Mes y
-  theming con tokens. Semana = **siempre 7 columnas lun→dom** (como calendario, no lista): ≤760px entradas compactas
-  (hora + nombre + cupo); ≤560px columnas de mín. 92px que se deslizan de costado (scroll-snap) y arranca mostrando hoy.
+  theming con tokens. **Semana** según el ancho (container query 620px):
+  - Ancho → **grilla por hora**: días en columnas, solo las horas con clases en filas; por celda 2 clases + "+N más".
+  - Angosto/celular → **tira de días** L M M J V S D (contador de clases, rojo si hay completas, punto si solo hay libres)
+    + **lista del día elegido** (hoy por defecto). Sin scroll horizontal.
+  `angular.json`: budget `anyComponentStyle` subido a 14 kB por el CSS del calendario.
 - **Fechas:** `startAt`/`endAt` se leen por texto (`isoTime`, `isoDateKey`), nunca se convierten a la zona
   del navegador. Bloqueos: el `datetime-local` se manda con offset `-03:00`.
 - **Recarga, no parcheo:** a diferencia del resto de la app, después de cada acción se recarga el rango

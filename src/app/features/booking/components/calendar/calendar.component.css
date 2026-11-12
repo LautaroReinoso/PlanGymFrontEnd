@@ -36,28 +36,47 @@
 .cal-week__list { display: flex; flex-direction: column; gap: 6px; }
 .cal-week__none { font-size: 12px; color: var(--color-muted); }
 
-/* Angosto: siempre 7 columnas (lun → dom) como calendario; entradas compactas.
-   En celular las columnas tienen un mínimo y la semana se desliza de costado. */
-@container (max-width: 760px) {
-  .cal-week { gap: 4px; }
-  .cal-week__day { min-height: 120px; padding: 6px 4px; gap: 6px; }
-  .cal-week__head { flex-direction: column; align-items: center; gap: 0; }
-  .cal-week__num { font-size: 16px; }
-  .cal-week__list { gap: 4px; }
-  .cal-week__none { display: none; }
-  .cal-entry { grid-template-columns: 1fr; grid-template-areas: "time" "body" "meta"; padding: 4px 5px; row-gap: 1px; }
-  .cal-entry__time { font-size: 12px; }
-  .cal-entry__title { font-size: 11px; }
-  .cal-entry__sub, .cal-entry__fixed { display: none; }
-  .cal-entry__meta { justify-self: start; font-size: 10px; }
+/* Grilla por hora (ancho) */
+.cal-grid {
+  display: grid; grid-template-columns: 52px repeat(7, minmax(0, 1fr));
+  border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden;
+  background: var(--color-surface);
 }
-@container (max-width: 560px) {
-  .cal-week {
-    grid-template-columns: repeat(7, minmax(92px, 1fr));
-    overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch; scrollbar-width: thin;
-  }
-  .cal-week__day { scroll-snap-align: start; }
+.cal-grid__corner, .cal-grid__dayhead { position: sticky; top: 0; z-index: 1; background: var(--color-card); border-bottom: 1px solid var(--color-border); }
+.cal-grid__dayhead { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 6px 0; border: 0; border-bottom: 1px solid var(--color-border); color: var(--color-text); cursor: pointer; font-family: var(--font-body); }
+.cal-grid__dayhead.today .cal-week__num { color: var(--color-accent); }
+.cal-grid__dayhead.today { box-shadow: inset 0 -2px 0 var(--color-accent); }
+.cal-grid__hour { font: 600 12px var(--font-body); color: var(--color-muted-light); padding: 8px 6px; border-top: 1px solid var(--color-border); text-align: right; }
+.cal-grid__cell { border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); padding: 4px; display: flex; flex-direction: column; gap: 4px; min-height: 44px; min-width: 0; }
+.cal-grid__cell.today { background: color-mix(in srgb, var(--color-accent) 5%, transparent); }
+.cal-grid__cell .cal-entry { grid-template-columns: auto 1fr; grid-template-areas: "time meta" "body body"; padding: 4px 6px; }
+.cal-grid__cell .cal-entry__sub, .cal-grid__cell .cal-entry__fixed { display: none; }
+.cal-grid__more { align-self: flex-start; background: none; border: 0; padding: 0 2px; color: var(--color-celeste); font: 600 12px var(--font-body); cursor: pointer; }
+
+/* Tira de días + lista (celular) */
+.cal-strip { display: none; flex-direction: column; gap: var(--space-3); }
+.cal-strip__days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cal-strip__day {
+  display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 6px;
+  background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  color: var(--color-text); font-family: var(--font-body); cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-smooth), transform var(--duration-fast) var(--ease-spring);
+}
+.cal-strip__day.today .cal-strip__num { color: var(--color-accent); }
+.cal-strip__day.on { border-color: var(--color-accent); background: var(--color-card); transform: translateY(-1px); box-shadow: var(--shadow-glow); }
+.cal-strip__dow { font-size: 11px; color: var(--color-muted-light); text-transform: uppercase; }
+.cal-strip__num { font: 700 16px var(--font-display); }
+.cal-strip__mark { height: 16px; display: flex; align-items: center; }
+.cal-strip__mark b { font-size: 10px; min-width: 16px; padding: 0 4px; border-radius: 999px; text-align: center; line-height: 16px; background: color-mix(in srgb, var(--color-accent) 25%, transparent); color: var(--color-text); }
+.cal-strip__mark b.full { background: color-mix(in srgb, var(--color-danger) 30%, transparent); }
+.cal-strip__mark i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-muted); }
+.cal-strip__title { margin: 0; font: 700 15px var(--font-display); }
+.cal-strip__title::first-letter { text-transform: uppercase; }
+.cal-strip__list { display: flex; flex-direction: column; gap: 8px; }
+
+@container (max-width: 620px) {
+  .cal-grid { display: none; }
+  .cal-strip { display: flex; }
 }
 
 /* ── Entrada (clase/turno) ─────────────── */
