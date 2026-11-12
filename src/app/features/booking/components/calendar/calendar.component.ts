@@ -21,7 +21,7 @@ import { PageLoaderComponent } from '../../../../shared/components/page-loader/p
   standalone: true,
   imports: [PageLoaderComponent, NgTemplateOutlet],
   templateUrl: './calendar.component.html',
-  styleUrl: './calendar.component.css',
+  styleUrls: ['./calendar.component.css', './calendar-entries.css', './calendar-month.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BookingCalendarComponent {

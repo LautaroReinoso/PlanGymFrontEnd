@@ -19,7 +19,7 @@ import { ButtonComponent } from '../../../shared/components/button-component/but
   imports: [ReactiveFormsModule, RouterLink, InputFieldComponent, ButtonComponent],
   templateUrl: './forgot-password.component.html',
   // Mismo look que el login
-  styleUrls: ['../login/login.component.css', './forgot-password.component.css'],
+  styleUrls: ['../auth-shared.css', '../login/login.component.css', './forgot-password.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPasswordComponent {

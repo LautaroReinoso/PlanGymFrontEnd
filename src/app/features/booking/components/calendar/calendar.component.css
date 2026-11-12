@@ -23,18 +23,8 @@
 
 /* ── Semana ───────────────────────────── */
 .cal-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); }
-.cal-week__day {
-  background: var(--color-surface); border: 1px solid var(--color-border);
-  border-radius: var(--radius-md); padding: var(--space-2); min-height: 140px;
-  display: flex; flex-direction: column; gap: var(--space-2);
-}
-.cal-week__day--today { border-color: var(--color-accent); box-shadow: var(--shadow-glow); }
-.cal-week__head { display: flex; align-items: baseline; gap: 6px; }
 .cal-week__dow { font-size: var(--text-xs); color: var(--color-muted-light); text-transform: uppercase; letter-spacing: .04em; }
 .cal-week__num { font: 700 var(--text-lg) var(--font-display); }
-.cal-week__day--today .cal-week__num { color: var(--color-accent-text); }
-.cal-week__list { display: flex; flex-direction: column; gap: 6px; }
-.cal-week__none { font-size: var(--text-xs); color: var(--color-muted-light); }
 
 /* Grilla por hora (ancho) */
 .cal-grid {
@@ -79,73 +69,3 @@
   .cal-strip { display: flex; }
 }
 
-/* ── Entrada (clase/turno) ─────────────── */
-.cal-entry {
-  display: grid; grid-template-columns: auto 1fr auto auto; grid-template-areas: "time meta meta fixed" "body body body body";
-  align-items: center; column-gap: 6px; row-gap: 2px; width: 100%;
-  text-align: left; cursor: pointer; color: var(--color-text); font-family: var(--font-body);
-  background: var(--color-card); border: 1px solid var(--color-border);
-  border-left: 3px solid var(--color-accent); border-radius: var(--radius-sm);
-  padding: 6px 8px; transition: transform var(--duration-fast) var(--ease-spring), border-color var(--duration-fast);
-}
-.cal-entry:hover { transform: translateY(-1px); border-color: var(--color-accent); }
-.cal-entry__time { grid-area: time; font: 700 var(--text-sm) var(--font-display); }
-.cal-entry__body { grid-area: body; display: flex; flex-direction: column; min-width: 0; }
-.cal-entry__title { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cal-entry__sub { font-size: var(--text-xs); color: var(--color-muted-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cal-entry__meta { grid-area: meta; justify-self: end; font-size: var(--text-xs); font-weight: 700; color: var(--color-celeste); }
-.cal-entry__fixed { grid-area: fixed; font-size: var(--text-xs); color: var(--color-muted-light); }
-.cal-entry--completed { border-left-color: var(--color-success); }
-.cal-entry--noshow    { border-left-color: var(--color-warning); }
-.cal-entry--cancelled { border-left-color: var(--color-muted); opacity: .6; }
-.cal-entry--cancelled .cal-entry__title, .cal-entry--cancelled .cal-entry__time { text-decoration: line-through; }
-.cal-entry--past { background: var(--color-surface); }
-.cal-entry--past .cal-entry__title { color: var(--color-muted-light); }
-
-/* ── Mes ──────────────────────────────── */
-.cal-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.cal-month__h { font-size: var(--text-xs); text-align: center; color: var(--color-muted-light); text-transform: uppercase; padding-bottom: 2px; }
-.cal-month__cell {
-  aspect-ratio: 16 / 10; min-height: 48px; display: flex; flex-direction: column; align-items: flex-start;
-  gap: 2px; padding: 6px; cursor: pointer; text-align: left; font-family: var(--font-body);
-  color: var(--color-text); background: var(--color-surface);
-  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
-}
-.cal-month__cell.out { opacity: .4; }
-.cal-month__cell.has { background: var(--color-card); }
-.cal-month__cell.today { border-color: var(--color-accent); }
-.cal-month__cell.sel { background: var(--color-accent-dim); border-color: var(--color-accent); }
-.cal-month__num { font: 700 var(--text-sm) var(--font-display); }
-.cal-month__count { font-size: var(--text-xs); color: var(--color-celeste); font-weight: 600; }
-.cal-month__people { font-size: var(--text-xs); color: var(--color-muted-light); }
-@container (max-width: 520px) {
-  .cal-month__cell { aspect-ratio: auto; min-height: 54px; padding: 4px; }
-  .cal-month__count { font-size: var(--text-xs); }
-  .cal-month__people { display: none; }
-}
-
-.cal-dayList { display: flex; flex-direction: column; gap: 6px; }
-.cal-dayList h3 { margin: 0 0 4px; font: 700 var(--text-md) var(--font-display); }
-
-/* Horario libre (para recuperar) */
-.cal-entry--free { background: transparent; border-style: dashed; border-left-style: dashed; border-left-color: var(--color-border); }
-.cal-entry--free .cal-entry__title { font-weight: 500; color: var(--color-muted-light); }
-.cal-entry--free .cal-entry__meta { color: var(--color-celeste); font-weight: 600; }
-.cal-entry--free:hover { border-color: var(--color-celeste); }
-.cal-month__free { font-size: var(--text-xs); color: var(--color-muted-light); }
-@container (max-width: 520px) { .cal-month__free { display: none; } }
-
-/* Completo: rojo PlanGym, suave (tinte + borde), sin gritar sobre el fondo oscuro */
-.cal-entry--full {
-  border-left-color: var(--color-danger);
-  background: linear-gradient(90deg, var(--color-danger-a12), transparent 75%), var(--color-card);
-}
-.cal-entry--full .cal-entry__meta { color: var(--color-danger-soft); font-weight: 700; }
-.cal-entry--full.cal-entry--free { border-style: solid; border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); border-left-color: var(--color-danger); }
-.cal-entry--full.cal-entry--free .cal-entry__title { color: var(--color-text); }
-.cal-entry--full:hover { border-color: var(--color-danger); }
-.cal-month__full { display: inline-flex; align-items: center; gap: 3px; font-size: var(--text-xs); font-weight: 600; color: var(--color-danger-soft); }
-.cal-month__full i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 6px var(--color-danger-a50); }
-@container (max-width: 520px) { .cal-month__full { font-size: 0; gap: 0; } .cal-month__full i { width: 7px; height: 7px; } }
-
-@media (pointer: coarse) { .cal__arrow, .cal__today, .cal__switch button { min-height: 44px; min-width: 44px; } }

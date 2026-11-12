@@ -6,23 +6,13 @@
 .week__nav { display: flex; align-items: center; gap: var(--space-2); }
 .week__range { flex: 1; text-align: center; font-size: var(--text-sm); color: var(--color-muted-light); }
 
-.nav-btn {
-  width: 44px; height: 44px; display: grid; place-items: center;
-  background: var(--color-card); border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm); color: var(--color-text); cursor: pointer;
-}
-.nav-btn svg { width: 18px; height: 18px; }
-.nav-btn:disabled { opacity: .35; cursor: default; }
-
 .card {
   background: var(--color-card); border: 1px solid var(--color-border);
   border-radius: var(--radius-md); padding: var(--space-4);
   display: flex; flex-direction: column; gap: var(--space-3);
   animation: fadeUp .4s var(--ease-smooth) both;
 }
-.card--error { border-color: var(--color-danger); color: var(--color-text); font-size: var(--text-sm); }
 .card--empty { color: var(--color-muted-light); font-size: var(--text-sm); text-align: center; }
-.card p { margin: 0; }
 
 /* Tira semanal */
 .strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
@@ -52,18 +42,6 @@
 .progress__done { font-size: var(--text-sm); color: var(--color-success); }
 
 /* Siguiente */
-.next {
-  display: flex; flex-direction: column; gap: 4px; text-align: left; cursor: pointer;
-  font-family: inherit; padding: var(--space-5); border-radius: var(--radius-lg);
-  border: 1px solid var(--color-accent);
-  background: linear-gradient(135deg, var(--color-accent-dim), transparent 70%), var(--color-card);
-  box-shadow: var(--shadow-glow);
-  animation: fadeUp .4s var(--ease-smooth) both;
-}
-.next__eyebrow { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .5px; color: var(--color-celeste); }
-.next__name { font: 700 var(--text-lg) var(--font-display); color: var(--color-text); }
-.next__meta { font-size: var(--text-sm); color: var(--color-muted-light); }
-
 /* Lista de días */
 .section-title { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); margin: 0 0 var(--space-3); }
 .days { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }

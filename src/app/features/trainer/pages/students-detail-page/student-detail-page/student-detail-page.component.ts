@@ -43,7 +43,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
     GymLoaderComponent
 ],
   templateUrl: './student-detail-page.component.html',
-  styleUrl: './student-detail-page.component.css',
+  styleUrls: ['../../detail-pages.css', './student-detail-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentDetailPageComponent implements OnInit {

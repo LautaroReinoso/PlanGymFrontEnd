@@ -14,47 +14,9 @@
 
 /* ── Back ────────────────────────────────────── */
 
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: var(--color-muted-light);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 24px;
-  transition: color 150ms;
-}
-.back-btn:hover { color: var(--color-text); }
-
 /* ── Error ───────────────────────────────────── */
 
-.error-banner {
-  padding: 14px 16px;
-  background: var(--color-danger-a8);
-  border: 1px solid var(--color-danger-a20);
-  border-radius: var(--radius-md);
-  color: var(--color-danger-soft);
-  font-size: var(--text-sm);
-  margin-bottom: 24px;
-}
-
 /* ── Skeleton ────────────────────────────────── */
-
-.skeleton-header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
-.skeleton-badges {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
 
 /* ── Template header ─────────────────────────── */
 
@@ -89,17 +51,10 @@
   animation: slideUp .4s cubic-bezier(.34,1.56,.64,1) both;
 }
 
-
-
 .template-header-actions {
   display: flex;
   gap: 6px;
   flex-shrink: 0;
-}
-
-.template-header-footer {
-  display: flex;
-  align-items: center;
 }
 /* ── Fila de badges de días ──────────────────── */
 
@@ -126,17 +81,6 @@
 }
 .day-content app-template-day {
   flex: 1;
-}
-
-.day-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.2;
-}
-.day-exercises {
-  font-size: var(--text-xs);
-  opacity: .7;
 }
 
 /* Botón agregar día — compacto, va al final de los badges */
@@ -210,110 +154,6 @@
 
 /* ── Modal: ejercicio ────────────────────────── */
 
-.exercise-modal-body { display: flex; flex-direction: column; gap: 16px; }
-
-.exercise-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.exercise-search svg {
-  position: absolute;
-  left: 12px;
-  color: var(--color-muted-light);
-  pointer-events: none;
-}
-
-.exercise-search input {
-  width: 100%;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px 10px 36px;
-  font-size: var(--text-sm);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color 200ms;
-}
-
-.exercise-search input:focus { border-color: var(--color-accent); }
-
-.exercise-options-loading { display: flex; flex-direction: column; gap: 8px; }
-
-.exercise-options {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 200px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border) transparent;
-}
-
-.exercise-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 14px;
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  color: var(--color-text);
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 150ms, background 150ms;
-}
-
-.exercise-option:hover { background: var(--color-card); border-color: var(--color-border-strong); }
-
-.exercise-option--selected {
-  border-color: var(--color-accent);
-  background: var(--color-accent-a8);
-  color: var(--color-accent-soft);
-}
-
-.exercise-params {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-}
-
-.param-field { display: flex; flex-direction: column; gap: 6px; }
-
-.param-field label { font-size: var(--text-xs); color: var(--color-muted-light); font-weight: 500; }
-
-.param-field input {
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  padding: 9px 10px;
-  font-size: var(--text-sm);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color 200ms;
-}
-
-.param-field input:focus { border-color: var(--color-accent); }
-
-.exercise-error {
-  padding: 10px 14px;
-  background: var(--color-danger-a8);
-  border: 1px solid var(--color-danger-a20);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  color: var(--color-danger-soft);
-}
-
-.exercise-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--color-border);
-}
-
 /* ── Modal: confirmar eliminar ───────────────── */
 
 .delete-confirm-body { display: flex; flex-direction: column; gap: 16px; }
@@ -342,7 +182,6 @@
 /* ── Mobile ──────────────────────────────────── */
 
 @media (max-width: 600px) {
-  .exercise-params { grid-template-columns: 1fr; }
   .template-header { padding: var(--space-2) 0; }
   .template-header-container { align-items: flex-start; gap: var(--space-2); }
 }

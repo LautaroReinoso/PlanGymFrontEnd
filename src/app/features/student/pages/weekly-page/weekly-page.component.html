@@ -83,11 +83,7 @@
 
       <!-- Siguiente sugerido (solo semana actual) -->
       @if (nextDay(); as nd) {
-        <button type="button" class="next" (click)="openDay(nd)">
-          <span class="next__eyebrow">Te toca</span>
-          <span class="next__name">{{ nd.name }}</span>
-          <span class="next__meta">{{ nd.exerciseCount }} ejercicios · Empezar</span>
-        </button>
+        <app-next-day-card [dayNumber]="days().indexOf(nd) + 1" [name]="nd.name" [exerciseCount]="nd.exerciseCount" (start)="openDay(nd)" />
       }
 
       <!-- Días del plan con su estado -->

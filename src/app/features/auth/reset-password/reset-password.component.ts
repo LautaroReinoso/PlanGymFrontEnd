@@ -24,7 +24,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   standalone: true,
   imports: [ReactiveFormsModule, RouterLink, InputFieldComponent, ButtonComponent],
   templateUrl: './reset-password.component.html',
-  styleUrls: ['../login/login.component.css'],
+  styleUrls: ['../auth-shared.css', '../login/login.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordComponent {

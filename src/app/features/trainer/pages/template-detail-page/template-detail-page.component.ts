@@ -55,7 +55,7 @@ import { DayBadgeComponent } from '../../../../shared/components/day-badge/day-b
     GymLoaderComponent
 ],
   templateUrl: './template-detail-page.component.html',
-  styleUrl: './template-detail-page.component.css',
+  styleUrls: ['../detail-pages.css', './template-detail-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TemplateDetailPageComponent implements OnInit {
