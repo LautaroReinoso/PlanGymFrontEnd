@@ -31,10 +31,13 @@
     <!-- 2. Servicio y fechas -->
     <section class="step">
       <span class="step__label">2. Servicio</span>
+      @if (currentPlanName()) {
+        <p class="bk-muted limit-line">Ya está en <strong>{{ currentPlanName() }}</strong>. Un alumno tiene un solo plan: para pasarlo a otro, usá "Cambiar plan" en Horarios fijos.</p>
+      }
       <div class="bk-grid2">
         <label class="bk-field">
           Servicio
-          <select [ngModel]="serviceId()" (ngModelChange)="setService(+$event)">
+          <select [ngModel]="serviceId()" (ngModelChange)="setService(+$event)" [disabled]="!!currentPlanId()">
             @for (s of fixedServices(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
           </select>
         </label>

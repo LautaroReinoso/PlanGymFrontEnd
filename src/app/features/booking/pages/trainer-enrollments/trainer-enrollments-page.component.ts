@@ -90,6 +90,17 @@ export class TrainerEnrollmentsPageComponent {
       .sort((a, b) => a.name.localeCompare(b.name) || a.serviceName.localeCompare(b.serviceName));
   });
 
+  /** Alumnos con horarios en más de un plan (datos viejos): se marcan para que el profe los ordene */
+  readonly multiPlan = computed(() => {
+    const plans = new Map<number, Set<number>>();
+    for (const e of this.enrollments()) {
+      if (e.status === 'ENDED') continue;
+      const s = plans.get(e.userId) ?? new Set<number>();
+      s.add(e.serviceId); plans.set(e.userId, s);
+    }
+    return new Set([...plans].filter(([, s]) => s.size > 1).map(([u]) => u));
+  });
+
   /** Horarios vigentes (activos o en pausa) del grupo: los que cuenta el tope semanal */
   liveCount(g: PlanGroup): number { return g.items.filter(e => e.status !== 'ENDED').length; }
   weeklyLimitOf(serviceId: number): number | null {

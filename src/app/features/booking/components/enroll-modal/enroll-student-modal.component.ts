@@ -85,6 +85,10 @@ export class EnrollStudentModalComponent {
     slots: this.slots().filter(s => s.dayOfWeek === d).sort((a, b) => a.startTime.localeCompare(b.startTime)),
   })));
 
+  /** Un alumno tiene un solo plan: si ya tiene horarios, el plan queda fijo (para cambiarlo, "Cambiar plan") */
+  readonly currentPlanId = computed(() => this.myEnrollments()[0]?.serviceId ?? null);
+  readonly currentPlanName = computed(() => this.services().find(s => s.id === this.currentPlanId())?.name ?? null);
+
   /** Veces por semana del plan elegido (null = sin tope) */
   readonly weeklyLimit = computed(() => this.services().find(s => s.id === this.serviceId())?.weeklyLimit ?? null);
   /** Horarios que ya tiene en este plan */
@@ -145,6 +149,8 @@ export class EnrollStudentModalComponent {
       const mine = list.filter(e => e.userId === userId && e.status !== 'ENDED');
       this.alreadyIn.set(new Set(mine.map(e => `${e.dayOfWeek}-${hhmm(e.startTime)}`)));
       this.myEnrollments.set(mine.map(e => ({ serviceId: e.serviceId })));
+      // Ya tiene plan → se anota en ese mismo plan
+      if (mine.length) this.serviceId.set(mine[0].serviceId);
     });
   }
 

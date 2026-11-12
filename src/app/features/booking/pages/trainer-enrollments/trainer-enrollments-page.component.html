@@ -51,6 +51,9 @@
           <div class="grid__row">
             <div class="grid__who">
               <span class="grid__name">{{ g.name }}</span>
+              @if (multiPlan().has(g.userId)) {
+                <span class="multi-plan" title="Un alumno tiene un solo plan: pasá estos horarios al plan que corresponde con Cambiar plan, o terminá los que sobran">Está en 2 planes</span>
+              }
               <span class="bk-muted">
                 {{ g.serviceName }}
                 @if (weeklyLimitOf(g.serviceId); as w) { · {{ liveCount(g) }}/{{ w }} por semana }
