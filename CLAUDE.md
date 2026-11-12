@@ -805,6 +805,13 @@ el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite
 - Probado contra el backend real ✔ (lista, ver días, copiar). Si aparece "Valor inválido para el parámetro 'id'" en
   `/reference`, el backend corriendo es anterior a V24 (la ruta cae en `/{id}`): pull de `feature/booking` y reiniciar.
 
+## Alumnos con este plan (nov-2026)
+`app-template-students` en el detalle de plantilla: lista quién la tiene activa, "+ Asignar" (buscador; aviso si
+reemplaza otro plan — el backend desactiva el anterior) y "Quitar" (`DELETE /student-workouts/{id}`, confirma).
+El listado de alumnos solo trae `templateName`: se filtra por nombre y se confirma con
+`GET /student-workouts/student/{id}` (`activeWorkout.workoutTemplateId` + `id` de la asignación).
+- [ ] Backend: sumar `workoutTemplateId` y `studentWorkoutId` a `activeWorkout` del listado (evita N llamadas).
+
 ## Suscripciones del entrenador (nov-2026)
 Quien paga es el TRAINER: suscripción mensual a la plataforma con Mercado Pago (preapproval).
 Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backend).

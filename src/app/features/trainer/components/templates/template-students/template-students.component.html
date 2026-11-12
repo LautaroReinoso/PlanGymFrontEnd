@@ -1,0 +1,65 @@
+<section class="ts">
+  <div class="ts__head">
+    <h2 class="ts__title">Alumnos con este plan @if (!isLoading()) { <span class="ts__count">{{ assigned().length }}</span> }</h2>
+    <gp-button size="sm" (click)="openAssign()">+ Asignar</gp-button>
+  </div>
+
+  @if (isLoading()) {
+    <p class="ts__muted">Cargando alumnos…</p>
+  } @else {
+    <ul class="ts__list">
+      @for (a of assigned(); track a.student.id) {
+        <li class="ts__item">
+          <a class="ts__name" [routerLink]="['/trainer/students', a.student.id]">{{ nameOf(a.student) }}</a>
+          @if (a.startDate) { <span class="ts__muted">desde {{ ddmmyyyy(a.startDate) }}</span> }
+          <button type="button" class="ts__remove" (click)="removeTarget.set(a)" [attr.aria-label]="'Quitar plan a ' + nameOf(a.student)">Quitar</button>
+        </li>
+      } @empty {
+        <li class="ts__muted">Nadie tiene asignado este plan todavía.</li>
+      }
+    </ul>
+  }
+</section>
+
+<!-- Asignar -->
+<gp-modal [isOpen]="showAssign()" title="Asignar plan" size="sm" (closed)="showAssign.set(false)">
+  <div class="ts__form">
+    <p class="ts__muted" style="margin:0">Plan: <strong>{{ templateName() }}</strong></p>
+    <input type="search" class="ts__search" placeholder="Buscar por nombre o DNI"
+           [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    <ul class="ts__pick">
+      @for (s of candidates(); track s.id) {
+        <li>
+          <button type="button" class="ts__pickbtn" [class.on]="pickedId() === s.id" (click)="pickedId.set(s.id)">
+            <span>{{ nameOf(s) }}</span>
+            <small>{{ s.activeWorkout ? 'Tiene: ' + s.activeWorkout.templateName : 'Sin plan' }}</small>
+          </button>
+        </li>
+      } @empty {
+        <li class="ts__muted">No hay alumnos para asignar.</li>
+      }
+    </ul>
+    @if (picked()?.activeWorkout; as w) {
+      <p class="ts__warn">{{ nameOf(picked()!) }} tiene "{{ w.templateName }}": se reemplaza por este plan.</p>
+    }
+    @if (error()) { <p class="ts__error">{{ error() }}</p> }
+    <div class="ts__actions">
+      <gp-button variant="ghost" size="sm" (click)="showAssign.set(false)">Cancelar</gp-button>
+      <gp-button size="sm" [disabled]="!picked()" [loading]="isSaving()" (click)="confirmAssign()">Asignar</gp-button>
+    </div>
+  </div>
+</gp-modal>
+
+<!-- Quitar -->
+<gp-modal [isOpen]="!!removeTarget()" title="Quitar plan" size="sm" (closed)="removeTarget.set(null)">
+  @if (removeTarget(); as a) {
+    <div class="ts__form">
+      <p style="margin:0">¿Quitarle "{{ templateName() }}" a <strong>{{ nameOf(a.student) }}</strong>? Va a quedar sin plan
+        hasta que le asignes otro. Su historial no se borra.</p>
+      <div class="ts__actions">
+        <gp-button variant="ghost" size="sm" (click)="removeTarget.set(null)">Cancelar</gp-button>
+        <gp-button variant="danger" size="sm" [loading]="isSaving()" (click)="confirmRemove()">Quitar</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>

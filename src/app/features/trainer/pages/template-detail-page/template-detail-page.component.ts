@@ -1,3 +1,4 @@
+import { TemplateStudentsComponent } from '../../components/templates/template-students/template-students.component';
 // ─────────────────────────────────────────────
 //  GymPlan — TemplateDetailPageComponent
 //  Fix #2/#3: onExerciseSelected completo
@@ -38,7 +39,7 @@ import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym
 @Component({
   selector: 'app-template-detail-page',
   standalone: true,
-  imports: [
+  imports: [TemplateStudentsComponent, 
     CommonModule,
     TemplateDayComponent,
     TemplateEditModalComponent,

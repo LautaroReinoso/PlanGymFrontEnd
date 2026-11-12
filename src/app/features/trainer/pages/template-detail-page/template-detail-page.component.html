@@ -58,7 +58,9 @@
   </div>
   }
 
-  <!-- ── Fila de badges + botón agregar día ── -->
+  @if (template(); as t) { <app-template-students [templateId]="t.id" [templateName]="t.name" /> }
+
+<!-- ── Fila de badges + botón agregar día ── -->
   @if (sortedDays().length > 0) {
   <div class="days-nav">
 
