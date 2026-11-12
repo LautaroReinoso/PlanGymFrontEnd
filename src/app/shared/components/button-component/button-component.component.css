@@ -63,6 +63,7 @@
 /* ── Tamaños ─────────────────────────────────── */
 
 .btn--sm {
+  min-height: 36px;
   padding: 7px 14px;
   font-size: var(--text-sm);
   border-radius: var(--radius-sm);
@@ -192,4 +193,8 @@
   }
   .btn:active { animation: none; }
   .btn__spinner svg { animation: spin 1.2s linear infinite; }
+}
+/* Pantallas táctiles: todo botón con al menos 44 px de alto */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
 }

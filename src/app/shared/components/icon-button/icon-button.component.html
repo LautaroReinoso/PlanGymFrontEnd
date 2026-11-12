@@ -1,5 +1,5 @@
-<button class="action-btn" (click)="clicked.emit()" [class]="hostClasses()"
-  [class.icon-button--borderless]="!bordered()">
+<button type="button" [class]="hostClasses()" [class.icon-btn--borderless]="!bordered()"
+  [disabled]="disabled()" [attr.aria-label]="ariaLabel() || null" (click)="onClick()">
 
   @switch(icon()) {
 

@@ -159,3 +159,4 @@
 @media (max-width: 480px) {
   .form-row, .form-row--3 { grid-template-columns: 1fr; }
 }
+@media (pointer: coarse) { .difficulty-btn { min-width: 44px; min-height: 44px; } }

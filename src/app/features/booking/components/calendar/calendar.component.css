@@ -147,3 +147,5 @@
 .cal-month__full { display: inline-flex; align-items: center; gap: 3px; font-size: var(--text-xs); font-weight: 600; color: var(--color-danger-soft); }
 .cal-month__full i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 6px var(--color-danger-a50); }
 @container (max-width: 520px) { .cal-month__full { font-size: 0; gap: 0; } .cal-month__full i { width: 7px; height: 7px; } }
+
+@media (pointer: coarse) { .cal__arrow, .cal__today, .cal__switch button { min-height: 44px; min-width: 44px; } }

@@ -77,3 +77,10 @@
   background: var(--color-card); border: 1px solid var(--color-accent); border-radius: var(--radius-md);
   box-shadow: var(--shadow-card);
 }
+
+/* Área táctil ≥ 44×44 (regla de 44 px) sin agrandar el dibujo */
+.slot__x { position: relative; }
+.slot__x::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+}

@@ -139,3 +139,4 @@
   .template-card { animation: none; transition: border-color 100ms; }
   .template-card:hover { transform: none; box-shadow: none; }
 }
+.tc-icon { color: var(--color-accent-text); flex-shrink: 0; }

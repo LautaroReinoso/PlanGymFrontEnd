@@ -10,8 +10,8 @@
 
     @if (!readonly()) {
       <div class="day-actions">
-        <gp-icon-button icon="edit"   variant="ghost" (click)="onEditDay()"/>
-        <gp-icon-button icon="delete" variant="ghost" (click)="onRemoveDay()"/>
+        <gp-icon-button icon="edit" variant="ghost" ariaLabel="Editar día" (click)="onEditDay()"/>
+        <gp-icon-button icon="delete" variant="ghost" ariaLabel="Quitar día" (click)="onRemoveDay()"/>
       </div>
     }
   </header>

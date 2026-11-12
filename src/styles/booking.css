@@ -90,3 +90,6 @@
   .bk-tabs::-webkit-scrollbar { display: none; }
   .bk-tab { flex-shrink: 0; white-space: nowrap; }
 }
+
+/* Regla de 44 px en pantallas táctiles */
+@media (pointer: coarse) { .bk-tab { min-height: 44px; } }

@@ -101,34 +101,6 @@
   display: flex;
   align-items: center;
 }
-.header-action-btn {
-  display: grid;
-  place-items: center;
-  width: 32px; height: 32px;
-  background: var(--color-celeste-a8);
-  border: 1px solid var(--color-celeste-a20);
-  border-radius: var(--radius-sm);
-  color: var(--color-celeste-soft);
-  cursor: pointer;
-  transition: background 150ms, border-color 150ms, transform 150ms;
-}
-
-.header-action-btn:hover {
-  background: var(--color-celeste-a20);
-  transform: translateY(-1px);
-}
-
-.header-action-btn--danger {
-  background: var(--color-danger-a8);
-  border-color: var(--color-danger-a20);
-  color: var(--color-danger-soft);
-}
-
-.header-action-btn--danger:hover {
-  background: var(--color-danger-a12);
-  border-color: var(--color-danger-a40);
-}
-
 /* ── Fila de badges de días ──────────────────── */
 
 .days-nav {

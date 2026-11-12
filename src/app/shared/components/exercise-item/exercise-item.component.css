@@ -68,30 +68,7 @@
 .exercise-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
-.exercise-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: transparent;
-  color: var(--color-muted-light);
-  cursor: pointer;
-  transition: background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
-}
-
-.exercise-icon-btn:hover {
-  background: var(--color-card);
-  color: var(--color-text);
-}
-
-.exercise-icon-btn.danger:hover {
-  background: var(--color-danger-a12);
-  color: var(--color-danger-soft);
-}

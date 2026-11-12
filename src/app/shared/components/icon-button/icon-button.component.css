@@ -1,125 +1,96 @@
-.action-btn {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border-strong);
-  background: none;
-  cursor: pointer;
-}
-.icon-button--borderless {
-  border: none;
-  background: transparent;
-  padding: 0;
-}
-
-.icon-button--borderless:hover {
-  background: transparent;
-}
-.action-btn svg {
-     color: var(--color-muted-light);
-  width: 16px;
-}
-.action-btn:hover {
-  background: var(--color-danger-a12);
-
-} 
-
 /* ─────────────────────────────────────────────
-   Variants
+   PlanGym — gp-icon-button
+   ÚNICA convención de botón de ícono de la app (antes convivían
+   .action-btn y .icon-btn--ghost). Visual: 32/36/40 px; área táctil
+   SIEMPRE ≥ 44×44 px con un ::before invisible (regla de 44 px).
 ───────────────────────────────────────────── */
 
-/* Ghost (por defecto) */
-.icon-btn--ghost {
+:host { display: inline-flex; }
+
+.icon-btn {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
   background: var(--color-card);
   color: var(--color-muted-light);
-  border: 1px solid var(--color-border);
-}
-
-.icon-btn--ghost:hover:not(:disabled) {
-  background: var(--color-surface-raised);
-  border-color: var(--color-border-strong);
-  color: var(--color-text);
-}
-
-.icon-btn--ghost:active:not(:disabled) {
-  background: var(--color-surface-sunken);
-  transform: scale(.96);
-}
-
-
-/* Primary */
-
-.icon-btn--primary {
-  background: transparent;
-  border-color: transparent; 
-  
-}
-.icon-btn--primary svg{
- 
-stroke: var( --color-accent);
-}
-.icon-btn--primary:hover:not(:disabled) {
-
-  box-shadow: 0 8px 20px var(--color-accent-a40);
-}
-
-.icon-btn--primary:active:not(:disabled) {
-  background: var(--color-accent-hover);
-  transform: scale(.96);
-}
-
-
-
-/* Danger */
-.icon-btn--danger {
-  background: var(--color-danger-a12);
-  color: var(--color-danger-soft);
-  border: 1px solid var(--color-danger-a30);
-}
-
-.icon-btn--danger:hover:not(:disabled) {
-  background: var(--color-danger-a30);
-  border-color: var(--color-danger-a50);
-  color: var(--color-danger-soft);
-}
-
-.icon-btn--danger:active:not(:disabled) {
-  background: var(--color-danger-a30);
-  transform: scale(.96);
-}
-.icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
   cursor: pointer;
   user-select: none;
-
-  transition:
-    background .18s ease,
-    color .18s ease,
-    border-color .18s ease,
-    box-shadow .18s ease,
-    transform .15s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .15s ease;
 }
+
+/* Área táctil de 44×44 aunque el botón se vea más chico */
+.icon-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}
+
+.icon-btn--sm { width: 32px; height: 32px; }
+.icon-btn--lg { width: 40px; height: 40px; }
+
+.icon-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+.icon-btn--lg svg { width: 18px; height: 18px; }
 
 .icon-btn:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
-.icon-btn--disabled,
-.icon-btn--loading {
-  cursor: not-allowed;
-  pointer-events: none;
+.icon-btn:active:not(:disabled) { transform: scale(.96); }
+
+/* Ghost (por defecto) */
+.icon-btn--ghost:hover:not(:disabled) {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
 }
 
-.icon-btn svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
+/* Primary: ícono en acento, sin relleno */
+.icon-btn--primary {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-accent-text);
+}
+.icon-btn--primary:hover:not(:disabled) {
+  background: var(--color-accent-a12);
+  color: var(--color-text);
+}
+
+/* Danger */
+.icon-btn--danger {
+  background: var(--color-danger-a12);
+  border-color: var(--color-danger-a30);
+  color: var(--color-danger-soft);
+}
+.icon-btn--danger:hover:not(:disabled) {
+  background: var(--color-danger-a30);
+  border-color: var(--color-danger-a50);
+}
+
+/* Sin borde ni fondo (dentro de filas / cards) */
+.icon-btn--borderless {
+  border-color: transparent;
+  background: transparent;
+}
+.icon-btn--borderless:hover:not(:disabled) { background: var(--color-surface-raised); }
+
+.icon-btn:disabled,
+.icon-btn--disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-btn { transition: none; }
+  .icon-btn:active:not(:disabled) { transform: none; }
 }
