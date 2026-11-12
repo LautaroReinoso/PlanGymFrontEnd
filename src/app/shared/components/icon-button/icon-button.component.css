@@ -19,7 +19,7 @@
   background: transparent;
 }
 .action-btn svg {
-     color: var(--color-muted);
+     color: var(--color-muted-light);
   width: 16px;
 }
 .action-btn:hover {

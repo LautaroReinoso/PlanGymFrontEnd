@@ -1,5 +1,5 @@
 :host { display: block; }
-.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 12px; color: var(--color-muted-light); }
+.legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: var(--text-xs); color: var(--color-muted-light); }
 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: -8px; }
 .dot--confirmed { background: var(--color-accent); }
 .dot--completed { background: var(--color-success); }
@@ -9,11 +9,11 @@
 .is-cancelled { opacity: .55; }
 .is-cancelled .bk-item__title { text-decoration: line-through; }
 .mark {
-  font: 600 13px var(--font-body); color: var(--color-muted-light); cursor: pointer;
+  font: 600 var(--text-sm) var(--font-body); color: var(--color-muted-light); cursor: pointer;
   background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm); padding: 6px 12px;
 }
-.mark--on-ok { color: var(--color-on-accent); background: var(--color-success); border-color: var(--color-success); }
-.mark--on-no { color: var(--color-on-accent); background: var(--color-warning); border-color: var(--color-warning); }
+.mark--on-ok { color: var(--color-bg); background: var(--color-success); border-color: var(--color-success); }
+.mark--on-no { color: var(--color-bg); background: var(--color-warning); border-color: var(--color-warning); }
 .mark:disabled { opacity: .5; cursor: default; }
 .cancel-box { width: 100%; display: flex; flex-direction: column; gap: var(--space-2); }
 .tag-rec { color: var(--color-celeste); font-weight: 600; }

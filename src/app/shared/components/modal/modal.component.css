@@ -131,7 +131,7 @@
 
 .modal-title {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 16px;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.2px;
@@ -145,7 +145,7 @@
   background: none;
   border: none;
   border-radius: var(--radius-sm);
-  color: var(--color-muted);
+  color: var(--color-muted-light);
   cursor: pointer;
   flex-shrink: 0;
   transition: background 150ms, color 150ms;

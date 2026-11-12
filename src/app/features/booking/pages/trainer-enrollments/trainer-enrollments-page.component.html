@@ -168,7 +168,7 @@
       <label class="bk-field">
         Desde
         <input type="date" [min]="today" [ngModel]="changeFrom()" (ngModelChange)="changeFrom.set($event)" />
-        <span class="bk-muted" style="font-size:12px">Las clases desde esta fecha pasan al plan nuevo. Mismos días, horas y estado.</span>
+        <span class="bk-muted" style="font-size:var(--text-xs)">Las clases desde esta fecha pasan al plan nuevo. Mismos días, horas y estado.</span>
       </label>
       @if (changeShortfall()) { <p class="bk-note cap-warn">{{ changeShortfall() }}</p> }
       @if (changeError()) { <p class="bk-error">{{ changeError() }}</p> }

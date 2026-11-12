@@ -23,7 +23,7 @@
 
 .page-title {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 26px;
+  font-size: var(--text-xl);
   font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--color-text);
@@ -31,8 +31,8 @@
 }
 
 .page-subtitle {
-  font-size: 14px;
-  color: var(--color-muted);
+  font-size: var(--text-sm);
+  color: var(--color-muted-light);
 }
 
 /* ── Error ───────────────────────────────────── */
@@ -45,7 +45,7 @@
   background: var(--color-danger-a8);
   border: 1px solid var(--color-danger-a20);
   border-radius: var(--radius-md);
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-danger-soft);
   margin-bottom: 24px;
 }
@@ -56,7 +56,7 @@
   border: 1px solid var(--color-danger-a30);
   border-radius: var(--radius-sm);
   padding: 4px 12px;
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--color-danger-soft);
   cursor: pointer;
 }
@@ -89,19 +89,19 @@
   border: 1px solid var(--color-border);
   display: grid;
   place-items: center;
-  color: var(--color-muted);
+  color: var(--color-muted-light);
 }
 
 .empty-title {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 18px;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-text);
 }
 
 .empty-sub {
-  font-size: 14px;
-  color: var(--color-muted);
+  font-size: var(--text-sm);
+  color: var(--color-muted-light);
   max-width: 280px;
   margin-bottom: 6px;
 }

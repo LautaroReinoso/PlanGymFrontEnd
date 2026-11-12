@@ -39,16 +39,16 @@ import { AuthService } from '../../../core/auth/services/auth.service';
     }
     .admin-brand { display: flex; align-items: center; gap: 8px; font: 700 16px var(--font-display); color: var(--color-text); }
     .admin-tag {
-      font: 600 11px var(--font-body); text-transform: uppercase; letter-spacing: .6px;
-      padding: 3px 8px; border-radius: 999px; background: var(--color-accent-dim); color: var(--color-accent);
+      font: 600 var(--text-xs) var(--font-body); text-transform: uppercase; letter-spacing: .6px;
+      padding: 3px 8px; border-radius: var(--radius-full); background: var(--color-accent-dim); color: var(--color-accent-text);
     }
     .admin-user { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    .admin-mail { font-size: 13px; color: var(--color-muted-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .admin-mail { font-size: var(--text-sm); color: var(--color-muted-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .admin-logout {
       width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 8px;
       background: none; color: var(--color-muted-light); cursor: pointer; flex-shrink: 0;
     }
-    .admin-logout:hover { background: var(--color-danger-a8); color: var(--color-danger); }
+    .admin-logout:hover { background: var(--color-danger-a8); color: var(--color-danger-soft); }
     .admin-content { max-width: 1000px; margin: 0 auto; padding: 28px 20px 48px; }
     @media (max-width: 560px) { .admin-mail { display: none; } .admin-content { padding: 20px 16px 40px; } }
   `],

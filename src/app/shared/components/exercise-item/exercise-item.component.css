@@ -22,7 +22,7 @@
 
 .exercise-check {
   flex-shrink: 0;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 .exercise-index {
@@ -35,7 +35,7 @@
   border-radius: 50%;
   background: var(--color-card);
   color: var(--color-muted-light);
-  font: 600 12px 'DM Sans', sans-serif;
+  font: 600 var(--text-xs) 'DM Sans', sans-serif;
 }
 
 .exercise-info {
@@ -53,7 +53,7 @@
 }
 
 .exercise-name {
-  font: 600 14px 'DM Sans', sans-serif;
+  font: 600 var(--text-sm) 'DM Sans', sans-serif;
   color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -61,8 +61,8 @@
 }
 
 .exercise-detail {
-  font: 400 12px 'DM Sans', sans-serif;
-  color: var(--color-muted);
+  font: 400 var(--text-xs) 'DM Sans', sans-serif;
+  color: var(--color-muted-light);
 }
 
 .exercise-actions {
@@ -93,5 +93,5 @@
 
 .exercise-icon-btn.danger:hover {
   background: var(--color-danger-a12);
-  color: var(--color-danger);
+  color: var(--color-danger-soft);
 }

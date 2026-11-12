@@ -32,15 +32,15 @@
 }
 
 .day-meta-label {
-  font-size: 10px;
+  font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--color-muted-light);
 }
 
 .day-meta-value {
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text);
 }
@@ -62,11 +62,11 @@
   background: var(--color-danger-a8);
   border: 1px solid var(--color-danger-a20);
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--color-danger-soft);
 }
 
-.edit-error svg { flex-shrink: 0; color: var(--color-danger); }
+.edit-error svg { flex-shrink: 0; color: var(--color-danger-soft); }
 
 /* ── Acciones ────────────────────────────────── */
 

@@ -17,7 +17,7 @@
 }
 
 .form-label {
-  font: 500 13px 'DM Sans', sans-serif;
+  font: 500 var(--text-sm) 'DM Sans', sans-serif;
   color: var(--color-muted-light);
 }
 
@@ -30,7 +30,7 @@
   border-radius: var(--radius-sm);
   padding: 12px 36px 12px 14px;
   color: var(--color-text);
-  font: 400 14px 'DM Sans', sans-serif;
+  font: 400 var(--text-sm) 'DM Sans', sans-serif;
   transition: border-color 0.2s var(--ease-smooth);
 }
 
@@ -40,8 +40,8 @@
 }
 
 .form-error {
-  font: 400 12px 'DM Sans', sans-serif;
-  color: var(--color-danger);
+  font: 400 var(--text-xs) 'DM Sans', sans-serif;
+  color: var(--color-danger-soft);
 }
 
 .form-textarea {
@@ -50,7 +50,7 @@
   border-radius: var(--radius-sm);
   padding: 12px 14px;
   color: var(--color-text);
-  font: 400 14px 'DM Sans', sans-serif;
+  font: 400 var(--text-sm) 'DM Sans', sans-serif;
   resize: vertical;
   min-height: 84px;
   transition: border-color 0.2s var(--ease-smooth);
@@ -79,7 +79,7 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-muted-light);
-  font: 600 14px 'DM Sans', sans-serif;
+  font: 600 var(--text-sm) 'DM Sans', sans-serif;
   cursor: pointer;
   transition: border-color 0.2s var(--ease-smooth), background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
 }
@@ -93,7 +93,7 @@
 }
 
 .difficulty-picker-label {
-  font: 500 13px 'DM Sans', sans-serif;
+  font: 500 var(--text-sm) 'DM Sans', sans-serif;
   color: var(--color-muted-light);
   margin-left: 4px;
 }
@@ -108,7 +108,7 @@
 /* ── Grillas extra ──────────────────────────── */
 .form-row--3 { grid-template-columns: repeat(3, 1fr); }
 .form-row--4 { grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.form-label--sm { font-size: 12px; }
+.form-label--sm { font-size: var(--text-xs); }
 
 .form-fieldset {
   border: 1px solid var(--color-border);
@@ -127,7 +127,7 @@
   border-radius: var(--radius-sm);
   padding: 10px 12px;
   color: var(--color-text);
-  font: 400 14px 'DM Sans', sans-serif;
+  font: 400 var(--text-sm) 'DM Sans', sans-serif;
   width: 100%;
   min-width: 0;
   transition: border-color 0.2s var(--ease-smooth);
@@ -143,7 +143,7 @@
   color: var(--color-muted-light);
   border-radius: var(--radius-full);
   padding: 6px 12px;
-  font: 500 12px 'DM Sans', sans-serif;
+  font: 500 var(--text-xs) 'DM Sans', sans-serif;
   cursor: pointer;
   transition: border-color 0.2s var(--ease-smooth), background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
 }

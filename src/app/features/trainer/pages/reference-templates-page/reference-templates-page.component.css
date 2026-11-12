@@ -1,16 +1,16 @@
 .ref-page { padding: 24px 16px 96px; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
-.back { color: var(--color-muted-light); text-decoration: none; font-size: 14px; }
-.title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; margin: 0; color: var(--color-text); }
+.back { color: var(--color-muted-light); text-decoration: none; font-size: var(--text-sm); }
+.title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: var(--text-xl); margin: 0; color: var(--color-text); }
 .sub { color: var(--color-muted-light); margin: 6px 0 0; line-height: 1.5; }
-.error { color: var(--color-danger); }
+.error { color: var(--color-danger-soft); }
 .list { display: flex; flex-direction: column; gap: 14px; }
 .plan { position: relative; background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 18px; overflow: hidden; }
 .plan::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--color-accent), var(--color-celeste)); }
 .plan__head { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
 .plan__info { flex: 1 1 280px; min-width: 0; }
-.plan__name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; margin: 0 0 8px; color: var(--color-text); }
-.plan__desc { color: var(--color-muted-light); font-size: 14px; line-height: 1.5; margin: 8px 0 0; white-space: pre-line; }
+.plan__name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: var(--text-lg); margin: 0 0 8px; color: var(--color-text); }
+.plan__desc { color: var(--color-muted-light); font-size: var(--text-sm); line-height: 1.5; margin: 8px 0 0; white-space: pre-line; }
 .plan__actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { font-size: 12px; padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--color-border); color: var(--color-muted-light); }
+.chip { font-size: var(--text-xs); padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--color-border); color: var(--color-muted-light); }
 .plan__days { margin-top: 16px; display: flex; flex-direction: column; gap: 12px; }

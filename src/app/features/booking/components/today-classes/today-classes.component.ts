@@ -29,7 +29,7 @@ import { isPast, isoTime, todayKey } from '../../utils/booking-date.util';
   styles: [`
     .tc {
       display: flex; align-items: center; gap: var(--space-2); text-decoration: none;
-      font-size: 14px; color: var(--color-text); padding: var(--space-3) var(--space-4);
+      font-size: var(--text-sm); color: var(--color-text); padding: var(--space-3) var(--space-4);
       background: var(--color-surface); border: 1px solid var(--color-border);
       border-left: 3px solid var(--color-celeste); border-radius: var(--radius-sm);
     }

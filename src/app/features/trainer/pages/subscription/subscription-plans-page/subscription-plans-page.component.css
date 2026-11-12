@@ -5,7 +5,7 @@
 .back-link {
   display: inline-block;
   margin-bottom: var(--space-2);
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--color-muted-light);
   text-decoration: none;
 }
@@ -13,12 +13,12 @@
 
 .page-title {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
 }
-.page-subtitle { margin: var(--space-1) 0 0; color: var(--color-muted-light); font-size: 14px; }
+.page-subtitle { margin: var(--space-1) 0 0; color: var(--color-muted-light); font-size: var(--text-sm); }
 
 .notice {
   display: flex;
@@ -30,10 +30,10 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   color: var(--color-muted-light);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
-.notice a { color: var(--color-accent); }
-.notice--error { border-color: var(--color-danger-a40); color: var(--color-danger); }
+.notice a { color: var(--color-accent-text); }
+.notice--error { border-color: var(--color-danger-a40); color: var(--color-danger-soft); }
 
 .plans-grid {
   display: grid;
@@ -55,7 +55,7 @@
 .plan-card--current { border-color: var(--color-success); box-shadow: 0 0 0 1px var(--color-success-dim); }
 
 .plan-card__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
-.plan-card__name { margin: 0; font-family: var(--font-display); font-size: 17px; color: var(--color-text); }
+.plan-card__name { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-text); }
 
 .plan-card__price {
   margin: 0;
@@ -64,7 +64,7 @@
   font-weight: 700;
   color: var(--color-text);
 }
-.plan-card__period { font-size: 14px; font-weight: 400; color: var(--color-muted-light); }
-.plan-card__limit { margin: 0 0 var(--space-2); color: var(--color-muted-light); font-size: 14px; flex: 1; }
+.plan-card__period { font-size: var(--text-sm); font-weight: 400; color: var(--color-muted-light); }
+.plan-card__limit { margin: 0 0 var(--space-2); color: var(--color-muted-light); font-size: var(--text-sm); flex: 1; }
 
-.empty { color: var(--color-muted); }
+.empty { color: var(--color-muted-light); }

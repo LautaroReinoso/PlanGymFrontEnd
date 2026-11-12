@@ -8,7 +8,7 @@
   border: 1px solid var(--color-warning-a40);
   background: var(--color-warning-a8);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-text);
 }
 .banner__icon { color: var(--color-warning); flex-shrink: 0; }

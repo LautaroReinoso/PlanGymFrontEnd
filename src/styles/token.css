@@ -6,7 +6,7 @@
   --color-surface:   #13131A;
   --color-card:      #1C1C26;
   --color-border:    #2A2A38;
-  --color-accent:    #4F6EF7;   /* electric blue */
+  --color-accent:    #4A68F2;   /* electric blue (antes #4F6EF7: texto blanco encima da 4,6:1) */
   --color-accent-dim:#4F6EF720;
   --color-success:   #22C55E;
   --color-warning:   #F59E0B;
@@ -14,7 +14,7 @@
   --color-text:      #F0F0F5;
   --color-muted:     #6B6B80;
   --color-muted-light: #9898A8; /* labels y texto secundario sobre fondo oscuro */
-  --color-accent-glow: rgba(79, 110, 247, 0.25);
+  --color-accent-glow: rgba(74, 104, 242, 0.25);
   --color-success-dim: #22C55E20;
   --color-celeste:     #38BDF8;
 
@@ -23,9 +23,11 @@
   --color-surface-raised: #232330;  /* capa sobre card: hover de filas, chips, skeleton */
   --color-surface-sunken: #16161F;  /* inputs y zonas hundidas */
   --color-accent-hover:   #3D5CE8;
+  --color-accent-text:    #7590FA;  /* acento como TEXTO sobre fondos oscuros (5,7:1 en card) */
   --color-accent-soft:    #818CF8;  /* texto azul claro sobre tinte de acento */
   --color-celeste-soft:   #7DD3FC;
-  --color-danger-soft:    #FCA5A5;  /* texto de error sobre tinte rojo */
+  --color-danger-soft:    #FCA5A5;  /* texto de error (rojo como texto siempre es este) */
+  --color-danger-strong:  #DC2626;  /* relleno rojo con texto blanco (4,8:1) */
   --color-warning-soft:   #FCD34D;
   --color-success-soft:   #4ADE80;
   --color-violet:         #8B5CF6;  /* solo identificación de avatares */
@@ -69,7 +71,7 @@
 
   /* Shadows */
   --shadow-card: 0 4px 24px rgba(0,0,0,0.4);
-  --shadow-glow: 0 0 24px rgba(79,110,247,0.2);
+  --shadow-glow: 0 0 24px rgba(74,104,242,0.2);
 
   /* Transitions */
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);

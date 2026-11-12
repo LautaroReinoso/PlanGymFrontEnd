@@ -22,9 +22,9 @@
   gap: 6px;
   background: none;
   border: none;
-  color: var(--color-muted);
+  color: var(--color-muted-light);
   font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 14px;
+  font-size: var(--text-sm);
   cursor: pointer;
   padding: 0;
   margin-bottom: 28px;
@@ -41,7 +41,7 @@
   border: 1px solid var(--color-danger-a20);
   border-radius: var(--radius-md);
   color: var(--color-danger-soft);
-  font-size: 14px;
+  font-size: var(--text-sm);
   margin-bottom: 24px;
 }
 
@@ -65,7 +65,7 @@
   display: grid;
   place-items: center;
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 26px;
+  font-size: var(--text-xl);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -73,7 +73,7 @@
 .profile-avatar--active {
   background: var(--color-accent-a12);
   border: 2px solid var(--color-accent-a30);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 .profile-avatar:not(.profile-avatar--active) {
@@ -90,15 +90,15 @@
 
 .profile-name {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 22px;
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-text);
   letter-spacing: -0.3px;
 }
 
 .profile-mail {
-  font-size: 14px;
-  color: var(--color-muted);
+  font-size: var(--text-sm);
+  color: var(--color-muted-light);
   margin-bottom: 6px;
 }
 
@@ -111,11 +111,11 @@
 
 .section-title {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-muted);
+  color: var(--color-muted-light);
   margin-bottom: 12px;
 }
 
@@ -154,20 +154,20 @@
   border: 1px solid var(--color-accent-a20);
   display: grid;
   place-items: center;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   flex-shrink: 0;
 }
 
 .workout-name {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 15px;
+  font-size: var(--text-md);
   font-weight: 700;
   color: var(--color-text);
 }
 
 .workout-since {
-  font-size: 12px;
-  color: var(--color-muted);
+  font-size: var(--text-xs);
+  color: var(--color-muted-light);
   margin-top: 2px;
 }
 
@@ -210,8 +210,8 @@
 }
 
 .no-workout-text {
-  font-size: 14px;
-  color: var(--color-muted);
+  font-size: var(--text-sm);
+  color: var(--color-muted-light);
 }
 
 /* ── Adherencia ──────────────────────────────── */
@@ -230,7 +230,7 @@
   font-family: 'Syne', system-ui, sans-serif;
   font-size: 32px;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   flex-shrink: 0;
 }
 
@@ -256,7 +256,7 @@
 }
 
 .assign-modal-sub {
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-muted-light);
   margin-bottom: 20px;
 }
@@ -306,14 +306,14 @@
 
 .template-option-name {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text);
 }
 
 .template-option-desc {
-  font-size: 12px;
-  color: var(--color-muted);
+  font-size: var(--text-xs);
+  color: var(--color-muted-light);
 }
 
 .template-check {
@@ -321,7 +321,7 @@
   right: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 .assign-error {
@@ -329,7 +329,7 @@
   background: var(--color-danger-a8);
   border: 1px solid var(--color-danger-a20);
   border-radius: var(--radius-sm);
-  font-size: 13px;
+  font-size: var(--text-sm);
   color: var(--color-danger-soft);
   margin-bottom: 16px;
 }
@@ -346,5 +346,5 @@
 
 @media (max-width: 600px) {
   .profile-header { flex-direction: column; align-items: flex-start; }
-  .profile-avatar { width: 56px; height: 56px; font-size: 20px; }
+  .profile-avatar { width: 56px; height: 56px; font-size: var(--text-lg); }
 }

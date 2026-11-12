@@ -15,12 +15,12 @@
 }
 .form-error {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--text-sm);
   line-height: 1.5;
-  color: var(--color-danger);
+  color: var(--color-danger-soft);
 }
 .form-error a {
   margin-left: 4px;
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   font-weight: 600;
 }

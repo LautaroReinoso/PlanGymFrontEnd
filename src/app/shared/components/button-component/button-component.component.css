@@ -64,19 +64,19 @@
 
 .btn--sm {
   padding: 7px 14px;
-  font-size: 13px;
+  font-size: var(--text-sm);
   border-radius: var(--radius-sm);
   gap: 6px;
 }
 
 .btn--md {
   padding: 11px 20px;
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 .btn--lg {
   padding: 14px 28px;
-  font-size: 15px;
+  font-size: var(--text-md);
   border-radius: var(--radius-md);
   gap: 10px;
 }
@@ -99,7 +99,7 @@
 
 .btn--secondary {
   background: var(--color-accent-a12);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
   border: 1.5px solid var(--color-accent-a30);
 }
 
@@ -127,7 +127,7 @@
 
 .btn--danger {
   background: var(--color-danger-a12);
-  color: var(--color-danger);
+  color: var(--color-danger-soft);
   border: 1.5px solid var(--color-danger-a30);
 }
 

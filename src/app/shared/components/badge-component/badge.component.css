@@ -4,7 +4,7 @@
     display:inline-flex;
     align-items:center;
     gap:8px;
-    color:var(--color-muted);
+    color: var(--color-muted-light);
     border-radius:var(--radius-full);
 
     font-weight:400;
@@ -20,12 +20,12 @@
 
 .badge--sm{
     padding:4px 10px;
-    font-size:12px;
+    font-size:var(--text-xs);
 }
 
 .badge--md{
     padding:6px 14px;
-    font-size:14px;
+    font-size:var(--text-sm);
 }
 
 /* Dot */
