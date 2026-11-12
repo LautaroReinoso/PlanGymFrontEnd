@@ -810,6 +810,8 @@ el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite
 reemplaza otro plan — el backend desactiva el anterior) y "Quitar" (`DELETE /student-workouts/{id}`, confirma).
 El listado de alumnos solo trae `templateName`: se filtra por nombre y se confirma con
 `GET /student-workouts/student/{id}` (`activeWorkout.workoutTemplateId` + `id` de la asignación).
+- **Eliminar plantilla con alumnos:** el componente emite `countChange` (nombres); si hay alumnos, el modal de
+  eliminar no muestra el botón y explica que primero hay que quitárselo. Si el backend rechaza, se muestra su `message`.
 - [ ] Backend: sumar `workoutTemplateId` y `studentWorkoutId` a `activeWorkout` del listado (evita N llamadas).
 
 ## Suscripciones del entrenador (nov-2026)

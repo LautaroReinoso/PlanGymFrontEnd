@@ -1,3 +1,4 @@
+import { apiErrorText } from '../../../../core/http/api-error.util';
 import { TemplateStudentsComponent } from '../../components/templates/template-students/template-students.component';
 // ─────────────────────────────────────────────
 //  GymPlan — TemplateDetailPageComponent
@@ -145,6 +146,8 @@ export class TemplateDetailPageComponent implements OnInit {
   readonly showDeleteConfirm = signal(false);
   readonly isDeleting = signal(false);
   readonly deleteError = signal<string | null>(null);
+  /** Alumnos con este plan (lo emite app-template-students). null = todavía cargando. */
+  readonly assignedNames = signal<string[] | null>(null);
 
   // ── Lifecycle ─────────────────────────────────
   ngOnInit(): void {
@@ -405,10 +408,10 @@ export class TemplateDetailPageComponent implements OnInit {
         this.isDeleting.set(false);
         this.router.navigate(['/trainer/templates']);
       },
-      error: () => {
+      error: err => {
+        // El modal queda abierto con el motivo (ej. el backend avisa que tiene alumnos asignados)
         this.isDeleting.set(false);
-        this.deleteError.set('No se pudo eliminar la plantilla.');
-        this.showDeleteConfirm.set(false);
+        this.deleteError.set(apiErrorText(err, 'No se pudo eliminar la plantilla.'));
       },
     });
   }

@@ -5,7 +5,7 @@
 //  (y obtener el id de la asignación) se consulta /student-workouts/student/{id} de los candidatos.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -43,6 +43,9 @@ export class TemplateStudentsComponent {
 
   readonly templateId   = input.required<number>();
   readonly templateName = input.required<string>();
+
+  /** Cantidad de alumnos con este plan (se emite después de cada carga). La página lo usa para no dejar eliminar. */
+  readonly countChange = output<string[]>();
 
   readonly all       = signal<StudentSummary[]>([]);
   readonly assigned  = signal<Assigned[]>([]);
@@ -85,7 +88,7 @@ export class TemplateStudentsComponent {
         this.all.set(list);
         // Candidatos: plan activo con el mismo nombre. Se confirma por id de plantilla.
         const cands = list.filter(s => s.activeWorkout?.templateName === name);
-        if (!cands.length) { this.assigned.set([]); this.isLoading.set(false); return; }
+        if (!cands.length) { this.assigned.set([]); this.isLoading.set(false); this.countChange.emit([]); return; }
         forkJoin(cands.map(s =>
           this.http.get<ActiveAssignment>(`${this.api}/student-workouts/student/${s.id}`).pipe(
             map(w => (w && w.activeWorkout?.workoutTemplateId === id)
@@ -96,6 +99,7 @@ export class TemplateStudentsComponent {
             this.assigned.set(res.filter((a): a is Assigned => !!a)
               .sort((a, b) => this.nameOf(a.student).localeCompare(this.nameOf(b.student))));
             this.isLoading.set(false);
+            this.countChange.emit(this.assigned().map(a => this.nameOf(a.student)));
           });
       },
       error: err => { this.isLoading.set(false); this.toast.error(apiErrorText(err, 'No se pudieron cargar los alumnos.')); },
