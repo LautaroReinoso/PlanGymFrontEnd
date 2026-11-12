@@ -15,7 +15,7 @@ export interface ExerciseItemBadge {
 @Component({
   selector: 'app-exercise-item',
     standalone: true,
-  imports: [CommonModule, MuscleIconComponent, BadgeComponent],
+  imports: [CommonModule, MuscleIconComponent, BadgeComponent, IconButtonComponent],
   templateUrl: './exercise-item.component.html',
   styleUrl: './exercise-item.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,

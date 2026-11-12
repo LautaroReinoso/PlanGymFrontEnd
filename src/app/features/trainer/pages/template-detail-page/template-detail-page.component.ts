@@ -37,10 +37,12 @@ import { EditDayModalComponent, UpdateDayRequest } from '../../components/templa
 import { BadgeComponent } from "../../../../shared/components/badge-component/badge.component";
 import { IconButtonComponent } from '../../../../shared/components/icon-button/icon-button.component';
 import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym-loader.component';
+import { DayBadgeComponent } from '../../../../shared/components/day-badge/day-badge.component';
+
 @Component({
   selector: 'app-template-detail-page',
   standalone: true,
-  imports: [TemplateStudentsComponent, 
+  imports: [DayBadgeComponent, TemplateStudentsComponent, 
     CommonModule,
     TemplateDayComponent,
     TemplateEditModalComponent,
@@ -53,7 +55,7 @@ import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym
     GymLoaderComponent
 ],
   templateUrl: './template-detail-page.component.html',
-  styleUrl: './template-detail-page.component.css',
+  styleUrls: ['../detail-pages.css', './template-detail-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TemplateDetailPageComponent implements OnInit {

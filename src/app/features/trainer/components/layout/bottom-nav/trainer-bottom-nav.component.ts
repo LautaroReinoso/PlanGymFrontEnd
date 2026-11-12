@@ -49,10 +49,10 @@ const ITEMS: Item[] = [
     }
     .tbn__item {
       flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0;
-      font: 500 11px var(--font-body); color: var(--color-muted); text-decoration: none;
+      font: 500 var(--text-xs) var(--font-body); color: var(--color-muted-light); text-decoration: none;
     }
     .tbn__item svg { width: 22px; height: 22px; }
-    .tbn__item.active { color: var(--color-accent); }
+    .tbn__item.active { color: var(--color-accent-text); }
   `],
 })
 export class TrainerBottomNavComponent {

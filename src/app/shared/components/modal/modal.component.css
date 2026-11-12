@@ -78,15 +78,15 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  background: #1C1C26;
-  border: 1px solid #2A2A38;
-  border-radius: 18px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   max-height: calc(100dvh - 32px);
   overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(79, 110, 247, 0.08) inset,
+    0 0 0 1px var(--color-accent-a8) inset,
     0 24px 64px rgba(0, 0, 0, 0.5);
   animation: panelIn 280ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
@@ -103,7 +103,7 @@
   transform: translateX(-50%);
   width: 50%; height: 1px;
   background: linear-gradient(
-    to right, transparent, #4F6EF7, transparent
+    to right, transparent, var(--color-accent), transparent
   );
 }
 
@@ -115,7 +115,7 @@
 .modal-panel--full {
   max-width: 100%;
   height: calc(100dvh - 32px);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 
 /* ── Header ──────────────────────────────────── */
@@ -125,15 +125,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid #232330;
+  border-bottom: 1px solid var(--color-surface-raised);
   flex-shrink: 0;
 }
 
 .modal-title {
   font-family: 'Syne', system-ui, sans-serif;
-  font-size: 16px;
+  font-size: var(--text-md);
   font-weight: 700;
-  color: #F0F0F5;
+  color: var(--color-text);
   letter-spacing: -0.2px;
   margin: 0;
 }
@@ -144,20 +144,20 @@
   width: 30px; height: 30px;
   background: none;
   border: none;
-  border-radius: 8px;
-  color: #6B6B80;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted-light);
   cursor: pointer;
   flex-shrink: 0;
   transition: background 150ms, color 150ms;
 }
 
 .modal-close-btn:hover {
-  background: #252535;
-  color: #F0F0F5;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
 }
 
 .modal-close-btn:focus-visible {
-  outline: 2px solid #4F6EF7;
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -168,12 +168,12 @@
   overflow-y: auto;
   flex: 1;
   scrollbar-width: thin;
-  scrollbar-color: #2A2A38 transparent;
+  scrollbar-color: var(--color-border) transparent;
 }
 
 .modal-content::-webkit-scrollbar { width: 4px; }
 .modal-content::-webkit-scrollbar-thumb {
-  background: #2A2A38;
+  background: var(--color-border);
   border-radius: 2px;
 }
 
@@ -186,14 +186,14 @@
   }
 
   .modal-panel {
-    border-radius: 18px 18px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     max-width: 100%;
     max-height: 92dvh;
   }
 
   .modal-panel--full {
     height: 92dvh;
-    border-radius: 18px 18px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
 }
 
@@ -208,3 +208,12 @@
   }
   .modal-backdrop--out { opacity: 0; }
 }
+/* Área táctil ≥ 44×44 (regla de 44 px) sin agrandar el dibujo */
+.modal-close-btn { position: relative; }
+.modal-close-btn::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%);
+}
+
+/* El panel recibe foco solo como último recurso: sin anillo */
+.modal-panel:focus { outline: none; }

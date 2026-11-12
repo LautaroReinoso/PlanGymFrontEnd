@@ -17,15 +17,17 @@
 
     <!-- Panel -->
     <div
+      #panel
       [class]="panelClass"
       role="dialog"
-      [attr.aria-modal]="true"
-      [attr.aria-label]="title()"
+      aria-modal="true"
+      tabindex="-1"
+      [attr.aria-labelledby]="title() ? titleId : null"
     >
 
       <!-- Header -->
       <div class="modal-header">
-        <h2 class="modal-title">{{ title() }}</h2>
+        <h2 class="modal-title" [id]="titleId">{{ title() }}</h2>
 
         @if (showClose()) {
           <button

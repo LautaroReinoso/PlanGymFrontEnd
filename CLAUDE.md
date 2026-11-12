@@ -29,7 +29,7 @@
 --color-surface:   #13131A
 --color-card:      #1C1C26
 --color-border:    #2A2A38
---color-accent:    #4F6EF7   /* azul eléctrico */
+--color-accent:    #4A68F2   /* azul eléctrico (antes #4F6EF7; se oscureció apenas para que el texto blanco encima dé 4,6:1) */
 --color-celeste:   #38BDF8   /* celeste — acento secundario */
 --color-text:      #F0F0F5
 --color-muted:     #6B6B80
@@ -91,7 +91,10 @@ src/app/
 │   │   ├── skeleton/                    → gp-skeleton
 │   │   ├── modal/                       → gp-modal
 │   │   ├── muscle-icon/                 → gp-muscle-icon
-│   │   ├── exercise-item/               → app-exercise-item (NUEVO — fila reutilizable)
+│   │   ├── exercise-item/               → app-exercise-item (ÚNICA copia — fila reutilizable)
+│   │   ├── icon-button/                 → gp-icon-button (único botón de ícono, área 44px)
+│   │   ├── empty-state/                 → app-empty-state
+│   │   ├── day-badge/                   → app-day-badge (chip de día)
 │   │   └── toast/                       → gp-toast (montado en app.component)
 │   ├── services/
 │   │   └── toast.service.ts             → ToastService (success / error / info)
@@ -808,11 +811,102 @@ el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite
 ## Alumnos con este plan (nov-2026)
 `app-template-students` en el detalle de plantilla: lista quién la tiene activa, "+ Asignar" (buscador; aviso si
 reemplaza otro plan — el backend desactiva el anterior) y "Quitar" (`DELETE /student-workouts/{id}`, confirma).
-El listado de alumnos solo trae `templateName`: se filtra por nombre y se confirma con
-`GET /student-workouts/student/{id}` (`activeWorkout.workoutTemplateId` + `id` de la asignación).
+El listado de alumnos trae `activeWorkout.workoutTemplateId` y `studentWorkoutId`: se filtra por id, sin llamadas extra.
+Si el backend no los manda (versión vieja), cae al método anterior: filtra por nombre y confirma con
+`GET /student-workouts/student/{id}`.
 - **Eliminar plantilla con alumnos:** el componente emite `countChange` (nombres); si hay alumnos, el modal de
   eliminar no muestra el botón y explica que primero hay que quitárselo. Si el backend rechaza, se muestra su `message`.
-- [ ] Backend: sumar `workoutTemplateId` y `studentWorkoutId` a `activeWorkout` del listado (evita N llamadas).
+- [x] Backend: `workoutTemplateId` y `studentWorkoutId` en `activeWorkout` del listado.
+
+## Sistema visual (nov-2026, rama `feature/ui-tokens`)
+
+### Política de colores y tokens
+- **Ningún color literal fuera de `src/styles/token.css`.** Ni hex ni `rgba()` de la paleta en CSS, TS o HTML.
+  Única excepción: los archivos de `public/` (favicon). Sombras `rgba(0,0,0,…)` y reflejos `rgba(255,255,255,…)` sí.
+  Verificar: `grep -rnoiE "#[0-9a-f]{3,8}\b" src/app src/styles.css src/styles/booking.css --include=*.css --include=*.ts --include=*.html`
+- Variantes: `--color-border-strong`, `--color-surface-raised` (capa sobre card), `--color-surface-sunken` (inputs),
+  `--color-accent-hover`, `--color-*-soft` (texto claro sobre tinte), `--color-danger-strong` (relleno rojo con texto blanco),
+  `--color-on-accent` (texto sobre relleno), `--color-violet*` (solo avatares), `--gradient-accent` (línea de acento de cards).
+- **Transparencias:** `--color-<color>-a<%>` con escala única 8 · 12 · 20 · 30 · 40 · 50 (ej. `--color-danger-a8`).
+  Si hace falta otra, agregarla en `token.css`, no escribir `color-mix` suelto.
+- **Texto en color:** acento como texto = `--color-accent-text` (#7590FA); rojo como texto = `--color-danger-soft`.
+  `--color-accent` / `--color-danger` quedan para bordes, rellenos y barras. Texto sobre success/warning/celeste = `--color-bg`.
+- **Texto secundario = `--color-muted-light`** (5,9:1 sobre card). `--color-muted` solo para placeholders, deshabilitados y
+  elementos decorativos (3,2:1: no alcanza para texto).
+- Radios: `--radius-sm` 8 · `--radius-md` 14 · `--radius-lg` 20 · `--radius-full`. Se dejan 50% (círculos) y 2–4px (barras).
+- ⚠️ No redefinir un token global dentro de un componente (`--color-accent: var(--color-accent)` es circular y deja el
+  valor vacío: así se rompió el botón del login).
+
+### Escala tipográfica
+`--text-xs` 12/16 · `--text-sm` 14/20 · `--text-md` 16/24 · `--text-lg` 20/28 · `--text-xl` 26/32 (`--leading-*`).
+Nada por debajo de 12px; texto de lectura ≥ 14px. Títulos grandes de página (30–32px) quedan en px.
+
+### Contraste (WCAG AA, texto normal ≥ 4,5:1)
+| Texto / fondo | card #1C1C26 | surface-raised #232330 |
+|---|---|---|
+| text | 14,9 | 13,6 |
+| muted-light | 5,9 | 5,5 |
+| accent-text | 5,7 | 5,3 |
+| danger-soft | 8,9 | 8,2 |
+| success / success-soft | 7,4 / 9,7 | 6,8 / 8,9 |
+| warning / warning-soft | 7,9 / 11,7 | 7,2 / 10,8 |
+| celeste | 7,9 | 7,2 |
+Rellenos: blanco sobre accent 4,6 · sobre danger-strong 4,8 · `--color-bg` sobre success/warning.
+
+### Regla de 44 px
+- Todo elemento interactivo tiene área táctil ≥ 44×44 en pantallas táctiles.
+- **Botón de ícono único: `gp-icon-button`** (`icon`, `variant` ghost|primary|danger, `size` sm|md|lg, `[bordered]`,
+  `ariaLabel` **obligatorio**). Se ve de 32/36/40 px pero un `::before` invisible lleva el área a 44×44. Ya no existen
+  `.action-btn`, `.exercise-icon-btn` ni `.header-action-btn`. Íconos decorativos van como `<svg aria-hidden>`, no como
+  botón deshabilitado.
+- `gp-button`: `sm` mínimo 36px de alto; con `@media (pointer: coarse)` todos ≥ 44px. Igual `.bk-tab`, flechas del calendario
+  y `.difficulty-btn`. Botones chicos sueltos (`.slot__x`, `.logout-btn`, `.modal-close-btn`) usan el mismo `::before`.
+- Bottom-nav: 64px de alto, label 12px.
+
+### Componentes nuevos / unificados
+- `app-empty-state` (shared): ícono (`[empty-icon]`) + título + subtítulo + acciones (`[empty-actions]`). Usado en Mis
+  alumnos y en el Inicio del alumno. Usarlo para todo estado vacío nuevo.
+- `app-student-card`: una columna. Fila 1 avatar + nombre (o DNI) + badge; fila 2 plan · días; fila 3 adherencia
+  (`adherencePercent` del backend, barra ≥70 verde / 40–69 ámbar / <40 rojo, "—" si viene null). Pendiente = DNI como
+  dato principal + "Registro pendiente"; el estado se marca SOLO con el badge (sin borde ámbar ni avatar ámbar).
+  Hover sin `translateY`. Falta backend: fecha de última actividad para "hace 2 días".
+  Pie de la card = lista `<dl>` etiqueta / valor con la misma forma para Adherencia, Próxima clase y Horario fijo
+  (input `turnos: { next, fixed }`, solo con Turnos prendido). Nada de texto en color suelto.
+- Inicio del alumno: `app-next-day-card` destaca el siguiente día pendiente de la semana (`WeekStatusService.nextDay`, el
+  mismo criterio que "Hoy"; si la semana no carga, el Día 1). Los días hechos esta semana muestran "Hecho".
+- `app-day-badge` (shared) es el único chip de día: lo usan detalle de plantilla y detalle de alumno (antes la plantilla
+  tenía su copia). Los chips bajan de línea; no hay scroll horizontal oculto.
+- `app-exercise-item`: queda solo el de `shared/` (se borró la copia sin uso de `features/trainer/components`). El nombre
+  baja de línea en vez de cortarse.
+- Nombres largos (alumno, plantilla, día, ejercicio) **bajan de línea** (`overflow-wrap: anywhere`), no usan ellipsis.
+
+### Verificación visual — `npm run visual`
+`tools/visual/visual-check.mjs` hace `ng build`, sirve `dist/`, simula el backend (`tools/visual/mocks.mjs`, Playwright
+interceptando `api.plangympro.com`, sesión fake en localStorage) y saca capturas en 360 / 390 / 768 / 1280 px de: Mis alumnos
+(con y sin Turnos), detalle de alumno, detalle de plantilla, modal Agregar ejercicio, Ejercicios, Inicio del alumno (con plan,
+sin plan, semana completa), Semana, login y registro. **Falla si hay scroll horizontal o errores de JS.** Capturas en
+`visual-output/` (ignorado por git). `node tools/visual/visual-check.mjs inicio` corre solo las que contienen "inicio".
+Primera vez en una máquina: `npx playwright install chromium`. Si cambia un DTO, actualizar `mocks.mjs`.
+
+### Tamaño de CSS por componente
+- `angular.json`: aviso `anyComponentStyle` en **4,5 kB** (los `var(--…)` pesan más que los hex). Hoy **ningún componente
+  avisa**. El límite es por hoja: un componente puede tener varias en `styleUrls`.
+- Hojas compartidas (van PRIMERO en `styleUrls`): `features/auth/auth-shared.css` (fondo, logo y error de login / registro /
+  recuperar), `features/student/pages/student-pages.css` (flechas de Semana/Mes, tarjeta de error),
+  `features/trainer/pages/detail-pages.css` (`.back-btn` con 44 px y `.error-banner` de los detalles de alumno, plantilla y
+  ejercicio). Solo se incluyen en los componentes que usan esas clases.
+- `app-booking-calendar` usa tres hojas en orden: `calendar.component.css` (base + Semana), `calendar-entries.css`,
+  `calendar-month.css`. **El orden importa** (es el orden original de las reglas).
+- La página Semana del alumno usa `app-next-day-card` (igual que el Inicio) en vez de su propia tarjeta "Te toca".
+
+### Modal (`gp-modal`) accesible
+Al abrir enfoca el primer campo del contenido (en pantallas táctiles, el panel, para no abrir el teclado), Tab / Shift+Tab
+quedan dentro, Escape cierra solo el modal de arriba (pila estática) y al cerrar el foco vuelve al botón que lo abrió.
+`aria-labelledby` apunta al título. El scroll del body se libera cuando no queda ningún modal abierto.
+
+### Logo
+El SVG del logo (sidebar, layout, registro) usa `style="fill: var(--color-accent)"`. `public/favicon.svg`,
+`favicon.ico` y `apple-touch-icon.png` están en #4A68F2 (no pueden usar tokens).
 
 ## Suscripciones del entrenador (nov-2026)
 Quien paga es el TRAINER: suscripción mensual a la plataforma con Mercado Pago (preapproval).
@@ -1032,11 +1126,10 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - [x] `MUSCLE_GROUP_LABELS` — fuente única en `muscle-group.util.ts`
 - [x] Tests de lógica pura: `recovery.util.spec.ts` (vencimientos, ventana de 30 días, tope del mes) y
       `exercise-meta.util.spec.ts` (por tiempo / reps). El resto de los `.spec.ts` sigue siendo boilerplate del CLI.
-      Correr solo esos: `ng test --watch=false --include='**/recovery.util.spec.ts' --include='**/exercise-meta.util.spec.ts'`
-      (en Linux como root, Chrome necesita `--no-sandbox` → karma config con customLauncher).
-- [ ] Tests del cálculo "le toca" de `/trainer/hoy` (hoy vive dentro del componente: extraerlo a un util para testearlo)
-- [ ] CSS de componentes que pasan el budget de aviso (4 kB): login, register, template-detail, student-detail — mover
-      estilos repetidos a `styles.css` / `booking.css`
+      Correr todos los de lógica: `npm run test:ci` (usa `karma.ci.cjs`: Chrome sin ventana y con `--no-sandbox`, sirve en
+      Linux como root y en CI; si Chrome no está en el PATH, `CHROME_BIN=/ruta/a/chrome`). Hoy 19 tests, todos pasan.
+- [x] Tests del cálculo "le toca" de `/trainer/hoy`: `booking/utils/today-plan.util.ts` + spec (10 casos)
+- [x] CSS de componentes bajo el límite de aviso (ver "Tamaño de CSS por componente")
 
 ### Student
 - [x] `DashboardPage` — plan activo + lista de días (el alumno elige)

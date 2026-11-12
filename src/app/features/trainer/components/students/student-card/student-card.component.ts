@@ -10,6 +10,8 @@ import { StudentSummary } from '../../../models/trainer.models';
 import { AvatarComponent } from '../../../../../shared/components/avatar/avatar.component';
 
 export type StudentStatus = 'active' | 'no-plan' | 'pending';
+/** Datos de Turnos ya formateados (solo con el módulo prendido) */
+export interface StudentTurnos { next: string | null; fixed: string | null; }
 
 @Component({
   selector: 'app-student-card',
@@ -22,8 +24,8 @@ export type StudentStatus = 'active' | 'no-plan' | 'pending';
 export class StudentCardComponent {
 
   readonly student = input.required<StudentSummary>();
-  /** "Próxima clase: jue 12 nov 18:00" (solo con Turnos prendido) */
-  readonly turnos = input<string | null>(null);
+  /** Próxima clase y horario fijo (solo con Turnos prendido) */
+  readonly turnos = input<StudentTurnos | null>(null);
 
   // Output para navegar al detalle
   readonly cardClick = output<void>();
@@ -74,6 +76,30 @@ export class StudentCardComponent {
     const days = this.student().activeWorkout?.dayCount;
     if (!days) return null;
     return `${days} ${days === 1 ? 'día' : 'días'} por semana`;
+  });
+
+  readonly statusText = computed(() =>
+    ({ active: 'Activo', 'no-plan': 'Sin plan', pending: 'Pendiente' } as const)[this.status()]);
+
+  /** % que calcula el backend; null = todavía no hay dato */
+  readonly adherence = computed(() => {
+    const v = this.student().adherencePercent;
+    return v === null || v === undefined ? null : Math.round(v);
+  });
+
+  /** Umbral solo visual: ≥70 verde, 40–69 ámbar, <40 rojo */
+  readonly adherenceLevel = computed(() => {
+    const v = this.adherence();
+    if (v === null) return 'none';
+    return v >= 70 ? 'high' : v >= 40 ? 'mid' : 'low';
+  });
+
+  readonly ariaLabel = computed(() => {
+    const parts = [`Ver detalle de ${this.displayName()}`, this.statusText()];
+    const w = this.student().activeWorkout;
+    if (w) parts.push(`plan ${w.templateName}`);
+    if (this.adherence() !== null) parts.push(`adherencia ${this.adherence()}%`);
+    return parts.join(', ');
   });
 
   onClick(): void {

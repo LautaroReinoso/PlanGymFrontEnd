@@ -32,14 +32,20 @@
 
     <!-- Implementación del Avatar Reutilizable -->
     <div class="avatar-wrapper">
-      <app-avatar [initials]="initials()" [identifier]="student()!.id" [isPending]="!student()!.activeWorkout" />
+      <app-avatar [initials]="initials()" [identifier]="student()!.id" />
     </div>
 
     <div class="profile-info">
-      <h1 class="profile-name">{{ displayName() }}</h1>
-      @if (student()!.dni) { <p class="profile-mail">{{ student()!.dni }}</p> }
-      @if (student()!.activeWorkout) {
-      <gp-badge variant="elevated">Plan activo</gp-badge>
+      <h1 class="profile-name" [class.profile-name--pending]="!student()!.fullName">{{ displayName() }}</h1>
+      @if (!student()!.fullName) {
+        <p class="profile-pending">Registro pendiente · todavía no completó sus datos</p>
+      } @else if (student()!.dni) {
+        <p class="profile-mail">DNI {{ dniFormatted() }}</p>
+      }
+      @if (!student()!.fullName) {
+      <gp-badge variant="warning">Pendiente</gp-badge>
+      } @else if (student()!.activeWorkout) {
+      <gp-badge variant="success">Plan activo</gp-badge>
       } @else {
       <gp-badge variant="default">Sin plan</gp-badge>
       }
@@ -62,7 +68,7 @@
             Desde {{ student()!.activeWorkout!.startDate | date:'dd/MM/yyyy' }}
           </div>
           <gp-badge variant="default" size="sm">
-            {{student()!.activeWorkout!.dayCount}} días ·
+            {{ student()!.activeWorkout!.dayCount }} {{ student()!.activeWorkout!.dayCount === 1 ? 'día' : 'días' }}
           </gp-badge>
         </div>
       </div>

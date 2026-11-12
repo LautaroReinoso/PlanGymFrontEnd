@@ -5,10 +5,10 @@
   gap: var(--space-3);
   flex-wrap: wrap;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid color-mix(in srgb, var(--color-warning) 35%, transparent);
-  background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+  border: 1px solid var(--color-warning-a40);
+  background: var(--color-warning-a8);
   border-radius: var(--radius-sm);
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-text);
 }
 .banner__icon { color: var(--color-warning); flex-shrink: 0; }

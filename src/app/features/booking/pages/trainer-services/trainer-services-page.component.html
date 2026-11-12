@@ -101,7 +101,7 @@
         </label>
       }
       @if (allowsEnrollment() && f.weeklyLimit) {
-        <p class="bk-muted" style="font-size:12px;margin:0">Son {{ f.weeklyLimit * 4 }} clases por mes ({{ f.weeklyLimit }} por semana × 4).</p>
+        <p class="bk-muted" style="font-size:var(--text-xs);margin:0">Son {{ f.weeklyLimit * 4 }} clases por mes ({{ f.weeklyLimit }} por semana × 4).</p>
       }
       @if (serviceError()) { <p class="bk-error">{{ serviceError() }}</p> }
       <div class="bk-row">

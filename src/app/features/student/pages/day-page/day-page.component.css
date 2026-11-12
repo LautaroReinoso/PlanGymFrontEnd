@@ -13,9 +13,9 @@
   border: 0;
   padding: var(--space-1) var(--space-2) var(--space-1) 0;
   font-family: inherit;
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 500;
-  color: var(--color-muted);
+  color: var(--color-muted-light);
   cursor: pointer;
   transition: color 200ms var(--ease-smooth);
 }
@@ -42,7 +42,7 @@
   flex-direction: column;
   gap: var(--space-3);
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 .day__header {
@@ -52,8 +52,8 @@
 }
 
 .day__eyebrow {
-  font-size: 12px;
-  color: var(--color-accent);
+  font-size: var(--text-xs);
+  color: var(--color-accent-text);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-weight: 600;
@@ -61,20 +61,20 @@
 
 .day__name {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--color-text);
   margin: 0;
 }
 
 .day__meta {
-  font-size: 13px;
-  color: var(--color-muted);
+  font-size: var(--text-sm);
+  color: var(--color-muted-light);
 }
 
 .day__desc {
-  font-size: 14px;
-  color: var(--color-muted);
+  font-size: var(--text-sm);
+  color: var(--color-muted-light);
   margin: var(--space-2) 0 0;
   line-height: 1.5;
 }
@@ -91,8 +91,8 @@
 .day__empty {
   text-align: center;
   padding: var(--space-10) var(--space-4);
-  color: var(--color-muted);
-  font-size: 15px;
+  color: var(--color-muted-light);
+  font-size: var(--text-md);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -106,17 +106,17 @@
   display: flex; align-items: center; justify-content: center; gap: var(--space-2);
   padding: var(--space-4); border-radius: var(--radius-md);
   background: var(--color-success-dim); border: 1px solid var(--color-success);
-  color: var(--color-success); font-weight: 600; font-size: 14px;
+  color: var(--color-success); font-weight: 600; font-size: var(--text-sm);
   animation: fadeUp .3s var(--ease-spring) both;
 }
 .day__done svg { width: 18px; height: 18px; }
-.day__mark-error { margin: 0; font-size: 13px; color: var(--color-danger); text-align: center; }
+.day__mark-error { margin: 0; font-size: var(--text-sm); color: var(--color-danger-soft); text-align: center; }
 .day__unmark {
   align-self: center; background: none; border: 0; padding: var(--space-2);
-  font: 500 13px var(--font-body); color: var(--color-muted); cursor: pointer;
+  font: 500 var(--text-sm) var(--font-body); color: var(--color-muted-light); cursor: pointer;
   text-decoration: underline; text-underline-offset: 3px;
 }
 .day__unmark:hover:not(:disabled) { color: var(--color-text); }
 .day__unmark:disabled { opacity: .5; cursor: default; }
 
-.detail-loading { margin: 8px 0 0; font-size: 13px; color: var(--color-muted-light); }
+.detail-loading { margin: 8px 0 0; font-size: var(--text-sm); color: var(--color-muted-light); }

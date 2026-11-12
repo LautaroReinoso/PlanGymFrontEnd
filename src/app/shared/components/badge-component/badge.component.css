@@ -4,8 +4,8 @@
     display:inline-flex;
     align-items:center;
     gap:8px;
-    color:var(--color-muted);
-    border-radius:999px;
+    color: var(--color-muted-light);
+    border-radius:var(--radius-full);
 
     font-weight:400;
     white-space:nowrap;
@@ -20,12 +20,12 @@
 
 .badge--sm{
     padding:4px 10px;
-    font-size:12px;
+    font-size:var(--text-xs);
 }
 
 .badge--md{
     padding:6px 14px;
-    font-size:14px;
+    font-size:var(--text-sm);
 }
 
 /* Dot */
@@ -45,35 +45,35 @@
 }
 
 .badge--elevated{
-    background:#2B2B3C;
-    border:1px solid #45455E;
+    background:var(--color-surface-raised);
+    border:1px solid var(--color-border-strong);
 }
 
 .badge--flat{
     background:transparent;
-    border:1px solid #34344A;
+    border:1px solid var(--color-border-strong);
 }
 
 .badge--accent{
-    background:rgba(79,110,247,.12);
-    color:#7EA1FF;
-    border:1px solid rgba(79,110,247,.35);
+    background:var(--color-accent-a12);
+    color:var(--color-accent-soft);
+    border:1px solid var(--color-accent-a40);
 }
 
 .badge--success{
-    background:rgba(22,163,74,.15);
-    color:#4ADE80;
-    border:1px solid rgba(22,163,74,.35);
+    background:var(--color-success-a20);
+    color:var(--color-success-soft);
+    border:1px solid var(--color-success-a40);
 }
 
 .badge--warning{
-    background:rgba(245,158,11,.15);
-    color:#FBBF24;
-    border:1px solid rgba(245,158,11,.35);
+    background:var(--color-warning-a20);
+    color:var(--color-warning-soft);
+    border:1px solid var(--color-warning-a40);
 }
 
 .badge--danger{
-    background:rgba(239,68,68,.15);
-    color:#F87171;
-    border:1px solid rgba(239,68,68,.35);
+    background:var(--color-danger-a20);
+    color:var(--color-danger-soft);
+    border:1px solid var(--color-danger-a40);
 }

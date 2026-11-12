@@ -7,11 +7,11 @@
 }
 
 .body-part {
-  stroke: var(--gym-loader-body-color, #e8e9ed);
+  stroke: var(--gym-loader-body-color, var(--color-text));
 }
 
 .weight-part {
-  stroke: var(--gym-loader-accent-color, #4f6ef7);
+  stroke: var(--gym-loader-accent-color, var(--color-accent));
 }
 
 /* Barra + discos + antebrazos: bajan y suben juntos, en línea recta (sin rotar) */

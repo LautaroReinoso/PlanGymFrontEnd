@@ -37,26 +37,26 @@
   width: 100%;
   height: 56px;                       /* altura fija para que el label tenga espacio */
   padding: 20px 16px 6px 16px;        /* top alto para dejar sitio al label flotado */
-  background: #13131A;
-  border: 1.5px solid #2A2A38;
-  border-radius: 12px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 15px;
-  color: #F0F0F5;
+  font-size: var(--text-md);
+  color: var(--color-text);
   outline: none;
   transition:
     border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
     background   200ms cubic-bezier(0.4, 0, 0.2, 1);
   /* Quitar estilos de autofill del browser */
-  -webkit-text-fill-color: #F0F0F5;
+  -webkit-text-fill-color: var(--color-text);
 }
 
 /* Autofill: mantener colores del design system */
 .input-field:-webkit-autofill,
 .input-field:-webkit-autofill:hover,
 .input-field:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 40px #16161F inset;
-  -webkit-text-fill-color: #F0F0F5;
+  -webkit-box-shadow: 0 0 0 40px var(--color-surface-sunken) inset;
+  -webkit-text-fill-color: var(--color-text);
   transition: background-color 9999s ease-out;
 }
 
@@ -83,9 +83,9 @@
   top: 50%;
   transform: translateY(-50%);
   font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 15px;
+  font-size: var(--text-md);
   font-weight: 400;
-  color: #6B6B80;
+  color: var(--color-muted-light);
   pointer-events: none;
   transform-origin: left center;
   transition:
@@ -106,20 +106,20 @@
 .input-wrapper--floating .input-label {
   top: 10px;
   transform: translateY(0) scale(0.78);
-  font-size: 15px;               /* scale lo reduce visualmente a ~12px */
-  color: #9898A8;
+  font-size: var(--text-md);               /* scale lo reduce visualmente a ~12px */
+  color: var(--color-muted-light);
   font-weight: 500;
 }
 
 /* ── Estado: focused ─────────────────────────── */
 
 .input-wrapper--focused .input-field {
-  border-color: #4F6EF7;
-  background: #16161F;
+  border-color: var(--color-accent);
+  background: var(--color-surface-sunken);
 }
 
 .input-wrapper--focused .input-label {
-  color: #4F6EF7;
+  color: var(--color-accent-text);
 }
 
 /* Línea de acento inferior — se expande desde el centro */
@@ -133,7 +133,7 @@
   background: linear-gradient(
     to right,
     transparent,
-    #4F6EF7,
+    var(--color-accent),
     transparent
   );
   border-radius: 0 0 2px 2px;
@@ -148,24 +148,24 @@
 /* ── Estado: error ───────────────────────────── */
 
 .input-wrapper--error .input-field {
-  border-color: #EF4444;
+  border-color: var(--color-danger);
   animation: errorShake 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .input-wrapper--error .input-label {
-  color: #EF4444;
+  color: var(--color-danger-soft);
 }
 
 .input-wrapper--error.input-wrapper--focused .input-field {
-  border-color: #EF4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px var(--color-danger-a12);
 }
 
 .input-wrapper--error .input-focus-line {
   background: linear-gradient(
     to right,
     transparent,
-    #EF4444,
+    var(--color-danger),
     transparent
   );
 }
@@ -186,7 +186,7 @@
 .input-icon-left {
   position: absolute;
   left: 14px;
-  color: #6B6B80;
+  color: var(--color-muted-light);
   display: flex;
   align-items: center;
   pointer-events: none;
@@ -194,7 +194,7 @@
 }
 
 .input-wrapper--focused .input-icon-left {
-  color: #4F6EF7;
+  color: var(--color-accent-text);
 }
 
 /* ── Botón acción derecha (password toggle) ──── */
@@ -208,17 +208,17 @@
   border: none;
   padding: 5px;
   cursor: pointer;
-  color: #6B6B80;
-  border-radius: 6px;
+  color: var(--color-muted-light);
+  border-radius: var(--radius-sm);
   transition: color 150ms;
 }
 
 .input-action:hover {
-  color: #F0F0F5;
+  color: var(--color-text);
 }
 
 .input-action:focus-visible {
-  outline: 2px solid #4F6EF7;
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -230,21 +230,21 @@
   gap: 5px;
   margin-top: 6px;
   font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 12px;
-  color: #EF4444;
+  font-size: var(--text-xs);
+  color: var(--color-danger-soft);
   animation: errorIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .input-error svg {
   flex-shrink: 0;
-  color: #EF4444;
+  color: var(--color-danger-soft);
 }
 
 .input-hint {
   margin-top: 6px;
   font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 12px;
-  color: #6B6B80;
+  font-size: var(--text-xs);
+  color: var(--color-muted-light);
 }
 
 /* ── Reduced motion ──────────────────────────── */

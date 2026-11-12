@@ -21,7 +21,7 @@
   gap: 2px;
   flex: 1;
   height: 100%;
-  color: var(--color-muted);
+  color: var(--color-muted-light);
   transition: color var(--duration-fast) var(--ease-smooth);
 }
 
@@ -38,10 +38,10 @@
 
 .bottom-nav__label {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: var(--text-xs);
   font-weight: 500;
 }
 
 .bottom-nav__item--active {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }

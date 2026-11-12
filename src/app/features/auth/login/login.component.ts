@@ -29,7 +29,7 @@ import { InputFieldComponent } from '../../../shared/components/input-field/inpu
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent, InputFieldComponent, RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
+  styleUrls: ['../auth-shared.css', './login.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent {

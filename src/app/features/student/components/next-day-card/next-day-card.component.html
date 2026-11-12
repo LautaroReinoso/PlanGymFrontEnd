@@ -1,0 +1,9 @@
+<button type="button" class="next__card" (click)="start.emit()">
+  <span class="next__eyebrow">Siguiente · Día {{ dayNumber() }}</span>
+  <span class="next__name">{{ name() }}</span>
+  <span class="next__count">{{ exerciseCount() }} ejercicios</span>
+  <span class="next__cta">
+    Empezar
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+  </span>
+</button>

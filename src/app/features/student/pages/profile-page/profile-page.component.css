@@ -2,47 +2,47 @@
 
 .profile { padding: 16px 16px 96px; max-width: 520px; margin: 0 auto; }
 .profile__header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-.profile__title { font-family: 'Syne', sans-serif; font-size: 22px; margin: 0; }
-.profile__back { color: inherit; text-decoration: none; font-size: 20px; padding: 4px 8px; }
+.profile__title { font-family: 'Syne', sans-serif; font-size: var(--text-lg); margin: 0; }
+.profile__back { color: inherit; text-decoration: none; font-size: var(--text-lg); padding: 4px 8px; }
 
 .dni-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 16px; margin-bottom: 20px; border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 20px; border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.04);
 }
-.dni-row__label { opacity: 0.6; font-size: 13px; }
+.dni-row__label { opacity: 0.6; font-size: var(--text-sm); }
 .dni-row__value { font-weight: 600; letter-spacing: 0.5px; }
 
 .profile__form { display: flex; flex-direction: column; gap: 14px; }
 .field { display: flex; flex-direction: column; gap: 4px; }
-.field__error { color: #ff6b6b; font-size: 12px; }
-.profile__saved { color: #4ade80; font-size: 14px; margin: 0; }
+.field__error { color: var(--color-danger-soft); font-size: var(--text-xs); }
+.profile__saved { color: var(--color-success-soft); font-size: var(--text-sm); margin: 0; }
 
 .btn {
-  border: 0; border-radius: 12px; padding: 14px 16px; font: inherit; font-weight: 600;
+  border: 0; border-radius: var(--radius-md); padding: 14px 16px; font: inherit; font-weight: 600;
   cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
 }
 .btn:active:not(:disabled) { transform: scale(0.97); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn--primary { background: #4F6EF7; color: #fff; margin-top: 6px; }
-.btn--ghost { background: transparent; color: #4F6EF7; border: 1px solid #4F6EF7; }
+.btn--primary { background: var(--color-accent); color: var(--color-on-accent); margin-top: 6px; }
+.btn--ghost { background: transparent; color: var(--color-accent-text); border: 1px solid var(--color-accent); }
 
 .state { text-align: center; padding: 48px 0; display: flex; flex-direction: column; gap: 16px; align-items: center; }
 
 .skeleton-list { display: flex; flex-direction: column; gap: 14px; }
 .skeleton {
-  height: 56px; border-radius: 12px;
+  height: 56px; border-radius: var(--radius-md);
   background: linear-gradient(90deg, rgba(255,255,255,.04) 25%, rgba(255,255,255,.09) 50%, rgba(255,255,255,.04) 75%);
   background-size: 200% 100%; animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer { to { background-position: -200% 0; } }
 /* ── Fecha (input nativo: gp-input no soporta type="date") ── */
 .date-field { display: flex; flex-direction: column; gap: 6px; }
-.date-field__label { font-size: 12px; color: var(--color-muted-light); }
+.date-field__label { font-size: var(--text-xs); color: var(--color-muted-light); }
 .date-field__input {
   background: var(--color-surface); border: 1px solid var(--color-border);
-  border-radius: 10px; padding: 12px 14px; color: var(--color-text);
-  font: 400 14px var(--font-body); width: 100%; box-sizing: border-box;
+  border-radius: var(--radius-sm); padding: 12px 14px; color: var(--color-text);
+  font: 400 var(--text-sm) var(--font-body); width: 100%; box-sizing: border-box;
 }
 .date-field__input:focus { outline: none; border-color: var(--color-accent); }
 
@@ -51,11 +51,11 @@
   display: flex; align-items: center; justify-content: center; gap: 8px;
   width: 100%; margin-top: var(--space-6); padding: 12px;
   background: transparent; border: 1px solid var(--color-border); border-radius: var(--radius-md);
-  color: var(--color-muted-light); font: 500 14px var(--font-body); cursor: pointer;
+  color: var(--color-muted-light); font: 500 var(--text-sm) var(--font-body); cursor: pointer;
   transition: border-color 150ms, color 150ms, background 150ms;
 }
-.logout:hover { border-color: var(--color-danger); color: var(--color-danger); background: rgba(239, 68, 68, 0.08); }
+.logout:hover { border-color: var(--color-danger); color: var(--color-danger-soft); background: var(--color-danger-a8); }
 .logout:focus-visible { outline: 2px solid var(--color-danger); outline-offset: 2px; }
 
-.legal-links { margin: var(--space-6) 0 0; text-align: center; font-size: 12px; color: var(--color-muted); }
+.legal-links { margin: var(--space-6) 0 0; text-align: center; font-size: var(--text-xs); color: var(--color-muted-light); }
 .legal-links a { color: var(--color-muted-light); }

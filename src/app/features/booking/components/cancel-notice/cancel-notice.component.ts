@@ -60,8 +60,8 @@ function saveSeen(ids: Set<number>): void {
     .cn__item { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3);
       background: var(--color-surface); border: 1px solid var(--color-border);
       border-left: 3px solid var(--color-warning); border-radius: var(--radius-sm); color: var(--color-text); }
-    .cn__reason { font-size: 13px; color: var(--color-muted-light); }
-    .cn__text { margin: 0; font-size: 14px; color: var(--color-text); }
+    .cn__reason { font-size: var(--text-sm); color: var(--color-muted-light); }
+    .cn__text { margin: 0; font-size: var(--text-sm); color: var(--color-text); }
     .cn__actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
   `],
 })

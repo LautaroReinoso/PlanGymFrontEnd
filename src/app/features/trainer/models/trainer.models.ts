@@ -42,6 +42,9 @@ export interface StudentSummary {
     startDate: string;
     templateName: string;
     dayCount: number;
+    /** Plantilla asignada y id de la asignación (para "Quitar"). Backends viejos no los mandan. */
+    workoutTemplateId?: number | null;
+    studentWorkoutId?: number | null;
   } | null;
   adherencePercent: number | null;         // 0-100
 }

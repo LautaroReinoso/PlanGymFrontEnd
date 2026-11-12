@@ -15,32 +15,7 @@
 
 /* ── Back ────────────────────────────────────── */
 
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: none;
-  border: none;
-  color: #6B6B80;
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0;
-  width: fit-content;
-}
-
-.back-btn:hover { color: #F0F0F5; }
-
 /* ── Error / skeleton ──────────────────────────── */
-
-.error-banner {
-  padding: 14px 16px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 12px;
-  color: #FCA5A5;
-  font-size: 14px;
-}
 
 .detail-skeleton {
   display: flex;

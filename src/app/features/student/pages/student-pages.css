@@ -1,0 +1,16 @@
+/* Estilos comunes de las páginas del alumno (navegación de semana/mes, tarjetas de error).
+   Va PRIMERO en styleUrls de cada página que lo usa. */
+
+.nav-btn {
+  width: 44px; height: 44px; display: grid; place-items: center;
+  background: var(--color-card); border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm); color: var(--color-text); cursor: pointer;
+}
+
+.nav-btn svg { width: 18px; height: 18px; }
+
+.nav-btn:disabled { opacity: .35; cursor: default; }
+
+.card--error { border-color: var(--color-danger); color: var(--color-text); font-size: var(--text-sm); }
+
+.card p { margin: 0; }

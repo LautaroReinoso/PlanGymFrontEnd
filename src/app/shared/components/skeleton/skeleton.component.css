@@ -21,9 +21,9 @@
   display: block;
   background: linear-gradient(
     90deg,
-    #1C1C26 25%,
-    #252534 50%,
-    #1C1C26 75%
+    var(--color-card) 25%,
+    var(--color-surface-raised) 50%,
+    var(--color-card) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
@@ -34,7 +34,7 @@
 /* Línea de texto */
 .skeleton--line {
   height: 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 /* Avatar / círculo */
@@ -48,14 +48,14 @@
 /* Bloque rectangular genérico */
 .skeleton--rect {
   height: 48px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 
 /* Card completa */
 .skeleton--card {
   height: 140px;
-  border-radius: 16px;
-  border: 1px solid #1E1E2A;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-surface-sunken);
 }
 
 /* ── Reduced motion ──────────────────────────── */
@@ -63,6 +63,6 @@
 @media (prefers-reduced-motion: reduce) {
   .skeleton {
     animation: none;
-    background: #1C1C26;
+    background: var(--color-card);
   }
 }

@@ -43,7 +43,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
     GymLoaderComponent
 ],
   templateUrl: './student-detail-page.component.html',
-  styleUrl: './student-detail-page.component.css',
+  styleUrls: ['../../detail-pages.css', './student-detail-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentDetailPageComponent implements OnInit {
@@ -107,9 +107,9 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
 
   readonly adherenceColor = computed(() => {
     const pct = this.student()?.adherencePercent ?? 0;
-    if (pct >= 80) return '#22C55E';
-    if (pct >= 50) return '#F59E0B';
-    return '#EF4444';
+    if (pct >= 80) return 'var(--color-success)';
+    if (pct >= 50) return 'var(--color-warning)';
+    return 'var(--color-danger)';
   });
 
   // ── Lifecycle ─────────────────────────────────

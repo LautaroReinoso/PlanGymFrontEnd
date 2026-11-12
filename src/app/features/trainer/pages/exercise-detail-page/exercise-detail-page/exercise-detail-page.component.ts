@@ -36,7 +36,7 @@ import { ExerciseFormValue } from '../../../components/exercises/exercise-form/e
     ExerciseFormModalComponent,
   ],
   templateUrl: './exercise-detail-page.component.html',
-  styleUrl: './exercise-detail-page.component.css',
+  styleUrls: ['../../detail-pages.css', './exercise-detail-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExerciseDetailPageComponent {

@@ -35,7 +35,7 @@ function passwordMatchValidator(ctrl: AbstractControl): ValidationErrors | null 
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, InputFieldComponent, ButtonComponent],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css',
+  styleUrls: ['../auth-shared.css', './register.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {

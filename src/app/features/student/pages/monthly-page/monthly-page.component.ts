@@ -36,7 +36,7 @@ interface CalendarCell {
   standalone: true,
   imports: [PageLoaderComponent, CommonModule, ButtonComponent],
   templateUrl: './monthly-page.component.html',
-  styleUrl: './monthly-page.component.css',
+  styleUrls: ['../student-pages.css', './monthly-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MonthlyPageComponent implements OnInit {

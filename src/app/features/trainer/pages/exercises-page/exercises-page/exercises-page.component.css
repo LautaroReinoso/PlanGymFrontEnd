@@ -9,18 +9,19 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 16px;
 }
 
 .page-title {
-  font: 800 26px 'Syne', sans-serif;
+  font: 800 var(--text-xl) 'Syne', sans-serif;
   color: var(--color-text);
   margin: 0 0 4px;
 }
 
 .page-subtitle {
-  font: 400 14px 'DM Sans', sans-serif;
-  color: var(--color-muted);
+  font: 400 var(--text-sm) 'DM Sans', sans-serif;
+  color: var(--color-muted-light);
   margin: 0;
 }
 
@@ -40,20 +41,20 @@
   padding: 4px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 .scope-tab {
   border: 0;
   background: transparent;
   color: var(--color-muted-light);
-  font: 500 13px 'DM Sans', sans-serif;
+  font: 500 var(--text-sm) 'DM Sans', sans-serif;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.2s var(--ease-smooth), color 0.2s var(--ease-smooth);
 }
 .scope-tab:hover { color: var(--color-text); }
-.scope-tab--active { background: var(--color-accent); color: #fff; }
+.scope-tab--active { background: var(--color-accent); color: var(--color-on-accent); }
 
 .form-field {
   display: flex;
@@ -62,7 +63,7 @@
 }
 
 .form-label {
-  font: 500 13px 'DM Sans', sans-serif;
+  font: 500 var(--text-sm) 'DM Sans', sans-serif;
   color: var(--color-muted-light);
 }
 
@@ -72,10 +73,10 @@
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B6B80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
     no-repeat right 12px center;
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 12px 36px 12px 14px;
   color: var(--color-text);
-  font: 400 14px 'DM Sans', sans-serif;
+  font: 400 var(--text-sm) 'DM Sans', sans-serif;
 }
 
 .form-select:focus {
@@ -99,10 +100,10 @@
 }
 
 .page-empty, .page-error {
-  font: 400 14px 'DM Sans', sans-serif;
-  color: var(--color-muted);
+  font: 400 var(--text-sm) 'DM Sans', sans-serif;
+  color: var(--color-muted-light);
   text-align: center;
   padding: 32px 0;
 }
 
-.page-error { color: var(--color-danger); }
+.page-error { color: var(--color-danger-soft); }

@@ -32,12 +32,14 @@ interface WeekCell {
   classTimes: string[];
 }
 
+import { NextDayCardComponent } from '../../components/next-day-card/next-day-card.component';
+
 @Component({
   selector: 'app-weekly-page',
   standalone: true,
-  imports: [PageLoaderComponent, CommonModule, ButtonComponent, RouterLink],
+  imports: [NextDayCardComponent, PageLoaderComponent, CommonModule, ButtonComponent, RouterLink],
   templateUrl: './weekly-page.component.html',
-  styleUrl: './weekly-page.component.css',
+  styleUrls: ['../student-pages.css', './weekly-page.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeeklyPageComponent implements OnInit {

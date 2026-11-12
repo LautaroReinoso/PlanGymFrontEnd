@@ -2,8 +2,8 @@
 
 .subscription-page { display: flex; flex-direction: column; gap: var(--space-6); max-width: 640px; }
 
-.page-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--color-text); margin: 0; }
-.page-subtitle { margin: var(--space-1) 0 0; color: var(--color-muted-light); font-size: 14px; }
+.page-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 700; color: var(--color-text); margin: 0; }
+.page-subtitle { margin: var(--space-1) 0 0; color: var(--color-muted-light); font-size: var(--text-sm); }
 
 .card {
   display: flex;
@@ -17,7 +17,7 @@
 .card--center { align-items: center; text-align: center; }
 
 .card__row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
-.label { color: var(--color-muted-light); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+.label { color: var(--color-muted-light); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: .04em; }
 
 .details {
   display: grid;
@@ -25,8 +25,8 @@
   gap: var(--space-4);
   margin: 0;
 }
-.details dt { color: var(--color-muted-light); font-size: 13px; margin-bottom: 2px; }
-.details dd { margin: 0; color: var(--color-text); font-size: 15px; font-weight: 500; }
+.details dt { color: var(--color-muted-light); font-size: var(--text-sm); margin-bottom: 2px; }
+.details dd { margin: 0; color: var(--color-text); font-size: var(--text-md); font-weight: 500; }
 
 .actions {
   display: flex;
@@ -38,10 +38,10 @@
   border-top: 1px solid var(--color-border);
 }
 .actions a { text-decoration: none; }
-.link { color: var(--color-muted-light); font-size: 14px; }
+.link { color: var(--color-muted-light); font-size: var(--text-sm); }
 .link:hover { color: var(--color-text); }
 
-.muted { margin: 0; color: var(--color-muted-light); font-size: 14px; }
+.muted { margin: 0; color: var(--color-muted-light); font-size: var(--text-sm); }
 
 .notice {
   display: flex;
@@ -50,12 +50,12 @@
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
-  border: 1px solid color-mix(in srgb, var(--color-warning) 35%, transparent);
-  background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+  border: 1px solid var(--color-warning-a40);
+  background: var(--color-warning-a8);
   color: var(--color-text);
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
-.notice--error { border-color: color-mix(in srgb, var(--color-danger) 40%, transparent); background: transparent; color: var(--color-danger); }
+.notice--error { border-color: var(--color-danger-a40); background: transparent; color: var(--color-danger-soft); }
 
 @media (max-width: 480px) {
   .details { grid-template-columns: 1fr; }

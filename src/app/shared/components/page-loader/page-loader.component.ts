@@ -35,7 +35,7 @@ import { GymLoaderComponent } from '../gym-loader/gym-loader.component';
     .page-loader--compact { min-height: 120px; }
     .page-loader__text {
       margin: 0;
-      font-size: 14px;
+      font-size: var(--text-sm);
       color: var(--color-muted-light);
       text-align: center;
     }

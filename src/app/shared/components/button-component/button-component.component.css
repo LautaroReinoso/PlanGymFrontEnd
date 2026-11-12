@@ -34,7 +34,7 @@
   justify-content: center;
   gap: 8px;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-family: 'Syne', system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -56,85 +56,86 @@
 }
 
 .btn:focus-visible {
-  outline: 2px solid #4F6EF7;
+  outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
 
 /* ── Tamaños ─────────────────────────────────── */
 
 .btn--sm {
+  min-height: 36px;
   padding: 7px 14px;
-  font-size: 13px;
-  border-radius: 8px;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-sm);
   gap: 6px;
 }
 
 .btn--md {
   padding: 11px 20px;
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
 .btn--lg {
   padding: 14px 28px;
-  font-size: 15px;
-  border-radius: 12px;
+  font-size: var(--text-md);
+  border-radius: var(--radius-md);
   gap: 10px;
 }
 
 /* ── Variante: primary ───────────────────────── */
 
 .btn--primary {
-  background: #4F6EF7;
-  color: #ffffff;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
   border: 1.5px solid transparent;
 }
 
 .btn--primary:hover:not(.btn--disabled):not(.btn--loading) {
-  background: #3D5CE8;
-  box-shadow: 0 4px 20px rgba(79, 110, 247, 0.4);
+  background: var(--color-accent-hover);
+  box-shadow: 0 4px 20px var(--color-accent-a40);
   transform: translateY(-1px);
 }
 
 /* ── Variante: secondary ─────────────────────── */
 
 .btn--secondary {
-  background: rgba(79, 110, 247, 0.1);
-  color: #4F6EF7;
-  border: 1.5px solid rgba(79, 110, 247, 0.25);
+  background: var(--color-accent-a12);
+  color: var(--color-accent-text);
+  border: 1.5px solid var(--color-accent-a30);
 }
 
 .btn--secondary:hover:not(.btn--disabled):not(.btn--loading) {
-  background: rgba(79, 110, 247, 0.18);
-  border-color: rgba(79, 110, 247, 0.5);
-  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.08);
+  background: var(--color-accent-a20);
+  border-color: var(--color-accent-a50);
+  box-shadow: 0 0 0 3px var(--color-accent-a8);
 }
 
 /* ── Variante: ghost ─────────────────────────── */
 
 .btn--ghost {
   background: transparent;
-  color: #9898A8;
-  border: 1.5px solid #2A2A38;
+  color: var(--color-muted-light);
+  border: 1.5px solid var(--color-border);
 }
 
 .btn--ghost:hover:not(.btn--disabled):not(.btn--loading) {
-  background: #1C1C26;
-  color: #F0F0F5;
-  border-color: #3A3A50;
+  background: var(--color-card);
+  color: var(--color-text);
+  border-color: var(--color-border-strong);
 }
 
 /* ── Variante: danger ────────────────────────── */
 
 .btn--danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
-  border: 1.5px solid rgba(239, 68, 68, 0.25);
+  background: var(--color-danger-a12);
+  color: var(--color-danger-soft);
+  border: 1.5px solid var(--color-danger-a30);
 }
 
 .btn--danger:hover:not(.btn--disabled):not(.btn--loading) {
-  background: rgba(239, 68, 68, 0.18);
-  border-color: rgba(239, 68, 68, 0.5);
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+  background: var(--color-danger-a20);
+  border-color: var(--color-danger-a50);
+  box-shadow: 0 0 0 3px var(--color-danger-a8);
 }
 
 /* ── Estado: full width ──────────────────────── */
@@ -192,4 +193,8 @@
   }
   .btn:active { animation: none; }
   .btn__spinner svg { animation: spin 1.2s linear infinite; }
+}
+/* Pantallas táctiles: todo botón con al menos 44 px de alto */
+@media (pointer: coarse) {
+  .btn { min-height: 44px; }
 }
