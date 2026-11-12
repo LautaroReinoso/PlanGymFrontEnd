@@ -48,16 +48,16 @@
 
 .exercise-name-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
 }
 
 .exercise-name {
   font: 600 var(--text-sm) 'DM Sans', sans-serif;
+  line-height: var(--leading-sm);
   color: var(--color-text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;   /* el nombre baja de línea, no se corta */
 }
 
 .exercise-detail {

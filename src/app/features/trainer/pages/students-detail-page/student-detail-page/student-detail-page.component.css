@@ -181,18 +181,12 @@
 .days-nav {
   margin-top: 20px;
   margin-bottom: 24px;
-  overflow-x: auto;
-  scrollbar-width: none; 
-  -webkit-overflow-scrolling: touch;
-}
-.days-nav::-webkit-scrollbar {
-  display: none; 
 }
 
 .days-badges {
   display: flex;
-  gap: 12px;
-  padding-bottom: 4px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* ── Sin plan ────────────────────────────────── */
@@ -345,6 +339,10 @@
 /* ── Mobile ──────────────────────────────────── */
 
 @media (max-width: 600px) {
-  .profile-header { flex-direction: column; align-items: flex-start; }
+  .profile-header { gap: var(--space-4); margin-bottom: var(--space-6); }
+  .workout-card { padding: var(--space-4) var(--space-3); }
   .profile-avatar { width: 56px; height: 56px; font-size: var(--text-lg); }
 }
+.profile-name { overflow-wrap: anywhere; }
+.profile-name--pending { font-family: var(--font-body); letter-spacing: .02em; }
+.profile-pending { margin: 2px 0 var(--space-2); font-size: var(--text-sm); color: var(--color-warning-soft); }

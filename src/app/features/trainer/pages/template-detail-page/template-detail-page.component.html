@@ -41,7 +41,7 @@
     </div>
     <div>
       <gp-badge variant="default" size="sm">
-        {{template()!.days.length}} días ·
+        {{ template()!.days.length }} {{ template()!.days.length === 1 ? 'día' : 'días' }}
       </gp-badge>
 
     </div>
@@ -67,17 +67,8 @@
     <!-- FIX #7: usar <button> en vez de gp-badge para accesibilidad -->
     <div class="days-badges" role="tablist" aria-label="Días del plan">
       @for (day of sortedDays(); track day.id) {
-      <button class="day-badge" [class.day-badge--active]="selectedDayId() === day.id" (click)="selectDay(day.id)"
-        role="tab" [attr.aria-selected]="selectedDayId() === day.id">
-        <div class="day-badge-index" [class.day-badge-index--active]="selectedDayId() === day.id">
-          {{ day.orderIndex }}
-        </div>
-        <div class="day-badge-content">
-          <span class="day-badge-name">{{ day.name }}</span>
-          <span class="day-badge-count">{{ day.exercises.length }} ejerc.</span>
-        </div>
-
-      </button>
+      <app-day-badge [name]="day.name" [index]="day.orderIndex" [exerciseCount]="day.exercises.length"
+        [isActive]="selectedDayId() === day.id" (badgeClick)="selectDay(day.id)" />
       }
     </div>
 

@@ -37,10 +37,12 @@ import { EditDayModalComponent, UpdateDayRequest } from '../../components/templa
 import { BadgeComponent } from "../../../../shared/components/badge-component/badge.component";
 import { IconButtonComponent } from '../../../../shared/components/icon-button/icon-button.component';
 import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym-loader.component';
+import { DayBadgeComponent } from '../../../../shared/components/day-badge/day-badge.component';
+
 @Component({
   selector: 'app-template-detail-page',
   standalone: true,
-  imports: [TemplateStudentsComponent, 
+  imports: [DayBadgeComponent, TemplateStudentsComponent, 
     CommonModule,
     TemplateDayComponent,
     TemplateEditModalComponent,
