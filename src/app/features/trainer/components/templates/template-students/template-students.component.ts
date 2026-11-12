@@ -86,7 +86,17 @@ export class TemplateStudentsComponent {
     this.students.getMyStudents().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         this.all.set(list);
-        // Candidatos: plan activo con el mismo nombre. Se confirma por id de plantilla.
+        // El listado ya trae la plantilla y la asignación: alcanza con filtrar
+        if (list.some(s => s.activeWorkout?.workoutTemplateId != null)) {
+          this.assigned.set(list
+            .filter(s => s.activeWorkout?.workoutTemplateId === id && s.activeWorkout.studentWorkoutId != null)
+            .map(s => ({ student: s, assignmentId: s.activeWorkout!.studentWorkoutId!, startDate: s.activeWorkout!.startDate ?? null }))
+            .sort((a, b) => this.nameOf(a.student).localeCompare(this.nameOf(b.student))));
+          this.isLoading.set(false);
+          this.countChange.emit(this.assigned().map(a => this.nameOf(a.student)));
+          return;
+        }
+        // Backend viejo: candidatos por nombre y se confirma uno por uno.
         const cands = list.filter(s => s.activeWorkout?.templateName === name);
         if (!cands.length) { this.assigned.set([]); this.isLoading.set(false); this.countChange.emit([]); return; }
         forkJoin(cands.map(s =>

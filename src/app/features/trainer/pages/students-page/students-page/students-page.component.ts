@@ -25,6 +25,8 @@ import { BookingTrainerService } from '../../../../booking/services/booking-trai
 
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
 
+import { StudentTurnos } from '../../../components/students/student-card/student-card.component';
+
 @Component({
   selector: 'app-students-page',
   standalone: true,
@@ -103,19 +105,16 @@ export class StudentsPageComponent implements OnInit {
   }
 
   // ── Turnos por alumno (GET /professional/students) ──
-  readonly turnosText = signal<Map<number, string>>(new Map());
+  readonly turnosText = signal<Map<number, StudentTurnos>>(new Map());
 
   private loadTurnos(): void {
     this.booking.students('', 'ALL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
-        const m = new Map<number, string>();
+        const m = new Map<number, StudentTurnos>();
         for (const s of list) {
-          const parts: string[] = [];
-          if (s.nextBookingAt) parts.push(`Próxima clase: ${shortDate(isoDateKey(s.nextBookingAt))} ${isoTime(s.nextBookingAt)}`);
-          else if (s.activeEnrollments?.length) parts.push('Sin clases próximas');
           const fixed = (s.activeEnrollments ?? []).map(e => `${DAY_SHORT[e.dayOfWeek]} ${hhmm(e.startTime)}`);
-          if (fixed.length) parts.push(fixed.join(' · '));
-          if (parts.length) m.set(s.userId, parts.join(' — '));
+          const next = s.nextBookingAt ? `${shortDate(isoDateKey(s.nextBookingAt))} · ${isoTime(s.nextBookingAt)}` : null;
+          if (next || fixed.length) m.set(s.userId, { next, fixed: fixed.length ? fixed.join(' · ') : null });
         }
         this.turnosText.set(m);
       },

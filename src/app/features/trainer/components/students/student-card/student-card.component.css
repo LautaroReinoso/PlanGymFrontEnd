@@ -66,10 +66,23 @@
 }
 .sc__plan { color: var(--color-text); font-weight: 500; overflow-wrap: anywhere; }
 
-/* ── Fila 3: adherencia ── */
-.sc__adh { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-3); }
-.sc__adh-label, .sc__adh-value { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-muted-light); }
-.sc__adh-value { font-weight: 600; min-width: 4ch; text-align: right; }
+/* ── Datos: etiqueta a la izquierda, valor a la derecha (adherencia y turnos) ── */
+.sc__facts {
+  margin: auto 0 0;                  /* se pegan al pie de la card */
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  display: flex; flex-direction: column; gap: var(--space-2);
+}
+.sc__fact { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: var(--space-3); }
+.sc__fact dt { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-muted-light); }
+.sc__fact dd {
+  margin: 0; min-width: 0;
+  font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+.sc__adh { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-3); }
+.sc__adh-value { font-size: var(--text-sm); font-weight: 600; min-width: 4ch; text-align: right; color: var(--color-muted-light); }
 .sc__adh-bar { height: 4px; border-radius: var(--radius-full); background: var(--color-border); overflow: hidden; }
 .sc__adh-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--color-muted); transition: width .4s var(--ease-smooth); }
 .sc__adh--high .sc__adh-bar > span { background: var(--color-success); }
@@ -78,8 +91,6 @@
 .sc__adh--high .sc__adh-value { color: var(--color-success-soft); }
 .sc__adh--mid  .sc__adh-value { color: var(--color-warning-soft); }
 .sc__adh--low  .sc__adh-value { color: var(--color-danger-soft); }
-
-.sc__turnos { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-celeste); }
 
 @media (prefers-reduced-motion: reduce) {
   .sc { animation: none; transition: none; }

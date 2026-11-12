@@ -811,11 +811,12 @@ el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite
 ## Alumnos con este plan (nov-2026)
 `app-template-students` en el detalle de plantilla: lista quién la tiene activa, "+ Asignar" (buscador; aviso si
 reemplaza otro plan — el backend desactiva el anterior) y "Quitar" (`DELETE /student-workouts/{id}`, confirma).
-El listado de alumnos solo trae `templateName`: se filtra por nombre y se confirma con
-`GET /student-workouts/student/{id}` (`activeWorkout.workoutTemplateId` + `id` de la asignación).
+El listado de alumnos trae `activeWorkout.workoutTemplateId` y `studentWorkoutId`: se filtra por id, sin llamadas extra.
+Si el backend no los manda (versión vieja), cae al método anterior: filtra por nombre y confirma con
+`GET /student-workouts/student/{id}`.
 - **Eliminar plantilla con alumnos:** el componente emite `countChange` (nombres); si hay alumnos, el modal de
   eliminar no muestra el botón y explica que primero hay que quitárselo. Si el backend rechaza, se muestra su `message`.
-- [ ] Backend: sumar `workoutTemplateId` y `studentWorkoutId` a `activeWorkout` del listado (evita N llamadas).
+- [x] Backend: `workoutTemplateId` y `studentWorkoutId` en `activeWorkout` del listado.
 
 ## Sistema visual (nov-2026, rama `feature/ui-tokens`)
 
@@ -869,6 +870,8 @@ Rellenos: blanco sobre accent 4,6 · sobre danger-strong 4,8 · `--color-bg` sob
   (`adherencePercent` del backend, barra ≥70 verde / 40–69 ámbar / <40 rojo, "—" si viene null). Pendiente = DNI como
   dato principal + "Registro pendiente"; el estado se marca SOLO con el badge (sin borde ámbar ni avatar ámbar).
   Hover sin `translateY`. Falta backend: fecha de última actividad para "hace 2 días".
+  Pie de la card = lista `<dl>` etiqueta / valor con la misma forma para Adherencia, Próxima clase y Horario fijo
+  (input `turnos: { next, fixed }`, solo con Turnos prendido). Nada de texto en color suelto.
 - Inicio del alumno: `app-next-day-card` destaca el siguiente día pendiente de la semana (`WeekStatusService.nextDay`, el
   mismo criterio que "Hoy"; si la semana no carga, el Día 1). Los días hechos esta semana muestran "Hecho".
 - `app-day-badge` (shared) es el único chip de día: lo usan detalle de plantilla y detalle de alumno (antes la plantilla

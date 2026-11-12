@@ -33,14 +33,30 @@
     }
   </p>
 
-  <!-- Fila 3: adherencia (dato del backend) -->
-  @if (student().activeWorkout) {
-    <div class="sc__adh" [class]="'sc__adh sc__adh--' + adherenceLevel()">
-      <span class="sc__adh-label">Adherencia</span>
-      <span class="sc__adh-bar" aria-hidden="true"><span [style.width.%]="adherence() ?? 0"></span></span>
-      <span class="sc__adh-value">{{ adherence() === null ? '—' : adherence() + '%' }}</span>
-    </div>
+  <!-- Datos: adherencia y turnos, con la misma forma etiqueta / valor -->
+  @if (student().activeWorkout || turnos()) {
+    <dl class="sc__facts">
+      @if (student().activeWorkout) {
+        <div class="sc__fact" [class]="'sc__fact sc__adh--' + adherenceLevel()">
+          <dt>Adherencia</dt>
+          <dd class="sc__adh">
+            <span class="sc__adh-bar" aria-hidden="true"><span [style.width.%]="adherence() ?? 0"></span></span>
+            <span class="sc__adh-value">{{ adherence() === null ? '—' : adherence() + '%' }}</span>
+          </dd>
+        </div>
+      }
+      @if (turnos(); as t) {
+        <div class="sc__fact">
+          <dt>Próxima clase</dt>
+          <dd>{{ t.next ?? 'Sin clases próximas' }}</dd>
+        </div>
+        @if (t.fixed) {
+          <div class="sc__fact">
+            <dt>Horario fijo</dt>
+            <dd>{{ t.fixed }}</dd>
+          </div>
+        }
+      }
+    </dl>
   }
-
-  @if (turnos()) { <p class="sc__turnos">{{ turnos() }}</p> }
 </article>

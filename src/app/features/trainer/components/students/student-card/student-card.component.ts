@@ -10,6 +10,8 @@ import { StudentSummary } from '../../../models/trainer.models';
 import { AvatarComponent } from '../../../../../shared/components/avatar/avatar.component';
 
 export type StudentStatus = 'active' | 'no-plan' | 'pending';
+/** Datos de Turnos ya formateados (solo con el módulo prendido) */
+export interface StudentTurnos { next: string | null; fixed: string | null; }
 
 @Component({
   selector: 'app-student-card',
@@ -22,8 +24,8 @@ export type StudentStatus = 'active' | 'no-plan' | 'pending';
 export class StudentCardComponent {
 
   readonly student = input.required<StudentSummary>();
-  /** "Próxima clase: jue 12 nov 18:00" (solo con Turnos prendido) */
-  readonly turnos = input<string | null>(null);
+  /** Próxima clase y horario fijo (solo con Turnos prendido) */
+  readonly turnos = input<StudentTurnos | null>(null);
 
   // Output para navegar al detalle
   readonly cardClick = output<void>();
