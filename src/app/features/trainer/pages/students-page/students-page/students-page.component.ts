@@ -23,10 +23,12 @@ import { EnrollStudentModalComponent } from '../../../../booking/components/enro
 import { DAY_SHORT, hhmm, isoDateKey, isoTime, shortDate } from '../../../../booking/utils/booking-date.util';
 import { BookingTrainerService } from '../../../../booking/services/booking-trainer.service';
 
+import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+
 @Component({
   selector: 'app-students-page',
   standalone: true,
-  imports: [PageLoaderComponent, 
+  imports: [EmptyStateComponent, PageLoaderComponent, 
     CommonModule,
     RouterLink,
     FormsModule,

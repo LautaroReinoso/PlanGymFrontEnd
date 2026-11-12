@@ -127,40 +127,6 @@
 
 /* ── Estado vacío ────────────────────────────── */
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 64px 24px;
-  text-align: center;
-  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  display: grid;
-  place-items: center;
-  color: var(--color-muted-light);
-}
-
-.empty-title {
-  font-family: 'Syne', system-ui, sans-serif;
-  font-size: var(--text-lg);
-  font-weight: 700;
-  color: var(--color-text);
-}
-
-.empty-sub {
-  font-size: var(--text-sm);
-  color: var(--color-muted-light);
-  max-width: 280px;
-}
-
 /* ── Mobile ──────────────────────────────────── */
 
 @media (max-width: 600px) {

@@ -76,6 +76,30 @@ export class StudentCardComponent {
     return `${days} ${days === 1 ? 'día' : 'días'} por semana`;
   });
 
+  readonly statusText = computed(() =>
+    ({ active: 'Activo', 'no-plan': 'Sin plan', pending: 'Pendiente' } as const)[this.status()]);
+
+  /** % que calcula el backend; null = todavía no hay dato */
+  readonly adherence = computed(() => {
+    const v = this.student().adherencePercent;
+    return v === null || v === undefined ? null : Math.round(v);
+  });
+
+  /** Umbral solo visual: ≥70 verde, 40–69 ámbar, <40 rojo */
+  readonly adherenceLevel = computed(() => {
+    const v = this.adherence();
+    if (v === null) return 'none';
+    return v >= 70 ? 'high' : v >= 40 ? 'mid' : 'low';
+  });
+
+  readonly ariaLabel = computed(() => {
+    const parts = [`Ver detalle de ${this.displayName()}`, this.statusText()];
+    const w = this.student().activeWorkout;
+    if (w) parts.push(`plan ${w.templateName}`);
+    if (this.adherence() !== null) parts.push(`adherencia ${this.adherence()}%`);
+    return parts.join(', ');
+  });
+
   onClick(): void {
     this.cardClick.emit();
   }
