@@ -34,7 +34,7 @@
       <div class="bk-grid2">
         <label class="bk-field">
           Servicio
-          <select [ngModel]="serviceId()" (ngModelChange)="serviceId.set(+$event)">
+          <select [ngModel]="serviceId()" (ngModelChange)="setService(+$event)">
             @for (s of fixedServices(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
           </select>
         </label>
@@ -58,6 +58,14 @@
       @if (slots().length === 0 && !loadingData()) {
         <p class="bk-note">No tenés franjas cargadas. Cargalas en "Horarios y cupos".</p>
       } @else {
+        @if (weeklyLimit(); as w) {
+          <p class="bk-muted limit-line">
+            Este plan es de <strong>{{ w }} por semana</strong>.
+            @if (existingInPlan()) { Ya tiene {{ existingInPlan() }}. }
+            @if (remaining() === 0) { No quedan días por elegir. } @else { Podés elegir {{ remaining() }} más. }
+          </p>
+        }
+        @if (limitNotice()) { <p class="bk-note cap-warn" role="status">{{ limitNotice() }}</p> }
         <div class="bk-slots">
           @for (col of byDay(); track col.day) {
             <div class="bk-slots__col">

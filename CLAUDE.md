@@ -890,6 +890,9 @@ src/styles/booking.css                → estilos compartidos de turnos (prefijo
 - **Anotar en horario fijo:** el entrenador elige al alumno de su lista (`GET /v1/users/students`, buscador por nombre o
   DNI) y el batch se manda con `userId` (el backend acepta exactamente uno de userId / dni / mail). Las franjas donde
   ya está anotado se ven como "Ya anotado". Al dar de alta un alumno se abre el modal con él preseleccionado (match por DNI).
+  **Tope del plan:** el modal muestra "Este plan es de 2 por semana. Ya tiene 1. Podés elegir 1 más." y no deja marcar más
+  días que `weeklyLimit − horarios vigentes del alumno en ese plan`; si lo intenta, aviso ámbar que sugiere "Cambiar plan".
+  Cambiar el plan en el select limpia los días elegidos. El backend igual valida (409).
 - **Horarios fijos:** filtro por defecto **Vigentes (activos y en pausa)** — el mismo criterio que usa el backend para el 409
   de franjas (antes se veían solo los activos y un horario en pausa bloqueaba guardar sin que se viera). Una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
   tiene fin). Tocar un chip abre sus acciones; "+" agrega otro día a ese alumno.

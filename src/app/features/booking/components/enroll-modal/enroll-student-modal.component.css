@@ -30,3 +30,6 @@
   margin-left: auto; font: 600 13px var(--font-body); color: var(--color-muted-light);
   background: none; border: none; cursor: pointer; text-decoration: underline;
 }
+
+.limit-line { margin: 0 0 8px; font-size: 13px; }
+.cap-warn { border-left: 3px solid var(--color-warning); padding-left: 10px; color: var(--color-text); margin: 0 0 8px; }

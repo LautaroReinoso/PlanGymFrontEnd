@@ -61,6 +61,10 @@ export class EnrollStudentModalComponent {
   readonly slots      = signal<ScheduleOverviewItem[]>([]);
   /** Franjas en las que el alumno elegido ya está anotado (activo o en pausa) */
   readonly alreadyIn  = signal<Set<string>>(new Set());
+  /** Horarios vigentes del alumno elegido (para contar cuántos tiene en cada plan) */
+  readonly myEnrollments = signal<{ serviceId: number }[]>([]);
+  /** Aviso cuando intenta elegir más días de los que permite el plan */
+  readonly limitNotice = signal<string | null>(null);
   readonly isSaving   = signal(false);
   readonly error      = signal<string | null>(null);
   readonly loadingData = signal(false);
@@ -81,7 +85,21 @@ export class EnrollStudentModalComponent {
     slots: this.slots().filter(s => s.dayOfWeek === d).sort((a, b) => a.startTime.localeCompare(b.startTime)),
   })));
 
-  readonly canSave = computed(() => !!this.selectedId() && !!this.serviceId() && this.picked().length > 0);
+  /** Veces por semana del plan elegido (null = sin tope) */
+  readonly weeklyLimit = computed(() => this.services().find(s => s.id === this.serviceId())?.weeklyLimit ?? null);
+  /** Horarios que ya tiene en este plan */
+  readonly existingInPlan = computed(() => this.myEnrollments().filter(e => e.serviceId === this.serviceId()).length);
+  /** Cuántos días más puede elegir (null = sin tope) */
+  readonly remaining = computed(() => {
+    const w = this.weeklyLimit();
+    return w == null ? null : Math.max(0, w - this.existingInPlan() - this.picked().length);
+  });
+  readonly overLimit = computed(() => {
+    const w = this.weeklyLimit();
+    return w != null && this.existingInPlan() + this.picked().length > w;
+  });
+
+  readonly canSave = computed(() => !!this.selectedId() && !!this.serviceId() && this.picked().length > 0 && !this.overLimit());
 
   constructor() {
     effect(() => {
@@ -124,9 +142,9 @@ export class EnrollStudentModalComponent {
 
   private loadAlreadyIn(userId: number): void {
     this.api.enrollments({ status: '' }).pipe(catchError(() => of([]))).subscribe(list => {
-      this.alreadyIn.set(new Set(list
-        .filter(e => e.userId === userId && e.status !== 'ENDED')
-        .map(e => `${e.dayOfWeek}-${hhmm(e.startTime)}`)));
+      const mine = list.filter(e => e.userId === userId && e.status !== 'ENDED');
+      this.alreadyIn.set(new Set(mine.map(e => `${e.dayOfWeek}-${hhmm(e.startTime)}`)));
+      this.myEnrollments.set(mine.map(e => ({ serviceId: e.serviceId })));
     });
   }
 
@@ -137,12 +155,16 @@ export class EnrollStudentModalComponent {
   select(s: StudentSummary): void {
     this.selectedId.set(s.id);
     this.picked.set([]);
+    this.limitNotice.set(null);
+    this.myEnrollments.set([]);
     this.loadAlreadyIn(s.id);
   }
 
   clearStudent(): void {
     this.selectedId.set(null);
     this.alreadyIn.set(new Set());
+    this.myEnrollments.set([]);
+    this.limitNotice.set(null);
     this.picked.set([]);
   }
 
@@ -153,7 +175,27 @@ export class EnrollStudentModalComponent {
   toggle(s: ScheduleOverviewItem): void {
     if (this.isIn(s)) return;
     const k = this.slotKey(s);
-    this.picked.update(p => p.includes(k) ? p.filter(x => x !== k) : [...p, k]);
+    if (this.picked().includes(k)) {
+      this.picked.update(p => p.filter(x => x !== k));
+      this.limitNotice.set(null);
+      return;
+    }
+    if (this.remaining() === 0) {
+      const svc = this.services().find(x => x.id === this.serviceId());
+      const w = this.weeklyLimit()!, had = this.existingInPlan();
+      this.limitNotice.set(`${svc?.name ?? 'Este plan'} es de ${w} ${w === 1 ? 'vez' : 'veces'} por semana: solo podés elegir ${w} ${w === 1 ? 'día' : 'días'}`
+        + (had ? ` y ya tiene ${had}.` : '.')
+        + ' Para sumar más, cambiale el plan en Horarios fijos.');
+      return;
+    }
+    this.picked.update(p => [...p, k]);
+  }
+
+  /** Al cambiar de plan se limpian los días elegidos (el tope cambia) */
+  setService(id: number): void {
+    this.serviceId.set(id);
+    this.picked.set([]);
+    this.limitNotice.set(null);
   }
 
   save(): void {
