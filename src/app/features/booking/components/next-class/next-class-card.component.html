@@ -1,0 +1,70 @@
+<section class="nc" aria-label="Próxima clase">
+  @if (isLoading()) {
+    <p class="nc__muted">Buscando tu próxima clase…</p>
+  } @else {
+  @if (next(); as b) {
+    <div class="nc__head">
+      <span class="nc__eyebrow">Tu próxima clase</span>
+      <a class="nc__link" routerLink="/student/turnos">Ver turnos</a>
+    </div>
+    <p class="nc__when">{{ whenLabel() }}</p>
+    <p class="nc__what">
+      {{ b.serviceName }} con {{ b.professionalName }}
+      @if (b.location) { · {{ b.location }} }
+    </p>
+    @if (moreCount() > 0) {
+      <p class="nc__muted">Y {{ moreCount() }} {{ moreCount() === 1 ? 'clase más' : 'clases más' }} en los próximos 7 días.</p>
+    }
+
+    @if (b.enrollmentId) {
+      @if (blockedMsg()) {
+        <p class="nc__note">{{ blockedMsg() }}</p>
+      } @else if (confirming()) {
+        @if (capNotice(); as cap) { <p class="nc__note cap-warn">{{ cap }}</p> }
+        <p class="nc__note">Tu lugar queda libre para otro alumno y si avisás con 12 horas o más, ganás una clase para recuperar en los próximos 30 días.</p>
+        <div class="nc__actions">
+          <gp-button size="sm" variant="secondary" [loading]="isWorking()" (click)="absence()">Sí, no voy</gp-button>
+          <gp-button size="sm" variant="ghost" [disabled]="isWorking()" (click)="confirming.set(false)">Volver</gp-button>
+        </div>
+      } @else {
+        <div class="nc__actions">
+          <gp-button size="sm" variant="ghost" (click)="confirming.set(true)">Avisar que no voy</gp-button>
+        </div>
+      }
+    }
+  } @else {
+    <div class="nc__head">
+      <span class="nc__eyebrow">Turnos</span>
+      <a class="nc__link" routerLink="/student/turnos">Ver turnos</a>
+    </div>
+    <p class="nc__what">No tenés clases en los próximos días.</p>
+    @if (canChoose() || canBookSingle()) {
+      <div class="nc__actions">
+        @if (canChoose()) {
+          <a class="nc__btn" routerLink="/student/turnos/elegir">Elegir mis horarios</a>
+        }
+        @if (canBookSingle()) {
+          <a class="nc__btn" routerLink="/student/turnos/reservar">Reservar clase</a>
+        }
+      </div>
+    } @else {
+      <p class="nc__muted">Tu entrenador todavía no te asignó horarios.</p>
+    }
+  }
+  }
+
+  @if (!isLoading() && (recovery()?.available ?? 0) > 0) {
+    <a class="nc__rec" routerLink="/student/turnos/horarios">
+      Tenés {{ recovery()!.available }} para recuperar
+      @if (earliestExpiry()) { · la primera vence el {{ earliestExpiry() }} }
+      · <strong>Elegir horario</strong>
+    </a>
+  }
+  @if (!isLoading() && planCaps().length) {
+    <p class="nc__muted">
+      @for (s of planCaps(); track s.id) {
+        Tu plan{{ planCaps().length > 1 ? ' ' + s.name : '' }}: {{ s.monthlyCap }} clases por mes@if (!$last) { · }
+      }
+    </p>
+  }
+</section>

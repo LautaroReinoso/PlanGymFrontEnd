@@ -1,0 +1,53 @@
+<div class="ref-page">
+  <a class="back" routerLink="/trainer/templates">← Plantillas</a>
+  <header>
+    <h1 class="title">Planes de referencia</h1>
+    <p class="sub">Planes armados por PlanGym para empezar. Con <strong>Usar este plan</strong> se copia a tus plantillas:
+      ahí lo adaptás a cada alumno y lo asignás.</p>
+  </header>
+
+  @if (isLoading()) {
+    <app-page-loader message="Cargando planes…" />
+  } @else if (error()) {
+    <p class="error">{{ error() }}</p>
+    <gp-button variant="secondary" size="sm" (click)="load()">Reintentar</gp-button>
+  } @else {
+    <div class="list">
+      @for (p of plans(); track p.id) {
+        <article class="plan" [class.plan--open]="openId() === p.id">
+          <div class="plan__head">
+            <div class="plan__info">
+              <h2 class="plan__name">{{ p.name }}</h2>
+              <div class="chips">
+                @if (level(p)) { <span class="chip">{{ level(p) }}</span> }
+                @if (p.daysPerWeek) { <span class="chip">{{ p.daysPerWeek }} días por semana</span> }
+                @if (p.exerciseCount) { <span class="chip">{{ p.exerciseCount }} ejercicios</span> }
+              </div>
+              @if (p.description) { <p class="plan__desc">{{ p.description }}</p> }
+            </div>
+            <div class="plan__actions">
+              <gp-button variant="ghost" size="sm" (click)="toggle(p)">{{ openId() === p.id ? 'Ocultar' : 'Ver días' }}</gp-button>
+              <gp-button size="sm" [loading]="copyingId() === p.id" [disabled]="copyingId() !== null" (click)="use(p)">Usar este plan</gp-button>
+            </div>
+          </div>
+
+          @if (openId() === p.id) {
+            <div class="plan__days">
+              @if (loadingDetail()) {
+                <app-page-loader [size]="40" [compact]="true" message="Cargando días…" />
+              } @else if (detail()) {
+                @let d = detail()!;
+                @if (d.description && d.description !== p.description) { <p class="plan__desc">{{ d.description }}</p> }
+                @for (day of sortedDays(d); track day.id) {
+                  <app-template-day [day]="day" [readonly]="true" />
+                }
+              }
+            </div>
+          }
+        </article>
+      } @empty {
+        <p class="sub">Todavía no hay planes de referencia.</p>
+      }
+    </div>
+  }
+</div>

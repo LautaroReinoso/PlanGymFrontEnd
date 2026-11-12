@@ -5,13 +5,8 @@
 //  de la plantilla recién creada.
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +24,7 @@ import { ButtonComponent } from '../../../../shared/components/button-component/
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TemplateCreatePageComponent {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly templateSvc = inject(TemplateService);
   private readonly router      = inject(Router);
@@ -64,7 +60,7 @@ export class TemplateCreatePageComponent {
     this.templateSvc.create({
       name: this.name().trim(),
       description: this.description().trim() || undefined,
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (created) => {
         this.isSaving.set(false);
         // Ir directo al builder para empezar a agregar días

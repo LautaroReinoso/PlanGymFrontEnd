@@ -1,0 +1,181 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <h1 class="bk-title">Horarios fijos</h1>
+      <p class="bk-subtitle">Los días y horas que cada alumno viene siempre. Las clases se generan solas.</p>
+    </div>
+    <nav class="bk-tabs">
+      <a class="bk-tab" routerLink="/trainer/turnos">Calendario</a>
+      <a class="bk-tab on" routerLink="/trainer/turnos/horarios-fijos">Horarios fijos</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/disponibilidad">Horarios y cupos</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/servicios">Servicios</a>
+    </nav>
+  </header>
+
+  <!-- ── Horarios fijos ─────────────────────── -->
+  <section class="bk-card">
+    <div class="bk-row bk-row--between">
+      <h2>Alumnos anotados</h2>
+      <gp-button size="sm" (click)="openEnroll()">+ Anotar alumno</gp-button>
+    </div>
+
+    <div class="bk-grid2">
+      <label class="bk-field">
+        Buscar
+        <input type="search" placeholder="Nombre" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+      </label>
+      <label class="bk-field">
+        Estado
+        <select [ngModel]="statusFilter()" (ngModelChange)="setStatus($event)">
+          <option value="CURRENT">Vigentes (activos y en pausa)</option>
+          <option value="ACTIVE">Activos</option>
+          <option value="PAUSED">En pausa</option>
+          <option value="ENDED">Terminados</option>
+          <option value="">Todos</option>
+        </select>
+      </label>
+      <label class="bk-field">
+        Servicio
+        <select [ngModel]="serviceFilter()" (ngModelChange)="setService($event)">
+          <option [ngValue]="null">Todos</option>
+          @for (s of services(); track s.id) { <option [ngValue]="s.id">{{ s.name }}</option> }
+        </select>
+      </label>
+    </div>
+
+    @if (isLoading()) {
+      <app-page-loader [size]="40" [compact]="true" message="Cargando horarios…" />
+    } @else {
+      <div class="grid">
+        @for (g of grouped(); track g.key) {
+          <div class="grid__row">
+            <div class="grid__who">
+              <span class="grid__name">{{ g.name }}</span>
+              @if (multiPlan().has(g.userId)) {
+                <span class="multi-plan">Tiene horarios en dos planes: unificalos con Cambiar plan</span>
+              }
+              <span class="bk-muted">
+                {{ g.serviceName }}
+                @if (weeklyLimitOf(g.serviceId); as w) { · {{ liveCount(g) }}/{{ w }} por semana }
+              </span>
+              <button type="button" class="link-btn" (click)="openChange(g)">Cambiar plan</button>
+            </div>
+            <div class="grid__chips">
+              @for (e of g.items; track e.id) {
+                <button type="button" class="chip chip--{{ e.status }}" (click)="actionTarget.set(e)"
+                        [attr.title]="e.serviceName + ' · ' + statusText[e.status] + (e.validTo ? ' · hasta ' + e.validTo : '')">
+                  <span class="chip__day">{{ dayShort[e.dayOfWeek] }}</span> {{ hhmm(e.startTime) }}
+                  @if (e.status === 'PAUSED') { <span class="chip__flag">pausa</span> }
+                  @if (e.validTo && e.status !== 'ENDED') { <span class="chip__flag">hasta {{ e.validTo.slice(8, 10) }}/{{ e.validTo.slice(5, 7) }}</span> }
+                </button>
+              }
+              <button type="button" class="chip chip--add" (click)="openEnroll(g.userId)" title="Agregar otro día">
+                + @if (freeDays(g) > 0) { Agregar horario }
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <p class="bk-muted">No hay horarios fijos con estos filtros.</p>
+        }
+      </div>
+      @if (grouped().length) { <p class="bk-muted">Tocá un horario para pausarlo, reactivarlo o terminarlo.</p> }
+    }
+  </section>
+
+  <!-- ── Recuperaciones ─────────────────────── -->
+  @if (me()) {
+    <section class="bk-card">
+      <h2>Recuperar clases</h2>
+      <p class="bk-muted">
+        Cuando un alumno avisa con 12 horas o más que no viene, gana una clase para recuperar en los 30 días
+        siguientes, en cualquier horario con lugar. Avisar tarde o faltar sin avisar no da recuperación.
+        Si cancelás vos una clase, el alumno también la puede recuperar (sin gastar este tope).
+      </p>
+      <div class="bk-row">
+        <label class="bk-field" style="max-width:200px">
+          Recuperaciones por mes (0 = no)
+          <input type="number" min="0" max="31" [ngModel]="recoveriesValue()" (ngModelChange)="recoveriesValue.set(+$event)" />
+        </label>
+        <gp-button size="sm" [loading]="isSavingMe()" [disabled]="!recoveriesDirty()" (click)="saveRecoveries()">Guardar</gp-button>
+      </div>
+    </section>
+  }
+
+</div>
+
+<app-enroll-student-modal [isOpen]="showEnroll()" [studentId]="enrollStudentId()"
+  (closed)="showEnroll.set(false)" (saved)="onEnrolled()" (changePlan)="changeFromEnroll($event)" />
+
+<!-- Acciones de un horario fijo -->
+<gp-modal [isOpen]="!!actionTarget()" [title]="actionTarget() ? dayLabels[actionTarget()!.dayOfWeek] + ' ' + hhmm(actionTarget()!.startTime) : ''"
+          size="sm" (closed)="actionTarget.set(null)">
+  @if (actionTarget(); as e) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p class="bk-muted">{{ nameOf(e) }} · {{ e.serviceName }} · {{ statusText[e.status] }}
+        @if (e.validTo) { · hasta {{ e.validTo }} }
+      </p>
+      <div class="bk-row">
+        @if (e.status === 'ACTIVE') { <gp-button variant="secondary" (click)="act('pause')">Pausar</gp-button> }
+        @if (e.status === 'PAUSED') { <gp-button variant="secondary" (click)="act('resume')">Reactivar</gp-button> }
+        @if (e.status !== 'ENDED') { <gp-button variant="danger" (click)="act('end')">Terminar</gp-button> }
+        <gp-button variant="ghost" (click)="actionTarget.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>
+
+<!-- Terminar horario fijo -->
+<gp-modal [isOpen]="!!endTarget()" title="Terminar horario fijo" size="sm" (closed)="endTarget.set(null)">
+  @if (endTarget(); as e) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p class="bk-muted">{{ nameOf(e) }} · {{ dayLabels[e.dayOfWeek] }} {{ hhmm(e.startTime) }}</p>
+      <p class="bk-note">Se borran sus clases futuras de este horario. Si querés, poné una fecha de fin y sigue viniendo hasta ese día.</p>
+      <label class="bk-field">
+        Fecha de fin (opcional)
+        <input type="date" [ngModel]="endDate()" (ngModelChange)="endDate.set($event)" />
+      </label>
+      <div class="bk-row">
+        <gp-button variant="danger" [loading]="busyId() === e.id" (click)="confirmEnd()">
+          {{ endDate() ? 'Guardar fecha de fin' : 'Terminar ahora' }}
+        </gp-button>
+        <gp-button variant="ghost" (click)="endTarget.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>
+
+<!-- Cambiar plan -->
+<gp-modal [isOpen]="!!changeTarget()" title="Cambiar plan" size="sm" (closed)="changeTarget.set(null)">
+  @if (changeTarget(); as g) {
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <p class="bk-muted" style="margin:0">{{ g.name }}</p>
+      <label class="bk-field">
+        Plan actual
+        <input type="text" [value]="g.serviceName + ' · ' + liveCount(g) + (liveCount(g) === 1 ? ' horario' : ' horarios')" disabled />
+      </label>
+      <label class="bk-field">
+        Plan nuevo
+        <select [ngModel]="changeTo()" (ngModelChange)="changeTo.set($event); changeError.set(null)">
+          <option [ngValue]="null" disabled>Elegí un plan</option>
+          @for (s of changeOptions(); track s.id) {
+            <option [ngValue]="s.id">{{ s.name }}@if (s.weeklyLimit) { · {{ s.weeklyLimit }} por semana }</option>
+          }
+        </select>
+      </label>
+      @if (!changeOptions().length) {
+        <p class="bk-note">No tenés otros planes de horario fijo activos. Creá uno en la pestaña Servicios.</p>
+      }
+      <label class="bk-field">
+        Desde
+        <input type="date" [min]="today" [ngModel]="changeFrom()" (ngModelChange)="changeFrom.set($event)" />
+        <span class="bk-muted" style="font-size:12px">Las clases desde esta fecha pasan al plan nuevo. Mismos días, horas y estado.</span>
+      </label>
+      @if (changeShortfall()) { <p class="bk-note cap-warn">{{ changeShortfall() }}</p> }
+      @if (changeError()) { <p class="bk-error">{{ changeError() }}</p> }
+      <div class="bk-row" style="justify-content:flex-end">
+        <gp-button variant="ghost" size="sm" (click)="changeTarget.set(null)">Cancelar</gp-button>
+        <gp-button size="sm" [loading]="isChanging()" [disabled]="!canConfirmChange()" (click)="confirmChange()">Confirmar</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>

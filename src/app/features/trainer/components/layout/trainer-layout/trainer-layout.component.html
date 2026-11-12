@@ -24,7 +24,7 @@
 
     <!-- Top bar mobile -->
     <header class="topbar">
-          <gp-icon-button [icon]="'lines'" [variant]="'ghost'"  (click)="toggleSidebar()"  aria-label="Abrir menú"      [bordered]="false"  class="topbar-menu-btn"></gp-icon-button>
+          <gp-icon-button [icon]="'lines'" [variant]="'ghost'"  (click)="toggleSidebar()"  aria-label="Más opciones"      [bordered]="false"  class="topbar-menu-btn"></gp-icon-button>
 
 
       <div class="topbar-logo">
@@ -42,6 +42,9 @@
     <main class="trainer-content">
       <router-outlet />
     </main>
+
+    <!-- Barra inferior (solo celular) -->
+    <app-trainer-bottom-nav />
 
   </div>
 </div>

@@ -7,15 +7,7 @@
 //  no actualizó, consulta cada 3 s hasta 5 veces.
 // ─────────────────────────────────────────────
 
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -104,7 +96,7 @@ export class SubscriptionPageComponent implements OnInit {
         }, true),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         complete: () => {
           this.isConfirming.set(false);
           if (returningFromMp) {
@@ -139,7 +131,7 @@ export class SubscriptionPageComponent implements OnInit {
     this.isCancelling.set(true);
     this.cancelError.set(null);
 
-    this.billing.cancelMySubscription().subscribe({
+    this.billing.cancelMySubscription().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isCancelling.set(false);
         this.showCancelModal.set(false);

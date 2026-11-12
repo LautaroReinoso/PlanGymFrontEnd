@@ -4,7 +4,8 @@
 //  siempre la misma, exista o no la cuenta.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -22,6 +23,7 @@ import { ButtonComponent } from '../../../shared/components/button-component/but
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForgotPasswordComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(PasswordResetService);
 
@@ -45,7 +47,7 @@ export class ForgotPasswordComponent {
     }
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.service.forgot(this.form.controls.mail.value.trim()).subscribe({
+    this.service.forgot(this.form.controls.mail.value.trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.sent.set(true);

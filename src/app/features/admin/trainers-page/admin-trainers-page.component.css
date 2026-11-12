@@ -70,3 +70,6 @@
   .badge { grid-column: 2; justify-self: start; }
   .action { grid-column: 1 / -1; width: 100%; }
 }
+
+.sub-on { color: var(--color-success); }
+.sub-off { color: var(--color-warning); }

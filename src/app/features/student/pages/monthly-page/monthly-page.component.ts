@@ -4,7 +4,8 @@
 //  (GET /workout-logs/my-history), racha y adherencia.
 // ─────────────────────────────────────────────
 
-import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 
 import { StudentProgress, StudentProgressService } from '../../services/student-progress.service';
@@ -39,6 +40,7 @@ interface CalendarCell {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MonthlyPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly progressService = inject(StudentProgressService);
 
   readonly progress  = signal<StudentProgress | null>(null);
@@ -106,7 +108,7 @@ export class MonthlyPageComponent implements OnInit {
   load(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.progressService.getProgress().subscribe({
+    this.progressService.getProgress().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: p => { this.progress.set(p); this.isLoading.set(false); },
       error: () => {
         this.error.set('No pudimos cargar tu historial. Intentá nuevamente.');

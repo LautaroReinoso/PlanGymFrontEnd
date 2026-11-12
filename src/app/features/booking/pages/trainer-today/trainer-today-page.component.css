@@ -1,0 +1,51 @@
+:host { display: block; max-width: 640px; margin: 0 auto; }
+.today { display: flex; flex-direction: column; gap: var(--space-4); padding-bottom: var(--space-8); }
+.today__head { display: flex; flex-direction: column; gap: 2px; }
+.today__eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-celeste); }
+.today__title { margin: 0; font: 800 26px var(--font-display); color: var(--color-text); }
+.today__sub { margin: 0; font-size: 14px; color: var(--color-muted-light); }
+
+.cls { background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; }
+.cls--past { opacity: .75; }
+.cls__head {
+  display: flex; align-items: baseline; gap: var(--space-2); padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border); background: var(--color-surface);
+}
+.cls__time { font: 800 18px var(--font-display); color: var(--color-text); }
+.cls__name { flex: 1; font-weight: 600; color: var(--color-muted-light); }
+.cls__count {
+  font: 700 12px var(--font-body); color: var(--color-celeste); padding: 2px 8px;
+  border: 1px solid var(--color-celeste); border-radius: var(--radius-full);
+}
+.cls__list { list-style: none; margin: 0; padding: 0; }
+.cls__list li + li { border-top: 1px solid var(--color-border); }
+
+.person {
+  width: 100%; display: flex; align-items: center; gap: var(--space-3); min-height: 60px;
+  padding: var(--space-2) var(--space-4); text-align: left; cursor: pointer;
+  background: transparent; border: none; color: var(--color-text); font-family: var(--font-body);
+}
+.person:active, .person:hover { background: var(--color-surface); }
+.person__avatar {
+  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
+  font: 700 13px var(--font-display); color: var(--color-accent); background: var(--color-accent-dim);
+}
+.person__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.person__name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.person__state { font-size: 13px; color: var(--color-muted-light); }
+.person__state--next { color: var(--color-celeste); }
+.person__state--doneToday { color: var(--color-success); }
+.person__chev { width: 18px; height: 18px; color: var(--color-muted); flex-shrink: 0; }
+
+.empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-8) 0; color: var(--color-muted-light); }
+
+.plan { display: flex; flex-direction: column; gap: var(--space-3); }
+.plan__days { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.plan__day {
+  flex-shrink: 0; font: 600 13px var(--font-body); color: var(--color-muted-light); cursor: pointer;
+  padding: 7px 14px; border-radius: var(--radius-full); background: var(--color-surface); border: 1px solid var(--color-border);
+}
+.plan__day.on { color: #fff; background: var(--color-accent); border-color: var(--color-accent); }
+.plan__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.plan__done { margin: 0; text-align: center; font-weight: 600; color: var(--color-success); padding: var(--space-2); }
+.plan__link { align-self: center; font-size: 13px; color: var(--color-muted-light); text-decoration: none; }

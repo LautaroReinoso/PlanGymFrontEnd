@@ -1,0 +1,21 @@
+.ts { position: relative; background: var(--color-card); border: 1px solid var(--color-border); border-radius: 16px; padding: 16px; margin: 0 0 20px; overflow: hidden; }
+.ts::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--color-accent), var(--color-celeste)); }
+.ts__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.ts__title { margin: 0; font: 700 16px 'Syne', sans-serif; color: var(--color-text); display: flex; align-items: center; gap: 8px; }
+.ts__count { font: 600 12px 'DM Sans', sans-serif; padding: 1px 8px; border-radius: 999px; background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-muted-light); }
+.ts__muted { color: var(--color-muted-light); font-size: 13px; }
+.ts__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ts__item { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: 999px; background: var(--color-surface); border: 1px solid var(--color-border); }
+.ts__name { color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 14px; }
+.ts__name:hover { color: var(--color-celeste); }
+.ts__remove { background: none; border: 0; border-radius: 999px; padding: 3px 9px; color: var(--color-muted-light); font: 600 12px 'DM Sans', sans-serif; cursor: pointer; }
+.ts__remove:hover { color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 12%, transparent); }
+.ts__form { display: flex; flex-direction: column; gap: 12px; }
+.ts__search { width: 100%; box-sizing: border-box; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); font: 14px 'DM Sans', sans-serif; }
+.ts__pick { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.ts__pickbtn { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text); cursor: pointer; text-align: left; font: 600 14px 'DM Sans', sans-serif; }
+.ts__pickbtn small { font-weight: 400; color: var(--color-muted-light); font-size: 12px; }
+.ts__pickbtn.on { border-color: var(--color-accent); box-shadow: 0 0 0 1px var(--color-accent); }
+.ts__warn { margin: 0; border-left: 3px solid var(--color-warning); padding-left: 10px; font-size: 13px; color: var(--color-text); }
+.ts__error { margin: 0; color: var(--color-danger); font-size: 13px; }
+.ts__actions { display: flex; justify-content: flex-end; gap: 8px; }

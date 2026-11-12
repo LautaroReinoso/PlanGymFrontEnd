@@ -7,6 +7,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, roleGuard } from '../../core/auth/services/auth-guard.service';
 import { billingEnabledGuard } from './guards/billing-enabled.guard';
+import { trainerBookingGuard, unsavedChangesGuard } from '../booking/booking.guard';
 
 export const TRAINER_ROUTES: Routes = [
   {
@@ -71,6 +72,14 @@ export const TRAINER_ROUTES: Routes = [
         title: 'Plantillas — PlanGym',
       },
       {
+        path: 'templates/referencia',
+        loadComponent: () =>
+          import('./pages/reference-templates-page/reference-templates-page.component').then(
+            m => m.ReferenceTemplatesPageComponent
+          ),
+        title: 'Planes de referencia — PlanGym',
+      },
+      {
         path: 'templates/new',
         loadComponent: () =>
           import('./pages/template-create-page/template-create-page.component').then(
@@ -104,6 +113,46 @@ export const TRAINER_ROUTES: Routes = [
             m => m.SubscriptionPlansPageComponent
           ),
         title: 'Planes — PlanGym',
+      },
+      // ── Hoy: quién viene hoy y su plan del día (requiere Turnos) ──
+      {
+        path: 'hoy',
+        canActivate: [trainerBookingGuard],
+        loadComponent: () =>
+          import('../booking/pages/trainer-today/trainer-today-page.component').then(m => m.TrainerTodayPageComponent),
+        title: 'Hoy — PlanGym',
+      },
+      // ── Turnos (módulo de booking; 403 = apagado) ──
+      {
+        path: 'turnos',
+        canActivate: [trainerBookingGuard],
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('../booking/pages/trainer-agenda/trainer-agenda-page.component').then(m => m.TrainerAgendaPageComponent),
+            title: 'Turnos — PlanGym',
+          },
+          {
+            path: 'horarios-fijos',
+            loadComponent: () =>
+              import('../booking/pages/trainer-enrollments/trainer-enrollments-page.component').then(m => m.TrainerEnrollmentsPageComponent),
+            title: 'Horarios fijos — PlanGym',
+          },
+          {
+            path: 'disponibilidad',
+            canDeactivate: [unsavedChangesGuard],
+            loadComponent: () =>
+              import('../booking/pages/trainer-availability/trainer-availability-page.component').then(m => m.TrainerAvailabilityPageComponent),
+            title: 'Horarios y cupos — PlanGym',
+          },
+          {
+            path: 'servicios',
+            loadComponent: () =>
+              import('../booking/pages/trainer-services/trainer-services-page.component').then(m => m.TrainerServicesPageComponent),
+            title: 'Mis servicios — PlanGym',
+          },
+        ],
       },
       {
         path: 'profile',

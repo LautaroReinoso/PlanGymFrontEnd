@@ -16,21 +16,13 @@
 //  />
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  input,
-  output,
-  signal,
-  computed,
-  effect,
-  ChangeDetectionStrategy,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ExerciseService } from '../../../services/exercise.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { Exercise, AddExerciseToDayRequest, CreateExerciseRequest } from '../../../models/trainer.models';
+import { Exercise, CreateExerciseRequest } from '../../../models/trainer.models';
 import { muscleGroupLabel } from '../../../models/muscle-group.util';
 import { toExercisePayload } from '../../../models/exercise-meta.util';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
@@ -48,6 +40,8 @@ export interface ExerciseSelection {
   reps: number;
   repsMax?: number;
   restSeconds: number;
+  /** Por tiempo: segundos por serie (reps = 0) */
+  durationSeconds?: number;
   weight?: number;
   notes?: string;
 }
@@ -61,6 +55,7 @@ export interface ExerciseSelection {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddExercisesModalComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly exerciseService = inject(ExerciseService);
 
   // ── Inputs ────────────────────────────────────
@@ -85,6 +80,9 @@ export class AddExercisesModalComponent {
   readonly repsMax            = signal<number | null>(null);
   readonly loadingDefaults    = signal(false);
   readonly restSeconds        = signal(60);
+  /** "Por tiempo": en vez de repeticiones, segundos por serie */
+  readonly byTime             = signal(false);
+  readonly durationSeconds    = signal(30);
   readonly weight             = signal(0);
   readonly notes              = signal('');
 
@@ -100,7 +98,7 @@ export class AddExercisesModalComponent {
   readonly canConfirmSelection = computed(() =>
     this.selectedExerciseId() !== null &&
     this.sets() > 0 &&
-    this.reps() > 0
+    (this.byTime() ? this.durationSeconds() > 0 : this.reps() > 0)
   );
 
   // ── Reset al abrir ────────────────────────────
@@ -128,7 +126,7 @@ export class AddExercisesModalComponent {
    *  (si los tiene). El trainer los puede cambiar antes de confirmar. */
   private prefillFromDefaults(id: number): void {
     this.loadingDefaults.set(true);
-    this.exerciseService.getById(id).subscribe({
+    this.exerciseService.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (d) => {
         this.loadingDefaults.set(false);
         if (this.selectedExerciseId() !== id) return; // cambió la selección
@@ -148,8 +146,9 @@ export class AddExercisesModalComponent {
     this.exerciseSelected.emit({
       exerciseId:  id,
       sets:        this.sets(),
-      reps:        this.reps(),
-      repsMax:     this.repsMax() && this.repsMax()! > this.reps() ? this.repsMax()! : undefined,
+      reps:        this.byTime() ? 0 : this.reps(),
+      repsMax:     !this.byTime() && this.repsMax() && this.repsMax()! > this.reps() ? this.repsMax()! : undefined,
+      durationSeconds: this.byTime() ? this.durationSeconds() : undefined,
       restSeconds: this.restSeconds(),
       weight:      this.weight() > 0 ? this.weight() : undefined,
       notes:       this.notes().trim() || undefined,
@@ -184,6 +183,8 @@ export class AddExercisesModalComponent {
     this.reps.set(10);
     this.repsMax.set(null);
     this.restSeconds.set(60);
+    this.byTime.set(false);
+    this.durationSeconds.set(30);
     this.weight.set(0);
     this.notes.set('');
   }

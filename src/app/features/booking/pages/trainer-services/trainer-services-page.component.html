@@ -1,0 +1,126 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <h1 class="bk-title">Mis servicios</h1>
+      <p class="bk-subtitle">Los tipos de clase que das (ej.: Funcional, Musculación). PlanGym no cobra turnos.</p>
+    </div>
+    <nav class="bk-tabs">
+      <a class="bk-tab" routerLink="/trainer/turnos">Calendario</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/horarios-fijos">Horarios fijos</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/disponibilidad">Horarios y cupos</a>
+      <a class="bk-tab on" routerLink="/trainer/turnos/servicios">Servicios</a>
+    </nav>
+  </header>
+
+  @if (isLoading()) { <app-page-loader message="Cargando servicios…" /> }
+  @else {
+  <section class="bk-card">
+    <div class="bk-row bk-row--between">
+      <h2>Activos</h2>
+      <gp-button size="sm" (click)="newService()">+ Nuevo servicio</gp-button>
+    </div>
+    <ul class="bk-list">
+      @for (s of activeServices(); track s.id) {
+        <li class="bk-item">
+          <div class="bk-item__main">
+            <span class="bk-item__title">{{ s.name }}</span>
+            <span class="bk-muted">
+              {{ s.durationMinutes }} min · {{ modeText[s.bookingMode] }}
+              @if (s.weeklyLimit) { · {{ s.weeklyLimit }} por semana }
+              @if (s.monthlyCap) { · {{ s.monthlyCap }} por mes }
+              @if (s.selfEnrollment) { · el alumno elige }
+            </span>
+          </div>
+          <div class="bk-item__actions">
+            <gp-button variant="ghost" size="sm" (click)="editService(s)">Editar</gp-button>
+            <gp-button variant="ghost" size="sm" (click)="deleteTarget.set(s)">Eliminar</gp-button>
+          </div>
+        </li>
+      } @empty {
+        <li class="bk-muted">Todavía no tenés servicios activos (ej.: "Funcional", "Musculación").</li>
+      }
+    </ul>
+  </section>
+
+  @if (inactiveServices().length) {
+    <section class="bk-card">
+      <h2>Eliminados</h2>
+      <p class="bk-muted">No se ofrecen más, pero se guardan para el historial. Podés volver a activarlos.</p>
+      <ul class="bk-list">
+        @for (s of inactiveServices(); track s.id) {
+          <li class="bk-item">
+            <div class="bk-item__main">
+              <span class="bk-item__title bk-muted">{{ s.name }}</span>
+              <span class="bk-muted">{{ s.durationMinutes }} min · {{ modeText[s.bookingMode] }}</span>
+            </div>
+            <div class="bk-item__actions">
+              <gp-button variant="ghost" size="sm" [loading]="busyId() === s.id" (click)="reactivate(s)">Reactivar</gp-button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+  }
+</div>
+
+<!-- Crear / editar servicio -->
+<gp-modal [isOpen]="!!serviceForm()" [title]="editingService() ? 'Editar servicio' : 'Nuevo servicio'" size="md" (closed)="serviceForm.set(null)">
+  @if (serviceForm(); as f) {
+    <div class="bk-page" style="padding-bottom:0">
+      <div class="bk-grid2">
+        <label class="bk-field">
+          Nombre
+          <input type="text" maxlength="80" [ngModel]="f.name" (ngModelChange)="patchForm({ name: $event })" />
+        </label>
+        <label class="bk-field">
+          Duración (minutos)
+          <input type="number" min="10" step="5" [ngModel]="f.durationMinutes" (ngModelChange)="patchForm({ durationMinutes: +$event })" />
+        </label>
+      </div>
+      <label class="bk-field">
+        ¿Cómo se reserva?
+        <select [ngModel]="f.bookingMode" (ngModelChange)="patchForm({ bookingMode: $event })">
+          <option value="ENROLLMENT">Horario fijo</option>
+          <option value="SELF">Clase suelta</option>
+          <option value="BOTH">Las dos</option>
+        </select>
+      </label>
+      <label class="bk-field">
+        Descripción (opcional)
+        <textarea rows="2" maxlength="300" [ngModel]="f.description" (ngModelChange)="patchForm({ description: $event })"></textarea>
+      </label>
+      @if (allowsEnrollment()) {
+        <label class="bk-check">
+          <input type="checkbox" [ngModel]="f.selfEnrollment" (ngModelChange)="patchForm({ selfEnrollment: $event })" />
+          El alumno elige sus horarios
+        </label>
+        <label class="bk-field">
+          Veces por semana
+          <input type="number" min="1" max="7" [ngModel]="f.weeklyLimit" (ngModelChange)="patchForm({ weeklyLimit: $event === '' || $event == null ? null : +$event })" />
+        </label>
+      }
+      @if (allowsEnrollment() && f.weeklyLimit) {
+        <p class="bk-muted" style="font-size:12px;margin:0">Son {{ f.weeklyLimit * 4 }} clases por mes ({{ f.weeklyLimit }} por semana × 4).</p>
+      }
+      @if (serviceError()) { <p class="bk-error">{{ serviceError() }}</p> }
+      <div class="bk-row">
+        <gp-button [loading]="isSavingService()" [disabled]="!f.name.trim() || !f.durationMinutes" (click)="saveService()">Guardar</gp-button>
+        <gp-button variant="ghost" [disabled]="isSavingService()" (click)="serviceForm.set(null)">Cancelar</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>
+
+<!-- Eliminar servicio -->
+<gp-modal [isOpen]="!!deleteTarget()" title="Eliminar servicio" size="sm" (closed)="deleteTarget.set(null)">
+  @if (deleteTarget(); as s) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p class="bk-muted">¿Eliminar "{{ s.name }}"? Deja de ofrecerse; las clases ya generadas no se tocan.</p>
+      <div class="bk-row">
+        <gp-button variant="danger" [loading]="isSavingService()" (click)="confirmDeleteService()">Eliminar</gp-button>
+        <gp-button variant="ghost" (click)="deleteTarget.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>

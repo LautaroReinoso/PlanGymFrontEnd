@@ -37,7 +37,7 @@
 
     <div class="profile-info">
       <h1 class="profile-name">{{ displayName() }}</h1>
-      <p class="profile-mail">{{ student()!.dni }}</p>
+      @if (student()!.dni) { <p class="profile-mail">{{ student()!.dni }}</p> }
       @if (student()!.activeWorkout) {
       <gp-badge variant="elevated">Plan activo</gp-badge>
       } @else {

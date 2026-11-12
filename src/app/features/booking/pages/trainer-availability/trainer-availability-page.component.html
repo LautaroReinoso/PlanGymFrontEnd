@@ -1,0 +1,235 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <h1 class="bk-title">Horarios y cupos</h1>
+      <p class="bk-subtitle">Cuándo das clase, cuántos alumnos entran y los días que no estás.</p>
+    </div>
+    <nav class="bk-tabs">
+      <a class="bk-tab" routerLink="/trainer/turnos">Calendario</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/horarios-fijos">Horarios fijos</a>
+      <a class="bk-tab on" routerLink="/trainer/turnos/disponibilidad">Horarios y cupos</a>
+      <a class="bk-tab" routerLink="/trainer/turnos/servicios">Servicios</a>
+    </nav>
+  </header>
+
+  <div class="bk-tabs">
+    <button type="button" class="bk-tab" [class.on]="tab() === 'rules'" (click)="setTab('rules')">Semana</button>
+    <button type="button" class="bk-tab" [class.on]="tab() === 'blocks'" (click)="setTab('blocks')">Días sin clase</button>
+  </div>
+
+  <!-- ── Franjas + cupos ───────────────────── -->
+  @if (tab() === 'rules') {
+    <section class="bk-card">
+      <div class="bk-row bk-row--between">
+        <h2>Tu semana</h2>
+        @if (rulesLoaded()) {
+          <span class="bk-muted">{{ totals().slots }} horarios · {{ totals().enrolled }} de {{ totals().cap }} lugares ocupados por fijos</span>
+        }
+      </div>
+      <p class="bk-muted">Agregá, editá o quitá horarios y al final tocá <strong>Guardar cambios</strong>. Cada horario muestra cuántos alumnos fijos tiene sobre el cupo.</p>
+
+      @if (isLoadingRules()) {
+        <app-page-loader [size]="40" [compact]="true" message="Cargando horarios…" />
+      } @else if (!rulesLoaded()) {
+        <p class="bk-error">{{ rulesError() }}</p>
+        <div><gp-button size="sm" variant="secondary" (click)="loadRules()">Reintentar</gp-button></div>
+      } @else {
+        <div class="week">
+          @for (col of rulesByDay(); track col.day) {
+            <div class="week__day">
+              <span class="week__name">{{ dayLabels[col.day] }}</span>
+              <div class="week__items">
+                @for (x of col.items; track x.i) {
+                  @let ov = overviewOf(x.r);
+                  @let saved = isSaved(x.r);
+                  <div class="slot" [class.slot--new]="!saved" [class.slot--full]="ov && ov.free <= 0">
+                    <button type="button" class="slot__main" [disabled]="isSaving()" (click)="openEdit(x.i)" title="Ver alumnos / editar">
+                      <span class="slot__time">{{ x.r.startTime }}–{{ x.r.endTime }}</span>
+                      @if (!saved) {
+                        <span class="slot__cap">cupo {{ x.r.capacity }} · sin guardar</span>
+                      } @else {
+                        <span class="slot__cap">{{ ov?.enrolled ?? 0 }}/{{ x.r.capacity }} fijos</span>
+                        <span class="slot__bar"><span [style.width.%]="((ov?.enrolled ?? 0) / x.r.capacity) * 100"></span></span>
+                      }
+                    </button>
+                    <button type="button" class="slot__x" [disabled]="isSaving()" (click)="askRemove(x.i)"
+                            [attr.aria-label]="'Quitar ' + dayLabels[col.day] + ' ' + x.r.startTime">✕</button>
+                  </div>
+                }
+                <button type="button" class="week__add" [disabled]="isSaving()" (click)="openAdd(col.day)">+ Agregar</button>
+              </div>
+            </div>
+          }
+        </div>
+        @if (rulesError()) {
+          @if (rulesConflict()) {
+            <div class="bk-error">
+              <strong>No se guardó: estos alumnos tienen horario fijo (activo o en pausa) en franjas que quitaste o cambiaste.</strong>
+              <p style="margin:6px 0">{{ rulesError() }}</p>
+              Primero cambiales el horario o terminalos en
+              <a routerLink="/trainer/turnos/horarios-fijos">Horarios fijos</a>, y después guardá de nuevo.
+            </div>
+          } @else { <p class="bk-error">{{ rulesError() }}</p> }
+        }
+      }
+    </section>
+
+    @if (dirty()) {
+      <div class="savebar" role="status">
+        <span>{{ changeCount() }} {{ changeCount() === 1 ? 'cambio sin guardar' : 'cambios sin guardar' }}</span>
+        <div class="bk-row">
+          <gp-button variant="ghost" size="sm" [disabled]="isSaving()" (click)="discard()">Descartar</gp-button>
+          <gp-button size="sm" [loading]="isSaving()" (click)="saveAll()">Guardar cambios</gp-button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ── Bloqueos ──────────────────────────── -->
+  @if (tab() === 'blocks') {
+    <section class="bk-card">
+      <h2>Días sin clase</h2>
+      <p class="bk-muted">Bloqueá un día o un rato en el que no das clase (horario de Argentina).</p>
+      <div class="bk-grid2">
+        <label class="bk-field">
+          Desde
+          <input type="datetime-local" [ngModel]="blockFrom()" (ngModelChange)="blockFrom.set($event)" />
+        </label>
+        <label class="bk-field">
+          Hasta
+          <input type="datetime-local" [ngModel]="blockTo()" (ngModelChange)="blockTo.set($event)" />
+        </label>
+        <label class="bk-field">
+          Motivo
+          <input type="text" maxlength="120" placeholder="Ej.: viaje" [ngModel]="blockReason()" (ngModelChange)="blockReason.set($event)" />
+        </label>
+      </div>
+      @if (blockError()) { <p class="bk-error">{{ blockError() }}</p> }
+      <div>
+        <gp-button size="sm" [loading]="busyBlock() === 'new'" [disabled]="!blockFrom() || !blockTo()" (click)="createBlock()">
+          Bloquear
+        </gp-button>
+      </div>
+
+      @if (isLoadingBlocks()) {
+        <app-page-loader [size]="40" [compact]="true" message="Cargando…" />
+      } @else {
+        <ul class="bk-list">
+          @for (b of blocks(); track b.id) {
+            <li class="bk-item">
+              <div class="bk-item__main">
+                <span class="bk-item__title">{{ blockLabel(b) }}</span>
+                @if (b.reason) { <span class="bk-muted">{{ b.reason }}</span> }
+              </div>
+              <gp-button variant="ghost" size="sm" [loading]="busyBlock() === b.id" (click)="deleteBlock(b)">Quitar</gp-button>
+            </li>
+          } @empty {
+            <li class="bk-muted">No tenés días bloqueados.</li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>
+
+<gp-modal [isOpen]="!!blockConflict()" title="Hay clases en ese horario" size="sm" (closed)="blockConflict.set(null)">
+  <div class="bk-page" style="padding-bottom:0">
+    <p class="bk-note">{{ blockConflict() }}</p>
+    <p class="bk-muted">Si bloqueás igual, esas clases se cancelan y se avisa a los alumnos.</p>
+    <div class="bk-row">
+      <gp-button variant="danger" [loading]="busyBlock() === 'new'" (click)="createBlock(true)">Bloquear y cancelar clases</gp-button>
+      <gp-button variant="ghost" [disabled]="busyBlock() === 'new'" (click)="blockConflict.set(null)">Volver</gp-button>
+    </div>
+  </div>
+</gp-modal>
+
+<!-- Agregar / editar horario -->
+<gp-modal [isOpen]="!!editor()" [title]="editor()?.mode === 'edit' ? 'Editar horario' : 'Agregar horario'" size="sm"
+          (closed)="editor.set(null)">
+  @if (editor(); as e) {
+    <div class="bk-page ed" style="padding-bottom:0">
+      @if (e.mode === 'edit') {
+        <p class="bk-muted">{{ dayLabels[e.days[0]] }}</p>
+        @if (e.index !== null && overviewOf(rules()[e.index]); as ov) {
+          <div class="ed__group">
+            <span class="ed__label">Alumnos fijos ({{ ov.enrolled }}/{{ ov.capacity }} · {{ ov.free }} libres)</span>
+            @if (ov.enrolled > 0) {
+              <p class="bk-note">Si cambiás la hora, estos alumnos siguen en el horario anterior ({{ rules()[e.index!].startTime }}). Para moverlos, cambialos desde "Horarios fijos".</p>
+            }
+            @if (ov.clients.length) {
+              <ul class="ed__clients">
+                @for (c of ov.clients; track c.enrollmentId) { <li>{{ clientName(c.name) }}</li> }
+              </ul>
+            } @else {
+              <span class="bk-muted">Nadie anotado todavía.</span>
+            }
+          </div>
+        }
+      }
+      <div class="bk-grid2">
+        <label class="bk-field">
+          Desde
+          <input type="time" [ngModel]="e.start" (ngModelChange)="patchEditor({ start: $event })" />
+        </label>
+        <label class="bk-field">
+          Cupo
+          <input type="number" min="1" max="200" [ngModel]="e.capacity" (ngModelChange)="patchEditor({ capacity: +$event })" />
+        </label>
+      </div>
+
+      <div class="ed__group">
+        <span class="ed__label">Duración</span>
+        <div class="pills">
+          @for (d of durations; track d) {
+            <button type="button" class="pill" [class.on]="!e.customDuration && e.duration === d"
+                    (click)="patchEditor({ duration: d, customDuration: false })">{{ d }} min</button>
+          }
+          <button type="button" class="pill" [class.on]="e.customDuration" (click)="patchEditor({ customDuration: true })">Otra</button>
+          @if (e.customDuration) {
+            <input class="pill-input" type="number" min="10" step="5" [ngModel]="e.duration"
+                   (ngModelChange)="patchEditor({ duration: +$event })" aria-label="Minutos" />
+            <span class="bk-muted">min</span>
+          }
+        </div>
+        <span class="bk-muted">Termina a las {{ editorEnd() }}</span>
+      </div>
+
+      @if (e.mode === 'add') {
+        <div class="ed__group">
+          <span class="ed__label">Repetir en</span>
+          <div class="pills">
+            @for (d of days; track d) {
+              <button type="button" class="pill pill--day" [class.on]="e.days.includes(d)" (click)="toggleDay(d)">{{ dayShort[d] }}</button>
+            }
+          </div>
+          <div class="pills">
+            <button type="button" class="link" (click)="setDays('weekdays')">Lunes a viernes</button>
+            <button type="button" class="link" (click)="setDays('all')">Todos los días</button>
+          </div>
+        </div>
+      }
+
+      <div class="bk-row">
+        <gp-button [loading]="isSaving()" [disabled]="!editorValid()" (click)="saveEditor()">
+          {{ e.mode === 'edit' ? 'Aplicar' : (e.days.length > 1 ? 'Agregar en ' + e.days.length + ' días' : 'Agregar') }}
+        </gp-button>
+        <gp-button variant="ghost" [disabled]="isSaving()" (click)="editor.set(null)">Cancelar</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>
+
+<!-- Borrar horario con alumnos -->
+<gp-modal [isOpen]="!!deleteTarget()" title="Eliminar horario" size="sm" (closed)="deleteTarget.set(null)">
+  @if (deleteTarget(); as d) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p><strong>{{ dayLabels[d.rule.dayOfWeek] }} {{ d.rule.startTime }}–{{ d.rule.endTime }}</strong></p>
+      <p class="bk-note">Tiene {{ d.enrolled }} {{ d.enrolled === 1 ? 'alumno' : 'alumnos' }} con horario fijo. Si lo quitás y guardás, ya no vas a ofrecer ese horario.</p>
+      <div class="bk-row">
+        <gp-button variant="danger" [loading]="isSaving()" (click)="remove(d.index)">Quitar igual</gp-button>
+        <gp-button variant="ghost" [disabled]="isSaving()" (click)="deleteTarget.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>
+

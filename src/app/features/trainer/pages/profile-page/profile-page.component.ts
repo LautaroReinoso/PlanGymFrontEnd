@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputFieldComponent } from '../../../../shared/components/input-field/input-field.component';
@@ -23,6 +23,7 @@ function passwordsMatch(group: import('@angular/forms').AbstractControl) {
   styleUrl: './profile-page.component.css',
 })
 export class TrainerProfilePageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly service = inject(TrainerProfileService);
 
@@ -58,11 +59,11 @@ export class TrainerProfilePageComponent {
   );
 
   constructor() {
-    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+    this.form.valueChanges.pipe(takeUntilDestroyed()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.dirty.set(true);
       this.saved.set(false);
     });
-    this.passwordForm.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+    this.passwordForm.valueChanges.pipe(takeUntilDestroyed()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.passwordChanged.set(false);
       this.passwordError.set(null);
     });
@@ -72,7 +73,7 @@ export class TrainerProfilePageComponent {
   load(): void {
     this.loading.set(true);
     this.loadError.set(false);
-    this.service.getMyProfile().subscribe({
+    this.service.getMyProfile().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (p) => {
         this.applyProfile(p);
         this.loading.set(false);
@@ -90,7 +91,7 @@ export class TrainerProfilePageComponent {
       return;
     }
     this.saving.set(true);
-    this.service.updateMyProfile(this.toRequest()).subscribe({
+    this.service.updateMyProfile(this.toRequest()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (p) => {
         this.applyProfile(p);
         this.saving.set(false);
@@ -111,7 +112,7 @@ export class TrainerProfilePageComponent {
     this.passwordError.set(null);
 
     const { currentPassword, newPassword } = this.passwordForm.getRawValue();
-    this.service.changePassword({ currentPassword, newPassword }).subscribe({
+    this.service.changePassword({ currentPassword, newPassword }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.changingPassword.set(false);
         this.passwordChanged.set(true);

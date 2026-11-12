@@ -29,13 +29,7 @@ export class TemplateCardComponent {
   readonly template  = input.required<WorkoutTemplateSummary>();
   readonly cardClick = output<void>();
 
-  ngOnInit(): void {
-    console.log(this.template());
-  }
   onClick(): void {
     this.cardClick.emit();
-  }
-  accent(): void{
-    console.log('accent');
   }
 }

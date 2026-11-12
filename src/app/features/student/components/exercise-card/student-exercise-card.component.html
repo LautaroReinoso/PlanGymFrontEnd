@@ -28,8 +28,8 @@
     <div class="ex-card__detail">
       <div class="ex-card__detail-grid">
         <div>
-          <span class="ex-card__detail-label">Series × reps</span>
-          <span class="ex-card__detail-value">{{ exercise().sets }} × {{ repsLabel() }}</span>
+          <span class="ex-card__detail-label">{{ exercise().durationSeconds ? 'Series × tiempo' : 'Series × reps' }}</span>
+          <span class="ex-card__detail-value">{{ setsReps() }}</span>
         </div>
         @if (exercise().weightSuggestion) {
           <div>

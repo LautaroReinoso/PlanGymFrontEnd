@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -18,6 +18,7 @@ import { PageLoaderComponent } from '../../../../shared/components/page-loader/p
   styleUrl: './profile-page.component.css',
 })
 export class ProfilePageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly service = inject(StudentProfileService);
   private readonly auth = inject(AuthService);
@@ -42,7 +43,7 @@ export class ProfilePageComponent {
   });
 
   constructor() {
-    this.form.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+    this.form.valueChanges.pipe(takeUntilDestroyed()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.dirty.set(true);
       this.saved.set(false);
       this.mailTaken.set(false);
@@ -54,7 +55,7 @@ export class ProfilePageComponent {
   load(): void {
     this.loading.set(true);
     this.loadError.set(false);
-    this.service.getMyProfile().subscribe({
+    this.service.getMyProfile().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (p) => {
         this.applyProfile(p);
         this.loading.set(false);
@@ -74,7 +75,7 @@ export class ProfilePageComponent {
     this.saving.set(true);
     this.saveError.set(null);
 
-    this.service.updateMyProfile(this.toRequest()).subscribe({
+    this.service.updateMyProfile(this.toRequest()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (p) => {
         this.applyProfile(p);
         this.saving.set(false);

@@ -4,10 +4,12 @@
 //  y habilitar / deshabilitar (no borra datos).
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
+import { apiErrorText } from '../../../core/http/api-error.util';
 import { AdminService, AdminTrainer } from '../services/admin.service';
 import { PageLoaderComponent } from '../../../shared/components/page-loader/page-loader.component';
 
@@ -22,12 +24,15 @@ type StatusFilter = 'ALL' | 'ENABLED' | 'DISABLED';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminTrainersPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly adminService = inject(AdminService);
 
   readonly trainers  = signal<AdminTrainer[]>([]);
   readonly isLoading = signal(false);
   readonly error     = signal<string | null>(null);
   readonly pendingId = signal<number | null>(null);
+  /** userIds de entrenadores que todavía no están dados de alta en turnos */
+  readonly notInBooking = signal<Set<number>>(new Set());
 
   readonly search = signal('');
   readonly status = signal<StatusFilter>('ALL');
@@ -50,10 +55,47 @@ export class AdminTrainersPageComponent implements OnInit {
     this.load();
   }
 
+  loadCandidates(): void {
+    this.adminService.bookingCandidates().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: list => this.notInBooking.set(new Set(list.map(c => c.userId))),
+      error: () => this.notInBooking.set(new Set()),   // módulo apagado o sin permiso: no se ofrece
+    });
+  }
+
+  toggleSubscription(t: AdminTrainer): void {
+    const next = !t.subscriptionActive;
+    const msg = next
+      ? `¿Activar a mano la suscripción de ${this.fullName(t)}? (prueba, cortesía o pago por fuera)`
+      : `¿Desactivar la suscripción de ${this.fullName(t)}? Sus alumnos pueden dejar de entrar.`;
+    if (!confirm(msg)) return;
+    this.pendingId.set(t.id);
+    this.error.set(null);
+    this.adminService.setSubscription(t.id, next).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: u => {
+        this.trainers.update(list => list.map(x => x.id === t.id ? { ...x, subscriptionActive: u?.subscriptionActive ?? next } : x));
+        this.pendingId.set(null);
+      },
+      error: err => { this.error.set(apiErrorText(err, 'No se pudo cambiar la suscripción.')); this.pendingId.set(null); },
+    });
+  }
+
+  addToBooking(t: AdminTrainer): void {
+    this.pendingId.set(t.id);
+    this.error.set(null);
+    this.adminService.addProfessional(t.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notInBooking.update(s => { const n = new Set(s); n.delete(t.id); return n; });
+        this.pendingId.set(null);
+      },
+      error: err => { this.error.set(apiErrorText(err, 'No se pudo dar de alta en turnos.')); this.pendingId.set(null); },
+    });
+  }
+
   load(): void {
+    this.loadCandidates();
     this.isLoading.set(true);
     this.error.set(null);
-    this.adminService.getTrainers().subscribe({
+    this.adminService.getTrainers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.trainers.set(list); this.isLoading.set(false); },
       error: () => {
         this.error.set('No pudimos cargar los entrenadores.');
@@ -81,7 +123,7 @@ export class AdminTrainersPageComponent implements OnInit {
 
     this.pendingId.set(t.id);
     this.error.set(null);
-    this.adminService.setTrainerEnabled(t.id, next).subscribe({
+    this.adminService.setTrainerEnabled(t.id, next).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: updated => {
         this.trainers.update(list => list.map(x => (x.id === updated.id ? updated : x)));
         this.pendingId.set(null);

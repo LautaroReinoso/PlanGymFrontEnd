@@ -34,7 +34,6 @@ export class StudentService {
 
     /** Lista de alumnos asignados al trainer autenticado */
 createStudent(request: CreateStudentRequest): Observable<userResponse> {
-  console.log(request)
   return this.http.post<userResponse>(
     `${this.api}/auth/student`,
     request

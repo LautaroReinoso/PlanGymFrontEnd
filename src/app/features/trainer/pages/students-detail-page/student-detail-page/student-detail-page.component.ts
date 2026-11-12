@@ -4,14 +4,10 @@
 //  workoutHistory, recentLogs y adherencia.
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { apiErrorText } from '../../../../../core/http/api-error.util';
+import { todayKey } from '../../../../booking/utils/booking-date.util';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -51,6 +47,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentDetailPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly route       = inject(ActivatedRoute);
   private readonly router      = inject(Router);
@@ -93,19 +90,19 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
       if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
       return parts[0].slice(0, 2).toUpperCase();
     }
-    return s.dni.toString().slice(0, 2);
+    return s.dni ? String(s.dni).slice(0, 2) : '?';
   });
 
   readonly displayName = computed(() => {
     const s = this.student();
     if (!s) return '';
-    return s.fullName ?? `DNI ${this.dniFormatted()}`;
+    return s.fullName?.trim() || (s.dni ? `DNI ${this.dniFormatted()}` : 'Sin nombre ni DNI');
   });
 
   readonly dniFormatted = computed(() => {
     const s = this.student();
     if (!s) return '';
-    return s.dni.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return s.dni ? String(s.dni).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '';
   });
 
   readonly adherenceColor = computed(() => {
@@ -124,12 +121,11 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.studentSvc.getStudentById(this.studentId()).subscribe({
+    this.studentSvc.getStudentById(this.studentId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data: any) => {
         this.student.set(data);
         this.isLoading.set(false);
-        
-    console.log(this.student())
+
       },
       error: () => {
         this.error.set('No se pudo cargar el alumno.');
@@ -150,7 +146,7 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
 
     if (this.templates().length === 0) {
       this.templatesLoading.set(true);
-      this.templateSvc.getAll().subscribe({
+      this.templateSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (t) => {
           this.templates.set(t);
           this.templatesLoading.set(false);
@@ -174,8 +170,9 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
     this.assignSvc.assign({
       studentId:         this.studentId(),
       workoutTemplateId: templateId,
-      startDate:         new Date().toISOString().split('T')[0],
-    }).subscribe({
+      // Fecha LOCAL (toISOString da UTC: después de las 21 h en Argentina mandaba mañana)
+      startDate:         todayKey(),
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isAssigning.set(false);
         this.showAssignModal.set(false);
@@ -183,11 +180,8 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
       },
       error: (err: any) => {
         this.isAssigning.set(false);
-        this.assignError.set(
-          err.status === 409
-            ? 'El alumno ya tiene un plan activo.'
-            : 'Error al asignar el plan.'
-        );
+        this.assignError.set(apiErrorText(err,
+          err.status === 409 ? 'El alumno ya tiene un plan activo.' : 'Error al asignar el plan.'));
       },
     });
   }

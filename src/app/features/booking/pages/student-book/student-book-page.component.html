@@ -1,0 +1,68 @@
+<div class="bk-page">
+  <header class="bk-header">
+    <div>
+      <a class="bk-muted" routerLink="/student/turnos">‹ Mis turnos</a>
+      <h1 class="bk-title">Reservar clase</h1>
+    </div>
+  </header>
+
+  @if (bookable().length > 1) {
+    <div class="bk-tabs">
+      @for (s of bookable(); track s.id) {
+        <button type="button" class="bk-tab" [class.on]="s.id === serviceId()" (click)="selectService(s.id)">{{ s.name }}</button>
+      }
+    </div>
+  }
+
+  @if (capNotice()) {
+    <div class="bk-note cap-notice" role="status">
+      <strong>Llegaste al tope de tu plan</strong>
+      <p style="margin:4px 0 0">{{ capNotice() }}</p>
+      <button type="button" class="bk-tab" style="margin-top:8px" (click)="capNotice.set(null)">Entendido</button>
+    </div>
+  }
+  @if (error()) { <p class="bk-error">{{ error() }}</p> }
+
+  @if (serviceId()) {
+    <div class="bk-row bk-row--between">
+      <gp-button variant="ghost" size="sm" [disabled]="!canGoBack() || isLoading()" (click)="move(-1)">‹ Antes</gp-button>
+      <span class="bk-muted">Próximos 14 días</span>
+      <gp-button variant="ghost" size="sm" [disabled]="isLoading()" (click)="move(1)">Después ›</gp-button>
+    </div>
+
+    @if (isLoading()) {
+      <app-page-loader message="Buscando horarios libres…" />
+    } @else {
+      @for (d of byDay(); track d.day) {
+        <section class="bk-card">
+          <h3>{{ longDate(d.day) }}</h3>
+          <div class="bk-row">
+            @for (s of d.list; track s.startAt + '-' + s.professionalId) {
+              <button type="button" class="bk-slot" (click)="chosen.set(s)">
+                {{ isoTime(s.startAt) }}
+                @if (s.professionalName) { <small>{{ s.professionalName }}</small> }
+              </button>
+            }
+          </div>
+        </section>
+      } @empty {
+        <p class="bk-muted">No hay horarios libres en estos días.</p>
+      }
+    }
+  } @else if (!error()) {
+    <p class="bk-muted">Tu entrenador no tiene clases sueltas para reservar.</p>
+  }
+</div>
+
+<gp-modal [isOpen]="!!chosen()" title="Confirmar clase" size="sm" (closed)="chosen.set(null)">
+  @if (chosen(); as s) {
+    <div class="bk-page" style="padding-bottom:0">
+      <p><strong>{{ service()?.name }}</strong><br />{{ longDate(s.startAt.slice(0, 10)) }}, {{ isoTime(s.startAt) }} a {{ isoTime(s.endAt) }}</p>
+      <p class="bk-note">Al reservar aceptás la política de cancelación de tu entrenador.</p>
+      <div class="bk-row">
+        <gp-button [loading]="isSaving()" (click)="book()">Reservar</gp-button>
+        <gp-button variant="ghost" [disabled]="isSaving()" (click)="chosen.set(null)">Volver</gp-button>
+      </div>
+    </div>
+  }
+</gp-modal>

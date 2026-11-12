@@ -4,14 +4,8 @@
 //  loader, estado vacío y búsqueda local.
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,6 +19,9 @@ import { CreateStudentRequest } from '../../../models/student.models';
 import { PageLoaderComponent } from '../../../../../shared/components/page-loader/page-loader.component';
 import { SubscriptionBannerComponent } from '../../../components/subscription/subscription-banner/subscription-banner.component';
 import { BillingService, apiErrorMessage, isStudentLimitError } from '../../../services/billing.service';
+import { EnrollStudentModalComponent } from '../../../../booking/components/enroll-modal/enroll-student-modal.component';
+import { DAY_SHORT, hhmm, isoDateKey, isoTime, shortDate } from '../../../../booking/utils/booking-date.util';
+import { BookingTrainerService } from '../../../../booking/services/booking-trainer.service';
 
 @Component({
   selector: 'app-students-page',
@@ -37,22 +34,29 @@ import { BillingService, apiErrorMessage, isStudentLimitError } from '../../../s
     ButtonComponent,
     NewStudentModalComponent,
     SubscriptionBannerComponent,
+    EnrollStudentModalComponent,
 ],
   templateUrl: './students-page.component.html',
   styleUrl: './students-page.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentsPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
     private readonly studentService = inject(StudentService);
   private readonly billing = inject(BillingService);
+  private readonly booking = inject(BookingTrainerService);
 
   // ── Estado ────────────────────────────────────
   readonly students   = signal<StudentSummary[]>([]);
   readonly isLoading  = signal(false);   // solo para carga inicial
   readonly isCreating = signal(false);   // solo para crear alumno
   readonly error      = signal<string | null>(null);
-  readonly createError = signal<string | null>(null); // error específico del modal
+  readonly createError = signal<string | null>(null);
+
+  // ── Turnos: ofrecer horario fijo después del alta ──
+  private readonly bookingEnabled = signal(false);
+  readonly enrollDni = signal<string | null>(null); // error específico del modal
   readonly createErrorIsLimit = computed(() =>
     this.billing.enabled && isStudentLimitError(this.createError()),
   );
@@ -89,7 +93,32 @@ export class StudentsPageComponent implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────
   ngOnInit(): void {
+    this.booking.probe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(ok => {
+      this.bookingEnabled.set(ok);
+      if (ok) this.loadTurnos();
+    });
     this.loadStudents();
+  }
+
+  // ── Turnos por alumno (GET /professional/students) ──
+  readonly turnosText = signal<Map<number, string>>(new Map());
+
+  private loadTurnos(): void {
+    this.booking.students('', 'ALL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: list => {
+        const m = new Map<number, string>();
+        for (const s of list) {
+          const parts: string[] = [];
+          if (s.nextBookingAt) parts.push(`Próxima clase: ${shortDate(isoDateKey(s.nextBookingAt))} ${isoTime(s.nextBookingAt)}`);
+          else if (s.activeEnrollments?.length) parts.push('Sin clases próximas');
+          const fixed = (s.activeEnrollments ?? []).map(e => `${DAY_SHORT[e.dayOfWeek]} ${hhmm(e.startTime)}`);
+          if (fixed.length) parts.push(fixed.join(' · '));
+          if (parts.length) m.set(s.userId, parts.join(' — '));
+        }
+        this.turnosText.set(m);
+      },
+      error: () => {},
+    });
   }
 
   // ── Carga ─────────────────────────────────────
@@ -97,7 +126,7 @@ export class StudentsPageComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.studentService.getMyStudents().subscribe({
+    this.studentService.getMyStudents().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.students.set(data);
         this.isLoading.set(false);
@@ -125,9 +154,10 @@ export class StudentsPageComponent implements OnInit {
     this.isCreating.set(true);
     this.createError.set(null);
 
-    this.studentService.createStudent(request).subscribe({
+    this.studentService.createStudent(request).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
     this.showCreateStudentModal.set(false);
+      if (this.bookingEnabled()) this.enrollDni.set(request.dni);
       this.isCreating.set(false);
       // Recargar lista para obtener el alumno real del backend
       this.loadStudents();

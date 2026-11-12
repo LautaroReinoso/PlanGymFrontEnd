@@ -104,6 +104,23 @@
                   (input)="sets.set(+$any($event.target).value)"
                 />
               </div>
+              <div class="param-field param-field--wide">
+                <label>Se mide por</label>
+                <div class="mode-toggle" role="group" aria-label="Repeticiones o tiempo">
+                  <button type="button" [class.on]="!byTime()" (click)="byTime.set(false)">Repeticiones</button>
+                  <button type="button" [class.on]="byTime()" (click)="byTime.set(true)">Por tiempo</button>
+                </div>
+              </div>
+              @if (byTime()) {
+              <div class="param-field">
+                <label>Segundos por serie</label>
+                <input
+                  type="number" min="5" step="5"
+                  [value]="durationSeconds()"
+                  (input)="durationSeconds.set(+$any($event.target).value)"
+                />
+              </div>
+              } @else {
               <div class="param-field">
                 <label>Reps</label>
                 <input
@@ -121,6 +138,7 @@
                   (input)="repsMax.set($any($event.target).value ? +$any($event.target).value : null)"
                 />
               </div>
+              }
               <div class="param-field">
                 <label>Descanso (s)</label>
                 <input

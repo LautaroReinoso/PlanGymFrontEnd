@@ -9,15 +9,11 @@
 //  Trainer— dentro de un gp-modal, sin salir de esta pantalla.
 // ─────────────────────────────────────────────
 
+import { ExerciseDetail } from '../../../trainer/models/trainer.models';
+import { TodayClassesComponent } from '../../../booking/components/today-classes/today-classes.component';
 import { dayExerciseSummary } from '../../../trainer/models/exercise-meta.util';
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -39,7 +35,7 @@ import { PageLoaderComponent } from '../../../../shared/components/page-loader/p
 @Component({
   selector: 'app-day-page',
   standalone: true,
-  imports: [PageLoaderComponent, 
+  imports: [PageLoaderComponent, TodayClassesComponent, 
     CommonModule,
     ButtonComponent,
     ModalComponent,
@@ -51,6 +47,7 @@ import { PageLoaderComponent } from '../../../../shared/components/page-loader/p
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DayPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly workoutService = inject(StudentWorkoutService);
   private readonly route          = inject(ActivatedRoute);
@@ -95,9 +92,9 @@ export class DayPageComponent implements OnInit {
     this.dayId.set(workoutDayId);
     // Siempre se pide la semana actual: es liviano y evita mostrar datos viejos
     // (p. ej. otro alumno que usó el mismo navegador antes).
-    this.weekService.load().subscribe({ error: () => { /* el botón queda en "Marcar" */ } });
+    this.weekService.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ error: () => { /* el botón queda en "Marcar" */ } });
 
-    this.workoutService.getMyWorkoutDay(workoutDayId).subscribe({
+    this.workoutService.getMyWorkoutDay(workoutDayId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.data.set(res);
         this.isLoading.set(false);
@@ -123,7 +120,7 @@ export class DayPageComponent implements OnInit {
   markAsDone(): void {
     if (this.doneToday() || this.isMarking()) return;
     this.markError.set(null);
-    this.weekService.markDone(this.dayId()).subscribe({
+    this.weekService.markDone(this.dayId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => this.markError.set('No pudimos registrar el entrenamiento. Probá de nuevo.'),
     });
   }
@@ -132,17 +129,36 @@ export class DayPageComponent implements OnInit {
   unmark(): void {
     if (!this.doneToday() || this.isMarking()) return;
     this.markError.set(null);
-    this.weekService.unmark(this.dayId()).subscribe({
+    this.weekService.unmark(this.dayId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => this.markError.set('No pudimos desmarcar el día. Probá de nuevo.'),
     });
   }
 
+  /** Detalle completo (técnica, secundarios, video) — null mientras carga o si el backend no lo da */
+  readonly fullDetail = signal<ExerciseDetail | null>(null);
+  readonly loadingDetail = signal(false);
+  private detailCache = new Map<number, ExerciseDetail>();
+
   openDetail(ex: DayExercise): void {
     this.selectedExercise.set(ex);
+    const cached = this.detailCache.get(ex.exerciseId);
+    this.fullDetail.set(cached ?? null);
+    if (cached) return;
+    this.loadingDetail.set(true);
+    this.workoutService.exerciseDetail(ex.exerciseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: d => {
+        this.detailCache.set(ex.exerciseId, d);
+        if (this.selectedExercise()?.exerciseId === ex.exerciseId) this.fullDetail.set(d);
+        this.loadingDetail.set(false);
+      },
+      // Backend sin el endpoint (o 403/404): queda la vista mínima, sin error visible
+      error: () => this.loadingDetail.set(false),
+    });
   }
 
   closeDetail(): void {
     this.selectedExercise.set(null);
+    this.fullDetail.set(null);
   }
 
   /**
@@ -154,11 +170,32 @@ export class DayPageComponent implements OnInit {
    * cuando el backend no las mandaba.
    */
   toDetailView(ex: DayExercise): ExerciseDetailViewModel {
+    const d = this.fullDetail();
+    // Los números son los de SU plan (lo que le indicó el entrenador), no los sugeridos del catálogo.
+    const plan = {
+      defaultSets: ex.sets,
+      defaultRepsMin: ex.durationSeconds ? null : ex.reps,
+      defaultRepsMax: ex.durationSeconds ? null : ex.repsMax ?? null,
+      defaultRestSeconds: ex.restSeconds,
+    };
+    if (!d) {
+      return { name: ex.exerciseName, primaryMuscle: ex.primaryMuscle, imageUrl: ex.imageUrl, difficulty: ex.difficulty, ...plan };
+    }
     return {
-      name: ex.exerciseName,
-      primaryMuscle: ex.primaryMuscle,
-      imageUrl: ex.imageUrl,
-      difficulty: ex.difficulty,
+      name: d.name,
+      primaryMuscle: d.primaryMuscle,
+      secondaryMuscles: d.secondaryMuscles,
+      imageUrl: d.imageUrl ?? ex.imageUrl,
+      videoUrl: d.videoUrl,
+      difficulty: d.difficulty,
+      description: d.description,
+      techniqueSteps: d.techniqueSteps,
+      exerciseType: d.exerciseType,
+      equipment: d.equipment,
+      laterality: d.laterality,
+      parentExerciseName: d.parentExerciseName,
+      ...plan,
+      // sin `global`: el alumno no necesita el badge Global/Personal
     };
   }
 

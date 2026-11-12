@@ -17,7 +17,7 @@
 
       <!-- DNI secundario (solo si tiene nombre) -->
       @if (student().fullName) {
-      <span class="student-dni">DNI {{ dniFormatted() }}</span>
+      @if (student().dni) { <span class="student-dni">DNI {{ dniFormatted() }}</span> }
       } @else {
       <span class="student-pending-label">Registro pendiente</span>
       <span class="student-pending-sub">Aún no completó sus datos</span>
@@ -46,6 +46,7 @@
         }
         }
       </div>
+      @if (turnos()) { <span class="student-turnos">{{ turnos() }}</span> }
 
     </div>
   </div>

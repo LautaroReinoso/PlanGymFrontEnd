@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 import { ENVIRONMENT } from '../../../../environments/tokens/environment.token';
 import {
   WorkoutTemplate,
-  WorkoutTemplateSummary,
+  WorkoutTemplateSummary, ReferenceTemplate,
   WorkoutTemplateDay,
   DayExercise,
   CreateTemplateRequest,
@@ -34,6 +34,20 @@ export class TemplateService {
   }
 
   /** Detalle completo con días y ejercicios */
+  // ── Planes de referencia de PlanGym (solo lectura; se copian) ──
+  getReferences(): Observable<ReferenceTemplate[]> {
+    return this.http.get<ReferenceTemplate[]>(`${this.api}/workout-templates/reference`);
+  }
+
+  getReference(id: number): Observable<WorkoutTemplate> {
+    return this.http.get<WorkoutTemplate>(`${this.api}/workout-templates/reference/${id}`);
+  }
+
+  /** Copia el plan a mis plantillas → devuelve la plantilla nueva (editable y asignable). */
+  copyReference(id: number): Observable<{ id: number; name: string }> {
+    return this.http.post<{ id: number; name: string }>(`${this.api}/workout-templates/reference/${id}/copy`, {});
+  }
+
   getById(id: number): Observable<WorkoutTemplate> {
     return this.http.get<WorkoutTemplate>(`${this.api}/workout-templates/${id}`);
   }
@@ -102,7 +116,6 @@ updateDay( templateId: number, workoutDayId: number,dto: UpdateDayRequest): Obse
       dayId: number,
       exerciseId: number
     ): Observable < void> {
-      console.log(`Removing exercise ${exerciseId} from day ${dayId}`);
       return this.http.delete<void>(
         `${this.api}/day-exercises/days/${dayId}/exercises/${exerciseId}`
       );

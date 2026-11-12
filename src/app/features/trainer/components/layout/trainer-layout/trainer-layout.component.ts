@@ -4,6 +4,7 @@
 //  Sidebar colapsable + router-outlet.
 // ─────────────────────────────────────────────
 
+import { TrainerBottomNavComponent } from '../bottom-nav/trainer-bottom-nav.component';
 import {
   Component,
   signal,
@@ -15,7 +16,7 @@ import { IconButtonComponent } from '../../../../../shared/components/icon-butto
 @Component({
   selector: 'app-trainer-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarComponent, IconButtonComponent],
+  imports: [TrainerBottomNavComponent, RouterOutlet, SidebarComponent, IconButtonComponent],
   templateUrl: './trainer-layout.component.html',
   styleUrl: './trainer-layout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

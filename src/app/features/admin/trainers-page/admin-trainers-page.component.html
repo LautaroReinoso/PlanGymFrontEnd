@@ -2,7 +2,7 @@
   <header class="page__head">
     <div>
       <h1 class="page__title">Entrenadores</h1>
-      <p class="page__sub">Habilitá o deshabilitá el acceso. Deshabilitar no borra datos.</p>
+      <p class="page__sub">Habilitá o deshabilitá el acceso, activá la suscripción a mano y dalos de alta en turnos. Deshabilitar no borra datos.</p>
     </div>
   </header>
 
@@ -54,6 +54,18 @@
               <span class="meta">
                 {{ t.studentCount }} {{ t.studentCount === 1 ? 'alumno' : 'alumnos' }}
                 @if (t.createdAt) { · Alta {{ t.createdAt | date: 'dd/MM/yyyy' }} }
+              </span>
+              <span class="meta">
+                Suscripción:
+                @if (t.subscriptionActive === true) { <strong class="sub-on">activa</strong> }
+                @else if (t.subscriptionActive === false) { <strong class="sub-off">inactiva</strong> }
+                @else { — }
+                · <button type="button" class="link" [disabled]="pendingId() === t.id" (click)="toggleSubscription(t)">
+                  {{ t.subscriptionActive ? 'Desactivar' : 'Activar a mano' }}
+                </button>
+                @if (notInBooking().has(t.id)) {
+                  · <button type="button" class="link" [disabled]="pendingId() === t.id" (click)="addToBooking(t)">Dar de alta en turnos</button>
+                }
               </span>
             </div>
             <span class="badge" [class.badge--on]="t.enabled">{{ t.enabled ? 'Habilitado' : 'Deshabilitado' }}</span>

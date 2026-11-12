@@ -1,5 +1,6 @@
 @import './styles/animation.css';
 @import './styles/token.css';
+@import './styles/booking.css';
 html,
 body {
   min-height: 100%;

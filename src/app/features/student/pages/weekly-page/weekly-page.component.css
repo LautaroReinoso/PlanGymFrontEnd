@@ -87,3 +87,17 @@
 .day--done .day__meta { color: var(--color-success); }
 .day__chevron { width: 18px; height: 18px; color: var(--color-muted); }
 .week__number { display: block; font-size: 12px; color: var(--color-celeste); margin-top: 2px; }
+
+/* ── Turnos en la semana ─────────────────────── */
+.strip__class { font-size: 10px; font-weight: 700; color: var(--color-celeste); line-height: 1; }
+.classes { display: flex; flex-direction: column; gap: var(--space-2); }
+.classes__head { display: flex; justify-content: space-between; align-items: baseline; }
+.classes__head .section-title { margin: 0; }
+.classes__link { font-size: 13px; color: var(--color-muted-light); text-decoration: none; }
+.classes__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.classes__row { display: grid; grid-template-columns: 84px 48px 1fr; gap: var(--space-2); font-size: 14px; color: var(--color-text); }
+.classes__day { color: var(--color-muted-light); }
+.classes__time { font-weight: 700; color: var(--color-celeste); }
+.classes__row--past { opacity: .5; }
+.month-link { align-self: flex-end; font-size: 13px; color: var(--color-muted-light); text-decoration: none; }
+.month-link:hover { color: var(--color-text); }

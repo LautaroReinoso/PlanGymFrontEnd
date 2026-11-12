@@ -12,11 +12,14 @@
         } 
     </div>
 
-    @if (!isLoading() && !isEmpty()) {
-    <gp-button variant="primary" size="md" (click)="goToCreate()">
-      + Nueva plantilla
-    </gp-button>
-    }
+    <div class="header-actions">
+      <gp-button variant="secondary" size="md" (click)="goToReferences()">Planes de referencia</gp-button>
+      @if (!isLoading() && !isEmpty()) {
+      <gp-button variant="primary" size="md" (click)="goToCreate()">
+        + Nueva plantilla
+      </gp-button>
+      }
+    </div>
   </div>
 
   <!-- ── Error ── -->
@@ -51,6 +54,7 @@
     </div>
     <h3 class="empty-title">Sin plantillas todavía</h3>
     <p class="empty-sub">Creá tu primera plantilla para empezar a armar planes.</p>
+    <gp-button variant="secondary" size="md" (click)="goToReferences()">Empezar con un plan de referencia</gp-button>
     <gp-button variant="primary" size="md" (click)="goToCreate()">
       Crear plantilla
     </gp-button>

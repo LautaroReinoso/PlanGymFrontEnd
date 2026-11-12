@@ -70,6 +70,8 @@
 ```
 src/app/
 ├── core/
+│   ├── http/
+│   │   └── api-error.util.ts        → apiErrorText(err, fallback): `message` del backend
 │   ├── auth/
 │   │   ├── auth.service.ts          → login, logout, sesión, roles
 │   │   ├── auth.guards.ts           → authGuard, roleGuard, loginGuard
@@ -78,7 +80,7 @@ src/app/
 │   │   └── storage.service.ts       → wrapper localStorage tipado
 │   ├── models/
 │   │   └── auth.models.ts           → AuthSession, JwtPayload, RoleType
-│   └── environment.token.ts         → InjectionToken para environment
+│   └── (token ENVIRONMENT: src/environments/tokens/environment.token.ts — única definición)
 │
 ├── shared/
 │   ├── components/
@@ -89,7 +91,10 @@ src/app/
 │   │   ├── skeleton/                    → gp-skeleton
 │   │   ├── modal/                       → gp-modal
 │   │   ├── muscle-icon/                 → gp-muscle-icon
-│   │   └── exercise-item/               → app-exercise-item (NUEVO — fila reutilizable)
+│   │   ├── exercise-item/               → app-exercise-item (NUEVO — fila reutilizable)
+│   │   └── toast/                       → gp-toast (montado en app.component)
+│   ├── services/
+│   │   └── toast.service.ts             → ToastService (success / error / info)
 │   └── utils/
 │       └── muscle-group.util.ts         → NUEVO — labels ES + opciones de select
 │
@@ -110,7 +115,8 @@ src/app/
 │   │   │   ├── student.service.ts
 │   │   │   ├── template.service.ts
 │   │   │   ├── exercise.service.ts       → COMPLETADO (CRUD full)
-│   │   │   └── assignment.service.ts
+│   │   │   ├── assignment.service.ts
+│   │   │   └── trainer-workout-log.service.ts → historial del alumno + "marcar hecho" como entrenador (Hoy)
 │   │   ├── pages/
 │   │   │   ├── students-page/
 │   │   │   ├── student-detail-page/
@@ -124,8 +130,9 @@ src/app/
 │   │   │       └── subscription-plans-page/  → tarjetas de planes
 │   │   └── components/
 │   │       ├── layout/
-│   │       │   ├── trainer-layout.component
-│   │       │   └── sidebar/
+│   │       │   ├── trainer-layout.component   → incluye <app-trainer-bottom-nav /> (solo celular)
+│   │       │   ├── sidebar/                   → Hoy · Alumnos · Turnos · Plantillas · Ejercicios (+ Suscripción)
+│   │       │   └── bottom-nav/                → app-trainer-bottom-nav (≤768px)
 │   │       ├── students/
 │   │       │   ├── student-card.component
 │   │       │   └── new-student-modal.component  → muestra errorMessage del backend (+ link a planes)
@@ -155,14 +162,17 @@ src/app/
 │       ├── components/
 │       │   ├── exercise-card/
 │       │   └── layout/
-│       │       ├── student-layout.component   → incluye <app-bottom-nav />
-│       │       └── bottom-nav/                → Inicio · Hoy · Semana · Mes · Perfil
+│       │       ├── student-layout.component   → incluye <app-bottom-nav /> y <app-cancel-notice />
+│       │       └── bottom-nav/                → con Turnos: Inicio · Hoy · Semana · Turnos
+│       │                                         sin Turnos: Inicio · Hoy · Semana · Mes · Perfil
 │       └── pages/
 │           ├── dashboard-page/
 │           ├── day-page/          → ejercicios + "Marcar como hecho" / "Me equivoqué, desmarcar"
 │           ├── weekly-page/
 │           ├── monthly-page/
 │           └── profile-page/      → datos + "Cerrar sesión"
+│
+└── booking/                          → TURNOS (ver sección "Turnos / calendario")
 ```
 
 ---
@@ -435,9 +445,7 @@ interface UpdateDayRequest {
   description: string
   orderIndex: number
 }
-// ⚠️ Duplicado: existe también un UpdateDayRequest local e idéntico dentro de
-//    edit-day-modal.component.ts. No rompe nada (misma forma), pero convendría
-//    que ese componente importe este tipo en vez de redeclararlo.
+// Fuente única: edit-day-modal.component.ts lo re-exporta desde acá (ya no lo redeclara).
 
 // Espejo de DayExerciseResponse
 interface DayExercise {
@@ -595,6 +603,12 @@ respuesta del backend → **las páginas no guardan estado propio**.
 
 ## Patrones Angular 19 usados
 
+### Suscripciones RxJS en componentes
+Todos los `.subscribe()` de componentes (`features/**/*.component.ts`) van con
+`.pipe(takeUntilDestroyed(this.destroyRef))` y el componente declara primero
+`private readonly destroyRef = inject(DestroyRef);`. Así una respuesta que llega tarde (celular lento) no pisa la
+pantalla a la que ya se fue el usuario. Los servicios no lo usan (son root). Sin `console.log` de debug en el código.
+
 ### Signals
 ```typescript
 readonly data    = signal<T[]>([]);
@@ -667,6 +681,7 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /trainer/students               → StudentsPageComponent
 /trainer/students/:id           → StudentDetailPageComponent
 /trainer/templates              → TemplatesListPageComponent
+/trainer/templates/referencia   → ReferenceTemplatesPageComponent (planes de PlanGym → "Usar este plan" copia)
 /trainer/templates/new          → TemplateCreatePageComponent
 /trainer/templates/:id          → TemplateDetailPageComponent
 /trainer/exercises              → ExercisesPageComponent (COMPLETADO)
@@ -682,8 +697,18 @@ readonly isDeleting = signal(false);  // acción de eliminar
 /student/weekly                 → WeeklyPageComponent
 /student/monthly                → MonthlyPageComponent
 /student/profile                → ProfilePageComponent
+/student/turnos                 → StudentAgendaPage (calendario + horarios libres) — studentBookingGuard
+/student/turnos/horarios        → StudentSchedulePage (horarios día por día + Recuperar)
+/student/turnos/elegir          → StudentChoosePage (elegir horarios fijos, si el servicio lo permite)
+/student/turnos/reservar        → StudentBookPage (clase suelta)
+
+/trainer/hoy                    → TrainerTodayPage (quién viene hoy + plan del día) — trainerBookingGuard
+/trainer/turnos                 → TrainerAgendaPage (calendario) — trainerBookingGuard
+/trainer/turnos/horarios-fijos  → TrainerEnrollmentsPage
+/trainer/turnos/disponibilidad  → TrainerAvailabilityPage (franjas y cupos + días sin clase) — unsavedChangesGuard
+/trainer/turnos/servicios       → TrainerServicesPage (Mis servicios: activos + eliminados con Reactivar)
 ```
-⚠️ `templates/new` debe ir ANTES que `templates/:id` en el array de rutas.
+⚠️ `templates/referencia` y `templates/new` deben ir ANTES que `templates/:id` en el array de rutas.
 ⚠️ El guard de `/trainer` deja pasar ADMIN y GYM_ADMIN; las rutas de suscripción suman
 `roleGuard('ROLE_TRAINER')` porque el billing es solo del entrenador.
 
@@ -769,6 +794,26 @@ el texto sale del `message` del 400 del backend (DNI repetido/inválido, límite
 
 ---
 
+## Planes de referencia y ejercicios por tiempo (nov-2026, backend V24)
+- `GET /workout-templates/reference` → `ReferenceTemplate[]` (name, description, level, daysPerWeek, exerciseCount);
+  `GET /workout-templates/reference/:id` → `WorkoutTemplate` con días; `POST /workout-templates/reference/:id/copy` → la copia
+  (201). Los originales no se editan ni se asignan. Página `/trainer/templates/referencia` (botón "Planes de referencia" en
+  Plantillas): ver días (solo lectura, `app-template-day [readonly]`) y "Usar este plan" → copia y abre la plantilla nueva.
+- `DayExercise.durationSeconds` (y en `AddExerciseToDayRequest`): ejercicio por tiempo, viene con `reps = 0`.
+  `dayExerciseSummary` muestra "3 × 20 seg" y suma `notes` cortas ("Por pierna"); `setsRepsLabel` / `durationLabel` en
+  `exercise-meta.util.ts`. El modal "Agregar ejercicio" tiene el selector Repeticiones / Por tiempo.
+- Probado contra el backend real ✔ (lista, ver días, copiar). Si aparece "Valor inválido para el parámetro 'id'" en
+  `/reference`, el backend corriendo es anterior a V24 (la ruta cae en `/{id}`): pull de `feature/booking` y reiniciar.
+
+## Alumnos con este plan (nov-2026)
+`app-template-students` en el detalle de plantilla: lista quién la tiene activa, "+ Asignar" (buscador; aviso si
+reemplaza otro plan — el backend desactiva el anterior) y "Quitar" (`DELETE /student-workouts/{id}`, confirma).
+El listado de alumnos solo trae `templateName`: se filtra por nombre y se confirma con
+`GET /student-workouts/student/{id}` (`activeWorkout.workoutTemplateId` + `id` de la asignación).
+- **Eliminar plantilla con alumnos:** el componente emite `countChange` (nombres); si hay alumnos, el modal de
+  eliminar no muestra el botón y explica que primero hay que quitárselo. Si el backend rechaza, se muestra su `message`.
+- [ ] Backend: sumar `workoutTemplateId` y `studentWorkoutId` a `activeWorkout` del listado (evita N llamadas).
+
 ## Suscripciones del entrenador (nov-2026)
 Quien paga es el TRAINER: suscripción mensual a la plataforma con Mercado Pago (preapproval).
 Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backend).
@@ -789,6 +834,180 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
   de menú, sin banner (ni consulta), rutas redirigen a `/trainer/students`, sin link a planes en el
   error de límite. Para habilitar: `true` en ambos environments y rebuild.
 
+## Turnos / calendario (booking, nov-2026)
+
+Módulo de turnos de `elytra-platform`. Base: `${apiUrl}/booking/plangym` (JWT, mismo login).
+PlanGym **no cobra turnos**: no se muestran precios ni MP; los servicios se mandan con `price: 0`.
+
+### Estructura
+```
+features/booking/
+├── booking.guard.ts                  → trainerBookingGuard / studentBookingGuard (403 = módulo apagado)
+├── models/booking.models.ts          → Booking, AgendaItem, Enrollment, ScheduleOverviewItem, SelfEnrollmentOptions, Rule…
+├── utils/booking-date.util.ts        → rangos semana/mes, splitRange (≤92 días), isoTime/isoDateKey, hhmm, textos
+├── services/
+│   ├── booking-http.service.ts       → base URL, cache GET 60 s, invalidación en mutaciones, signal `enabled`
+│   ├── booking-trainer.service.ts    → /professional/** (agenda, attendance, availability, blocks, enrollments, services…)
+│   ├── booking-student.service.ts    → /bookings/mine, /enrollments/**, /services, /bookings
+│   └── calendar-prefs.ts             → última vista (localStorage con try/catch)
+├── components/
+│   ├── calendar/                     → app-booking-calendar (grilla propia Semana/Mes, sin librería)
+│   └── enroll-modal/                 → app-enroll-student-modal (elegir alumno de la lista + franjas → batch con userId)
+└── pages/
+    ├── trainer-today/                → /trainer/hoy — quién viene hoy (por clase) + plan del día del alumno + marcar hecho
+    ├── trainer-agenda/               → /trainer/turnos — agrupa por startAt+serviceId, pasar lista, cancelar con motivo
+    ├── trainer-enrollments/          → /trainer/turnos/horarios-fijos — grilla por alumno (chips Lun 07:00…), acciones por horario, recuperaciones
+    ├── trainer-services/             → /trainer/turnos/servicios — Mis servicios (activos / eliminados → Reactivar)
+    ├── trainer-availability/         → /trainer/turnos/disponibilidad — semana lun–dom con franjas y cupos juntos (borrador + Guardar cambios), bloqueos
+    ├── student-agenda/               → /student/turnos — mis clases + mis horarios fijos, ausencia / cancelar
+    ├── student-choose/               → /student/turnos/elegir — elegir/cambiar/dejar horarios (selfEnrollment)
+    ├── student-schedule/             → /student/turnos/horarios — horarios día por día + Recuperar
+    └── student-book/                 → /student/turnos/reservar — clase suelta (SELF/BOTH)
+core/http/api-error.util.ts           → apiErrorText(err, fallback): `message` del backend para cualquier status
+shared/services/toast.service.ts + shared/components/toast → <gp-toast /> montado en app.component
+src/styles/booking.css                → estilos compartidos de turnos (prefijo bk-), importado en styles.css
+```
+
+### Decisiones
+- **Calendario propio** (sin FullCalendar/angular-calendar): agrupación por clase, contadores en Mes y
+  theming con tokens. **Semana** según el ancho (container query 620px):
+  - Ancho → **grilla por hora**: días en columnas, solo las horas con clases en filas; por celda 2 clases + "+N más".
+  - Angosto/celular → **tira de días** L M M J V S D (contador de clases, rojo si hay completas, punto si solo hay libres)
+    + **lista del día elegido** (hoy por defecto). Sin scroll horizontal.
+  `angular.json`: budget `anyComponentStyle` subido a 14 kB por el CSS del calendario.
+- **Fechas:** `startAt`/`endAt` se leen por texto (`isoTime`, `isoDateKey`), nunca se convierten a la zona
+  del navegador. Bloqueos: el `datetime-local` se manda con offset `-03:00`.
+- **Recarga, no parcheo:** a diferencia del resto de la app, después de cada acción se recarga el rango
+  visible (el backend genera/borra clases solo). La cache de 60 s se invalida entera en cada POST/PUT/PATCH/DELETE.
+- **Por usuario:** `BookingHttp.syncUser()` y `StudentClassesService` comparan el token actual: si cambió
+  (logout/login en la misma pestaña) se olvida `enabled` y la cache. Antes, un alumno dejaba "Turnos"
+  prendido y el entrenador entraba a pantallas que le daban 403.
+- **Entrenador sin acceso:** para `/professional/**` el backend exige una fila activa en `bk_professionals`
+  (alta por GLOBAL_ADMIN: `POST /booking/plangym/admin/professionals { userId, displayName }`). Sin eso → 403 y
+  "Turnos" no aparece en el menú.
+- **Módulo apagado:** el primer 403 (antes de cualquier 2xx) pone `enabled = false`. El sidebar del trainer,
+  la tarjeta "Mis turnos" del Dashboard del alumno y la oferta de horario fijo en "Mis alumnos" dependen de `probe()`.
+- **Alumno — integración en su vista** (`StudentClassesService`, root: probe único + `classesIn(range)` + `upcoming()`):
+  - Bottom-nav con Turnos prendido: **Inicio · Hoy · Semana · Turnos** (Turnos tiene vista Semana y Mes; la página
+    Mes de entrenamientos queda en "Ver mi mes" dentro de Semana). Sin Turnos: Inicio · Hoy · Semana · Mes · Perfil.
+    El Perfil vive en el avatar del header del Inicio (punto naranja si falta completar el nombre).
+  - **Mis turnos (calendario):** además de sus clases muestra los **horarios libres** del entrenador (`GET /schedule`
+    del rango visible, tenues y punteados, "3 lugares"). Tocar una clase suya → avisar que no va / cancelar; tocar un
+    horario libre → recuperar ahí (si le quedan y es del mes). Filtros "Horarios libres" y "Canceladas".
+  - **Aviso de cancelación del profe:** `app-cancel-notice` (en el layout del alumno) muestra un popup con las clases
+    futuras canceladas por el profe o el sitio (`Booking.cancelledBy === 'PROFESSIONAL'`) y botón "Elegir horario"
+    (si `grantsRecovery`). Se muestra una vez por clase (ids vistos en localStorage `pg.student.seenCancelNotices`).
+  - Inicio: `app-next-class-card` — próxima clase ("Hoy · 20:00"), "y N más en 7 días", "Avisar que no voy"
+    en horario fijo; sin clases → atajos a Elegir horarios / Reservar clase.
+  - Semana: hora de la clase en la tira de días + tarjeta "Tus clases" de la semana mostrada.
+  - Día: `app-today-classes` — aviso "Hoy tenés clase: Funcional 18:00" (solo si hay).
+  - Todo informativo: el plan de ejercicios sigue sin depender del día de la semana.
+- **Cupo "7/10"** en el calendario del trainer: sale de cruzar `schedule-overview` (día + hora) porque `AgendaItem`
+  no trae capacidad. Si no hay franja que coincida, se muestra solo "7 alumnos".
+- **Anotar en horario fijo:** el entrenador elige al alumno de su lista (`GET /v1/users/students`, buscador por nombre o
+  DNI) y el batch se manda con `userId` (el backend acepta exactamente uno de userId / dni / mail). Las franjas donde
+  ya está anotado se ven como "Ya anotado". Al dar de alta un alumno se abre el modal con él preseleccionado (match por DNI).
+  **Tope del plan:** el modal muestra "Este plan es de 2 por semana. Ya tiene 1. Podés elegir 1 más." y no deja marcar más
+  días que `weeklyLimit − horarios vigentes del alumno en ese plan`; si lo intenta, aviso ámbar que sugiere "Cambiar plan".
+  Cambiar el plan en el select limpia los días elegidos. El backend igual valida (409).
+  **Un solo plan por alumno:** si el alumno ya tiene horarios vigentes, el select de plan queda fijo en ese plan ("Ya está en
+  X…" + link **Cambiar plan**, que cierra el modal y abre el de cambio de plan de Horarios fijos vía output `changePlan`).
+  Un 409 al anotar muestra el `message` + botón "Cambiar plan". En Horarios fijos, el alumno con horarios en dos planes
+  (datos viejos) se marca en ámbar: "Tiene horarios en dos planes: unificalos con Cambiar plan" (el backend unifica).
+  Alumno (`/student/turnos/elegir`): si ya tiene horarios vigentes, solo ve su plan; un 409 se muestra con su `message`.
+- **Horarios fijos:** filtro por defecto **Vigentes (activos y en pausa)** — el mismo criterio que usa el backend para el 409
+  de franjas (antes se veían solo los activos y un horario en pausa bloqueaba guardar sin que se viera). Una fila por alumno con chips "Lun 07:00 · Mié 07:00" (pausa = borde punteado, "hasta dd/mm" si
+  tiene fin). Tocar un chip abre sus acciones; "+" agrega otro día a ese alumno.
+- **Cambiar plan** (backend `feature/booking-change-service`): las filas de Horarios fijos son por **alumno + plan**
+  ("Funcional 2 veces · 2/2 por semana"). "Cambiar plan" abre un modal: plan actual, plan nuevo (activos, ENROLLMENT/BOTH,
+  distinto del actual), "Desde" (hoy por defecto, sin fechas pasadas) y aviso ámbar si el plan nuevo tiene menos
+  `weeklyLimit` que los horarios del grupo (deshabilita Confirmar). `POST /professional/students/{userId}/change-service
+  { fromServiceId, toServiceId, from }` → mismos días/horas/estado en el plan nuevo, todo o nada; errores en el modal.
+  Si el plan nuevo deja lugar, el "+" dice "Agregar horario". Al anotar, el 409 de "ya tiene todos los días de su plan"
+  suma la sugerencia de "Cambiar plan".
+- **Franjas y cupos (una sola vista):** grilla lun–dom; cada franja muestra "3/10 fijos" con barra (naranja si está
+  completa) y al tocarla se ve la lista de alumnos fijos y se edita. "+ Agregar": Desde + Duración (45/60/90/Otra) + Cupo +
+  "Repetir en" (L–D, atajos Lunes a viernes / Todos los días). ✕ quita (confirma si tiene alumnos fijos).
+  **Borrador:** todo se arma en pantalla y se guarda con "Guardar cambios" (barra con N cambios + Descartar). El PUT
+  reemplaza todas las franjas, por eso **no se deja guardar si la carga inicial falló** (`rulesLoaded`), y hay aviso al
+  salir con cambios (`unsavedChangesGuard` + `beforeunload`). Las nuevas se ven "sin guardar".
+  Cambiar la hora de una franja **no** mueve a los alumnos fijos (quedan en la hora vieja); el editor lo avisa y el
+  backend rechaza con 409 si un cambio deja horarios fijos vigentes fuera de las franjas.
+- **Servicios — soft delete:** `DELETE /professional/services/{id}` pone `active=false` y el GET los sigue devolviendo.
+  `BookingTrainerService.services()` filtra los activos (filtros, modal de anotar); `allServices()` trae todos y solo lo usa
+  la página Servicios, que muestra los eliminados aparte con "Reactivar" (`PUT` con `active: true`).
+- ⚠️ **Bug corregido (nov-2026):** `GET/PUT /professional/availability` devuelven `RuleResponse[]` (array), no
+  `{ rules }`. El front leía `res.rules` → veía la semana vacía y al guardar **borraba las franjas existentes**.
+- **Entrenador en el celular:** barra inferior `app-trainer-bottom-nav` (≤768px): Hoy · Alumnos · Turnos · Plantillas ·
+  Ejercicios (Hoy y Turnos solo con el módulo prendido). El ☰ sigue para Perfil, Suscripción y Cerrar sesión. En
+  pantallas angostas las pestañas de Turnos (`.bk-tabs`) van en una fila que se desliza.
+- **Hoy (`/trainer/hoy`):** `GET /professional/agenda` de hoy (sin canceladas), agrupado por clase. Por cada alumno:
+  `GET /v1/users/students/{id}` (plan con días y ejercicios) + `GET /workout-logs/student/{id}`. "Le toca" se calcula en
+  el front con el mismo criterio que el "Hoy" del alumno: el día que ya marcó hoy, o el primer día pendiente de la
+  semana (lun–dom); si hizo todos, "Semana completa". Al tocar: plan del día (chips para ver otro día) y
+  "Marcar como hecho" → `POST /workout-logs { studentId, workoutDayId, completedAt: hoy, completed: true }`
+  (`TrainerWorkoutLogService`). No hay desmarcar del lado del entrenador (lo puede desmarcar el alumno).
+- **Admin (GYM_ADMIN):** no implementado; no existe panel de GYM_ADMIN en este front.
+- **Panel GLOBAL_ADMIN (`features/admin`, Entrenadores):** habilitar/deshabilitar, suscripción a mano
+  (`PATCH /admin/users/{id}/subscription { active }`) y "Dar de alta en turnos" para los que aparecen en
+  `GET /booking/plangym/admin/professionals/candidates` (`POST …/admin/professionals { userId }`). `subscriptionActive`
+  se muestra si `AdminTrainerResponse` lo trae (hoy no: se ve "—" hasta cambiarlo). No usa el `PATCH /admin/{id}/role` obsoleto.
+- **Agenda del entrenador:** en canceladas, "canceló el alumno / cancelaste vos / cancelación automática" (`cancelledBy`).
+- **Mis alumnos:** con Turnos prendido, cada tarjeta muestra próxima clase y horarios fijos (`GET /professional/students?status=ALL`, cruce por `userId`).
+- **409 de franjas:** se explica que primero hay que cambiar o terminar esos horarios fijos, con link a Horarios fijos.
+
+### Recuperar clases (plazo de 30 días — backend `feature/booking-cupos`)
+- Avisar que no va con **12 horas o más** (`POST /bookings/{id}/absence`) → gana 1 clase para recuperar **hasta 30 días
+  después de la clase**, aunque caiga en el mes siguiente. Avisar tarde → 400 con `message` ("Faltan menos de 12 horas…").
+- **El profe (o el sitio) cancela** una clase → también gana una, mismo plazo, sin gastar el tope `recoveriesPerMonth`.
+- Tope **por entrenador**: `GET/PUT /professional/me { displayName, recoveriesPerMonth }` (0 = no). Se edita en
+  "Horarios fijos → Recuperar clases".
+- `GET /recoveries/mine` **sin `?month`** → créditos vigentes `{ month, limit, absences, professionalCancels, used,
+  available, expiresAt (el más próximo), items[{ …, expiresAt }] }`. `utils/recovery.util.ts`: `pendingRecoveries`,
+  `latestRecoveryDeadline`, `withinRecoveryWindow`, `expiresSoon` (≤ 7 días → ámbar), `ddmm`, `plus30`.
+- `POST /recoveries/mine { serviceId, professionalId, startAt }`: el horario tiene que ser anterior al vencimiento (si no, 400
+  con la fecha); el backend usa la que vence antes. 409 sin lugar.
+- `GET /schedule?from=&to=` (máx. 42 días). La tira de `/student/turnos/horarios` se extiende hasta el vencimiento más lejano
+  (21 a 42 días); los horarios posteriores se ven "después del vencimiento" y no se pueden elegir.
+- Textos: "Listo. Podés recuperar esta clase hasta el dd/MM" (`absenceWithMessage`, busca el item recién creado),
+  "Tenés N para recuperar · la primera vence el dd/MM" + lista con vencimiento en Mis turnos y Horarios, popup del profe
+  "La podés recuperar hasta el {día + 30}". `changesLeft` (cambios de horario fijo) **sigue siendo mensual**.
+- **Tope de ausencias del mes usado** (`absenceCapNotice`): si ya se recuperaron `limit` ausencias de clases de ese mes, se
+  avisa "Ya usaste tus 3 recuperaciones de noviembre…" antes de "Avisar que no voy" (detalle de la clase y tarjeta del Inicio)
+  y en el estado vacío. El backend cuenta por profesional y mes de la clase faltada; el front lo aproxima con `items`.
+- **Clases completas en el calendario** (`CalEntry.full` → `.cal-entry--full`, rojo `--color-danger` en tinte + borde):
+  entrenador = cupo lleno (`active ≥ capacity`); alumno = horarios de `/schedule` con `free = 0` (antes no se mostraban;
+  al tocarlos dicen "Esta clase está completa"). En Mes, cada día muestra "N completas" con punto rojo (solo el punto en
+  pantallas angostas). En Horarios (`/student/turnos/horarios`) la fila "Completo" usa el mismo rojo.
+
+### Tope mensual de clases por plan (backend `feature/booking-cupos`)
+- Servicio: `monthlyLimit` (a mano, 1–62, o null) y `monthlyCap` (el que se aplica: `monthlyLimit` o `weeklyLimit × 4`;
+  null = sin tope). Suma horario fijo + sueltos; las recuperaciones no cuentan; el generador no crea la clase de más.
+- Formulario de Servicios: solo "Veces por semana" + texto "Son 12 clases por mes (3 por semana × 4)". `monthlyLimit` se
+  manda siempre `null` (el backend calcula `monthlyCap`). Listado: "3 por semana · 12 por mes".
+- `modality` es obligatoria en el backend: PlanGym es solo presencial → el front manda siempre `IN_PERSON` (crear,
+  editar y reactivar).
+- Alumno: "Tu plan: 12 clases por mes" en Mis turnos y en la tarjeta del Inicio (servicios en los que está anotado). El uso del
+  mes no se calcula en el front. Reservar clase suelta: el 409 del tope se muestra como aviso con su `message`.
+- No hay "reprogramar" en el front todavía (`POST /bookings/{id}/reschedule`).
+
+### Formas verificadas contra el backend (`elytra-platform`, rama `feature/booking`)
+- Servicio = `ServiceAdminResponse` (trae además precio, modalidad, avisos mínimos, abonos…; el front ignora lo que no usa).
+- Bloqueos = `ExceptionResponse { id, professionalId, professionalName, startAt, endAt, type, reason }`.
+  `POST /professional/blocks` da **409 si pisa clases**; con `?confirm=true` las cancela y avisa (el front pide confirmación).
+- `GET /services/{id}/slots` → `SlotsResponse { serviceId, timezone, slots: [{ startAt, endAt, professionals: [{ id, displayName, capacity, spotsLeft }] }] }`;
+  `BookingStudentService.slots()` lo aplana a `FreeSlot` (una opción por horario + profesional con lugar).
+- `POST /bookings { serviceId, professionalId, startAt, acceptPolicy: true }`.
+- `CancellationPreview { canCancel, canReschedule, reschedulesLeft, losesPayment, message }` — si `!canCancel` se deshabilita cancelar.
+- `Booking` / `AgendaItem`: `cancelledBy: "STUDENT" | "PROFESSIONAL" | "SYSTEM" | null` (en la base: CLIENT/PROFESSIONAL/
+  ADMIN/SYSTEM; ADMIN se informa como PROFESSIONAL), `grantsRecovery: boolean`, `recoveryOfBookingId`.
+- `GET/PUT /professional/availability` → `RuleResponse[]` (array). El PUT recibe `{ rules: [...] }` y da **409 si deja
+  afuera horarios fijos vigentes** (el mensaje se muestra abajo de la semana).
+- `GET /v1/users/students/{id}` (entrenador) → `StudentDetail` con `activeTemplate` completo (días + ejercicios).
+- `GET /workout-logs/student/{id}` y `POST /workout-logs { studentId, workoutDayId, completedAt, completed }` como
+  entrenador (valida que el alumno sea suyo y que el día sea de su plan activo; 400 si ya está registrado ese día).
+- Respuestas 400/409 en ausencia/cancelación se toman como "fuera de término" → se muestra `message` y se deshabilita el botón.
+
 ---
 
 ## Pendiente de implementar
@@ -807,11 +1026,17 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
       `WorkoutTemplateMapper.toExerciseDetail()`, que antes mandaba `.muscleGroup(...)`. Si sigue
       mandando `muscleGroup` en vez de `primaryMuscle`, se pierden los íconos y el resumen por músculo
       en la plantilla. Lo mismo para la vista del alumno (`studentWorkout`).
-- [ ] Posible **doble definición del token `ENVIRONMENT`**: existe `core/config/environment.ts` (no usado por `exercise.service.ts`/`template.service.ts`, que importan de `environments/tokens/environment.token.ts`) — confirmar cuál es el real y borrar el que sobre
-- [ ] `AddExerciseToDayRequest` — import sin usar en `add-exercises-modal.component.ts` (preexistente, no rompe nada)
-- [ ] `UpdateDayRequest` duplicado entre `trainer.models.ts` y `edit-day-modal.component.ts` (mismo shape, preexistente) — unificar para que `edit-day-modal` importe el de `trainer.models.ts`
+- [x] Token `ENVIRONMENT` duplicado: se borró `core/config/environment.ts` (sin uso); el real es `environments/tokens/environment.token.ts`
+- [x] Import sin usar de `AddExerciseToDayRequest` en `add-exercises-modal` — sacado
+- [x] `UpdateDayRequest` unificado en `trainer.models.ts`
 - [x] `MUSCLE_GROUP_LABELS` — fuente única en `muscle-group.util.ts`
-- [ ] Sin tests nuevos para lo agregado (`.spec.ts` del proyecto son boilerplate default de Angular CLI, sin adaptar)
+- [x] Tests de lógica pura: `recovery.util.spec.ts` (vencimientos, ventana de 30 días, tope del mes) y
+      `exercise-meta.util.spec.ts` (por tiempo / reps). El resto de los `.spec.ts` sigue siendo boilerplate del CLI.
+      Correr solo esos: `ng test --watch=false --include='**/recovery.util.spec.ts' --include='**/exercise-meta.util.spec.ts'`
+      (en Linux como root, Chrome necesita `--no-sandbox` → karma config con customLauncher).
+- [ ] Tests del cálculo "le toca" de `/trainer/hoy` (hoy vive dentro del componente: extraerlo a un util para testearlo)
+- [ ] CSS de componentes que pasan el budget de aviso (4 kB): login, register, template-detail, student-detail — mover
+      estilos repetidos a `styles.css` / `booking.css`
 
 ### Student
 - [x] `DashboardPage` — plan activo + lista de días (el alumno elige)
@@ -819,8 +1044,9 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
 - [x] `WeeklyPage` — estado de la semana calculado en backend (WeekStatus)
 - [x] `MonthlyPage` — calendario con días entrenados, racha y adherencia
 - [x] `ProfilePage` + cerrar sesión
-- [ ] Detalle rico de ejercicio para el alumno (técnica, secundarios, video): requiere habilitar
-      `GET /api/exercises/:id` para STUDENT solo con ejercicios de su plan activo
+- [~] Detalle rico de ejercicio para el alumno: el front ya llama `GET /student-workouts/my-workout/exercises/{exerciseId}`
+      (→ `ExerciseDetail`) al tocar un ejercicio en el Día y muestra técnica, secundarios, video, etc., con las series/reps/
+      descanso **de su plan** (no los sugeridos). Si el endpoint no existe o da 403/404, queda la vista mínima. **Falta backend.**
 - [ ] "Semana N de M": agregar `durationWeeks` a `WorkoutTemplate` (V9) + campo en el form de plantilla
 - [ ] Registro de pesos/reps reales por ejercicio (tabla `workout_log_sets` colgada del log)
 
@@ -828,7 +1054,7 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
 - [x] **Íconos de músculos**: silueta anatómica frente/espalda, modos zoom/single/both, secundarios
 - [x] `app-page-loader` con el gym-loader en toda la app
 - [x] Marca unificada PlanGym + favicon propio
-- [ ] `ToastService` — feedback de éxito/error global
+- [x] `ToastService` — feedback de éxito/error global (`<gp-toast />`, usado por Turnos)
 
 ### Suscripciones
 - [x] Modelos, `BillingService`, planes, Mi suscripción, polling de vuelta, banner, menú, guard
@@ -839,6 +1065,41 @@ Sin suscripción AUTHORIZED, sus alumnos no pueden entrar (lo resuelve el backen
       que apuntar a `localhost:4200`)
 - [ ] `isStudentLimitError` detecta el límite buscando "plan" en el mensaje: si el backend agrega un
       `code` en el error, cambiar a ese campo
+
+### Turnos
+- [x] Calendario trainer (semana/mes, detalle de clase, pasar lista, cancelar)
+- [x] Calendario alumno (semana/mes, horarios fijos, ausencia, cancelar con preview)
+- [x] Horarios fijos del trainer + servicios + anotar por DNI (también tras el alta)
+- [x] Elegir horarios del alumno + clase suelta
+- [x] Disponibilidad, bloqueos y resumen de cupos
+- [x] Turnos en la vista del alumno: pestaña (Perfil al header), próxima clase en Inicio, clases en Semana y Día
+- [x] Entrenador mobile: barra inferior + pantalla Hoy (alumnos del día, plan, marcar hecho)
+- [ ] Backend (opcional): "día que le toca" calculado en el backend para el entrenador (hoy lo calcula el front) y desmarcar desde el entrenador
+- [ ] Detalles: contador de clases en la pestaña Turnos del alumno
+- [x] La cancelación del profe da recuperación (sin tope, mismo mes) + `cancelledBy`/`grantsRecovery` (backend V22) + popup
+- [x] Recuperar tocando un horario libre del calendario (semana y mes)
+- [ ] Cambiar la hora de una franja deja a los alumnos fijos en la hora vieja (el editor avisa, el backend da 409);
+      decidir si se mueven solos
+- [x] Probado contra el backend real (nov-2026): turnos, recuperar (30 días, topes), cambiar plan, un solo plan, celular
+- [x] Formas verificadas contra el backend (servicio, bloqueos, slots, preview de cancelación)
+- [x] Recuperar clases: horarios día por día, recuperar, tope del entrenador, "recupera" en su agenda
+- [ ] Panel GYM_ADMIN (agenda de todos, feriados, ajustes)
+
+### Plantillas
+- [x] Planes de referencia (ver días + "Usar este plan" → copia) — probado
+- [x] Ejercicios por tiempo (`durationSeconds`, "3 × 20 seg", selector en "Agregar ejercicio")
+- [ ] Traducir `level` si el backend manda otro valor que BASIC / INTERMEDIATE
+
+### Admin
+- [x] Suscripción a mano y "Dar de alta en turnos" en Entrenadores
+- [ ] Backend: sumar `subscriptionActive` a `AdminTrainerResponse` (hoy se ve "—" hasta cambiarlo)
+- [ ] Dar / quitar rol TRAINER desde el panel (`PUT/DELETE /admin/tenants/plangym/members/{userId}/roles/{role}`), si hace falta
+
+### Cerrar Turnos (cuando termine la prueba)
+- [ ] PR `feature/turnos-calendario` → `master` (front) y `feature/booking` → `main` (backend `elytra-platform`)
+- [ ] Deploy: backend a Railway (Flyway corre V21, V22, V24 y las de `feature/booking-cupos`) y `ng build` del front a HostGator
+- [ ] Producción: habilitar el módulo BOOKING para `plangym` y dar de alta como profesionales a los entrenadores que
+      ya tenían TRAINER (los nuevos se dan de alta solos al recibir el rol)
 
 ### Backend pendiente
 - [ ] `exerciseCount` y `assignedStudents` en `WorkoutTemplateSummary`

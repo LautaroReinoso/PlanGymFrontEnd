@@ -1,0 +1,79 @@
+:host { display: block; }
+.save-state { font-size: 13px; color: var(--color-success); min-height: 18px; }
+
+/* Semana lun–dom */
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); }
+.week__day {
+  display: flex; flex-direction: column; gap: var(--space-2); min-width: 0;
+  padding: var(--space-2); background: var(--color-surface);
+  border: 1px solid var(--color-border); border-radius: var(--radius-md);
+}
+.week__name { font: 700 13px var(--font-display); color: var(--color-text); text-align: center; }
+.week__items { display: flex; flex-direction: column; gap: 6px; }
+.week__add {
+  font: 600 12px var(--font-body); color: var(--color-muted-light); cursor: pointer;
+  padding: 7px 4px; background: transparent; border: 1px dashed var(--color-border); border-radius: var(--radius-sm);
+}
+.week__add:hover:not(:disabled) { color: var(--color-text); border-color: var(--color-accent); }
+
+.slot {
+  display: flex; align-items: stretch; background: var(--color-card);
+  border: 1px solid var(--color-border); border-left: 3px solid var(--color-accent); border-radius: var(--radius-sm);
+}
+.slot__main {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; text-align: left; cursor: pointer;
+  padding: 6px 4px 6px 8px; background: transparent; border: none; font-family: var(--font-body);
+}
+.slot__time { font: 700 13px var(--font-display); color: var(--color-text); white-space: nowrap; }
+.slot__cap { font-size: 11px; color: var(--color-muted-light); }
+.slot__x {
+  flex-shrink: 0; width: 26px; cursor: pointer; font-size: 12px; color: var(--color-muted);
+  background: transparent; border: none; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.slot__x:hover:not(:disabled) { color: var(--color-danger); background: rgba(239, 68, 68, .1); }
+
+@container (max-width: 860px) {
+  .week { grid-template-columns: 1fr; }
+  .week__day { flex-direction: row; align-items: flex-start; }
+  .week__name { width: 84px; flex-shrink: 0; text-align: left; padding-top: 6px; }
+  .week__items { flex: 1; flex-direction: row; flex-wrap: wrap; }
+  .slot { flex: 0 1 150px; }
+  .week__add { flex: 0 0 auto; padding: 7px 12px; }
+}
+
+/* Editor */
+.ed__group { display: flex; flex-direction: column; gap: 6px; }
+.ed__label { font-size: 13px; color: var(--color-muted-light); }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pill {
+  font: 600 13px var(--font-body); color: var(--color-muted-light); cursor: pointer;
+  padding: 7px 12px; border-radius: var(--radius-full);
+  background: var(--color-surface); border: 1px solid var(--color-border);
+}
+.pill.on { color: #fff; background: var(--color-accent); border-color: var(--color-accent); }
+.pill--day { min-width: 46px; }
+.pill-input {
+  width: 70px; font: 14px var(--font-body); color: var(--color-text); background: var(--color-surface);
+  border: 1.5px solid var(--color-border); border-radius: var(--radius-sm); padding: 6px 8px;
+}
+.link {
+  font: 600 13px var(--font-body); color: var(--color-celeste); cursor: pointer;
+  background: none; border: none; padding: 2px 0; text-decoration: underline;
+}
+
+/* Cupos dentro de la franja */
+.slot__bar { display: block; height: 3px; margin-top: 3px; border-radius: 2px; background: var(--color-border); overflow: hidden; }
+.slot__bar span { display: block; height: 100%; background: var(--color-celeste); }
+.slot--full { border-left-color: var(--color-warning); }
+.slot--full .slot__bar span { background: var(--color-warning); }
+.slot--new { border-style: dashed; border-left-style: solid; border-left-color: var(--color-celeste); }
+.ed__clients { margin: 0; padding-left: 18px; font-size: 14px; color: var(--color-text); max-height: 160px; overflow-y: auto; }
+
+/* Barra de guardado */
+.savebar {
+  position: sticky; bottom: var(--space-3); z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap;
+  padding: var(--space-3) var(--space-4); font-size: 14px; color: var(--color-text);
+  background: var(--color-card); border: 1px solid var(--color-accent); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}

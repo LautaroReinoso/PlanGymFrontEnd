@@ -176,13 +176,30 @@ export function toExercisePayload(value: ExerciseFormValueLike): ExerciseRequest
 }
 
 /** "3 series · 8–10 reps · 20kg · 90 s" — formato común Trainer/Student */
+/** "20 seg" · "1 min" · "1 min 30 seg" */
+export function durationLabel(seconds?: number | null): string | null {
+  if (!seconds || seconds <= 0) return null;
+  const m = Math.floor(seconds / 60), s = seconds % 60;
+  if (!m) return `${s} seg`;
+  return s ? `${m} min ${s} seg` : `${m} min`;
+}
+
+/** "3 × 20 seg" (por tiempo) o "3 × 8–10" (por repeticiones) */
+export function setsRepsLabel(de: { sets: number; reps: number; repsMax?: number | null; durationSeconds?: number | null }): string {
+  const dur = durationLabel(de.durationSeconds);
+  return `${de.sets} × ${dur ?? repsRangeLabel(de.reps, de.repsMax) ?? ''}`;
+}
+
 export function dayExerciseSummary(de: {
   sets: number; reps: number; repsMax?: number | null;
-  weightSuggestion?: number | null; restSeconds?: number | null;
+  weightSuggestion?: number | null; restSeconds?: number | null; durationSeconds?: number | null;
+  notes?: string | null;
 }): string {
-  const parts = [`${de.sets} series`, `${repsRangeLabel(de.reps, de.repsMax)} reps`];
+  const dur = durationLabel(de.durationSeconds);
+  const parts = dur ? [`${de.sets} × ${dur}`] : [`${de.sets} series`, `${repsRangeLabel(de.reps, de.repsMax)} reps`];
   if (de.weightSuggestion) parts.push(`${de.weightSuggestion}kg`);
   const rest = restLabel(de.restSeconds);
   if (rest) parts.push(rest);
+  if (de.notes && de.notes.trim().length <= 30) parts.push(de.notes.trim());   // "Por pierna", "15 metros por serie"
   return parts.join(' · ');
 }

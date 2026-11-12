@@ -31,11 +31,9 @@ import { ModalComponent } from '../../../../../shared/components/modal/modal.com
 import { InputFieldComponent } from '../../../../../shared/components/input-field/input-field.component';
 import { ButtonComponent } from '../../../../../shared/components/button-component/button-component.component';
 
-export interface UpdateDayRequest {
-  name: string;
-  description: string;
-  orderIndex: number;
-}
+// UpdateDayRequest vive en trainer.models.ts (fuente única); se re-exporta para no romper imports viejos.
+export type { UpdateDayRequest } from '../../../models/trainer.models';
+import type { UpdateDayRequest } from '../../../models/trainer.models';
 
 // Nombres de días de la semana para el selector opcional
 export const DAY_OF_WEEK: Record<number, string> = {

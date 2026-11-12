@@ -4,16 +4,12 @@
 //  Desktop: fijo. Mobile: drawer desde la izquierda.
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  input,
-  output,
-  inject,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../../../core/auth/services/auth.service';
 import { ENVIRONMENT } from '../../../../../../../environments/tokens/environment.token';
+import { BookingTrainerService } from '../../../../../booking/services/booking-trainer.service';
 
 interface NavItem {
   label: string;
@@ -30,6 +26,7 @@ interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly auth = inject(AuthService);
   private readonly billingEnabled = inject(ENVIRONMENT).billingEnabled;
@@ -39,9 +36,19 @@ export class SidebarComponent {
 
   private readonly allNavItems: NavItem[] = [
     {
+      label: 'Hoy',
+      route: '/trainer/hoy',
+      icon: 'M12 8v4l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z',
+    },
+    {
       label: 'Alumnos',
       route: '/trainer/students',
       icon: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+    },
+    {
+      label: 'Turnos',
+      route: '/trainer/turnos',
+      icon: 'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 14h2M14 14h2M8 18h2',
     },
     {
       label: 'Plantillas',
@@ -60,10 +67,18 @@ export class SidebarComponent {
     },
   ];
 
-  // "Suscripción" solo aparece con billingEnabled
-  readonly navItems: NavItem[] = this.allNavItems.filter(
-    item => this.billingEnabled || item.route !== '/trainer/suscripcion',
-  );
+  /** Módulo de turnos prendido (un 403 lo apaga) */
+  private readonly bookingEnabled = signal(false);
+
+  constructor() {
+    inject(BookingTrainerService).probe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(ok => this.bookingEnabled.set(ok));
+  }
+
+  // "Suscripción" solo aparece con billingEnabled; "Turnos" si el módulo responde
+  readonly navItems = computed<NavItem[]>(() => this.allNavItems.filter(item =>
+    (this.billingEnabled || item.route !== '/trainer/suscripcion') &&
+    (this.bookingEnabled() || (item.route !== '/trainer/turnos' && item.route !== '/trainer/hoy')),
+  ));
 
   readonly userMail = this.auth.currentMail;
 

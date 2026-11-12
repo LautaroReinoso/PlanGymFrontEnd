@@ -266,3 +266,4 @@
   .status-dot { animation: none; }
   .card-arrow { transition: none; }
 }
+.student-turnos { display:block; margin-top:6px; font-size:12px; color: var(--color-celeste); }

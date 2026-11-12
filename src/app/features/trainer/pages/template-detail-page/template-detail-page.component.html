@@ -58,7 +58,9 @@
   </div>
   }
 
-  <!-- ── Fila de badges + botón agregar día ── -->
+  @if (template(); as t) { <app-template-students [templateId]="t.id" [templateName]="t.name" (countChange)="assignedNames.set($event)" /> }
+
+<!-- ── Fila de badges + botón agregar día ── -->
   @if (sortedDays().length > 0) {
   <div class="days-nav">
 
@@ -143,20 +145,35 @@
   <!-- FIX #8: modal de eliminación descomentado con gp-modal -->
   <gp-modal [isOpen]="showDeleteConfirm()" title="Eliminar plantilla" size="sm" (closed)="showDeleteConfirm.set(false)">
     <div class="delete-confirm-body">
+      @if (assignedNames() === null) {
+      <p class="delete-confirm-text">Revisando quién tiene este plan…</p>
+      } @else if (assignedNames()!.length > 0) {
+      <p class="delete-confirm-text">
+        No se puede eliminar <strong>{{ template()?.name }}</strong> porque
+        {{ assignedNames()!.length === 1 ? 'lo tiene asignado 1 alumno' : 'lo tienen asignado ' + assignedNames()!.length + ' alumnos' }}:
+        <strong>{{ assignedNames()!.join(', ') }}</strong>.
+      </p>
+      <p class="delete-confirm-text">Primero quitáselo (o asignales otro plan) desde "Alumnos con este plan".</p>
+      } @else {
       <p class="delete-confirm-text">
         ¿Eliminar <strong>{{ template()?.name }}</strong>?
         Esta acción no se puede deshacer.
       </p>
+      }
       @if (deleteError()) {
       <div class="delete-error" role="alert">{{ deleteError() }}</div>
       }
       <div class="delete-confirm-actions">
+        @if (assignedNames()?.length) {
+        <gp-button variant="primary" size="md" (click)="showDeleteConfirm.set(false)">Entendido</gp-button>
+        } @else {
         <gp-button variant="ghost" size="md" (click)="showDeleteConfirm.set(false)">
           Cancelar
         </gp-button>
-        <gp-button variant="danger" size="md" [loading]="isDeleting()" (click)="confirmDelete()">
+        <gp-button variant="danger" size="md" [loading]="isDeleting()" [disabled]="assignedNames() === null" (click)="confirmDelete()">
           Eliminar
         </gp-button>
+        }
       </div>
     </div>
   </gp-modal>
