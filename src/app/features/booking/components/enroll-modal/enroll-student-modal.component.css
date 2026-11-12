@@ -15,7 +15,7 @@
 .students__item {
   width: 100%; display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2);
   padding: 9px 10px; text-align: left; cursor: pointer; font: 500 14px var(--font-body);
-  color: var(--color-text); background: transparent; border: none; border-radius: 6px;
+  color: var(--color-text); background: transparent; border: none; border-radius: var(--radius-sm);
 }
 .students__item:hover { background: var(--color-card); }
 .students__item small { color: var(--color-muted-light); font-size: 12px; }

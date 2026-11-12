@@ -107,9 +107,9 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
 
   readonly adherenceColor = computed(() => {
     const pct = this.student()?.adherencePercent ?? 0;
-    if (pct >= 80) return '#22C55E';
-    if (pct >= 50) return '#F59E0B';
-    return '#EF4444';
+    if (pct >= 80) return 'var(--color-success)';
+    if (pct >= 50) return 'var(--color-warning)';
+    return 'var(--color-danger)';
   });
 
   // ── Lifecycle ─────────────────────────────────

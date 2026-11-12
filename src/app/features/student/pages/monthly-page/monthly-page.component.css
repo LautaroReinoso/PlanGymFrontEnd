@@ -51,7 +51,7 @@
 .calendar__cell--out { color: var(--color-border); }
 .calendar__cell:not(:disabled):hover { background: var(--color-surface); }
 .calendar__cell--trained,
-.calendar__cell--trained:not(:disabled):hover { background: var(--color-accent); color: #fff; font-weight: 700; }
+.calendar__cell--trained:not(:disabled):hover { background: var(--color-accent); color: var(--color-on-accent); font-weight: 700; }
 .calendar__cell--today { box-shadow: inset 0 0 0 2px var(--color-celeste); }
 .calendar__cell--selected { outline: 2px solid var(--color-text); outline-offset: 1px; }
 

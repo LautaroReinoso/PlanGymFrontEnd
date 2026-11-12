@@ -33,7 +33,7 @@
   font-size: 14px;
 }
 .notice a { color: var(--color-accent); }
-.notice--error { border-color: color-mix(in srgb, var(--color-danger) 40%, transparent); color: var(--color-danger); }
+.notice--error { border-color: var(--color-danger-a40); color: var(--color-danger); }
 
 .plans-grid {
   display: grid;

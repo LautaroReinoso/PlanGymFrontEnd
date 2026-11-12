@@ -8,13 +8,13 @@
 /* Badge de día */
 .day-badge {
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   text-align: center;
   font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 15px;
   font-weight: 600;
-  border: 1.5px solid #2A2A38;
-  background: #1C1C26;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
   color: var(--color-muted);
   cursor: pointer;
   white-space: nowrap;
@@ -34,7 +34,7 @@ css
   opacity: 0.7;
 }
 .day-badge:focus-visible {
-  outline: 2px solid #4F6EF7;
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 
@@ -44,15 +44,15 @@ css
 }
 
 .day-badge:hover:not(.day-badge--active) {
-  background: #232330;
-  border-color: #3A3A52;
-  color: #F0F0F5;
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
 }
 
 .day-badge--active {
-  background: rgba(79, 110, 247, 0.12);
-  border-color: rgba(79, 110, 247, 0.5);
-  color: #818CF8;
+  background: var(--color-accent-a12);
+  border-color: var(--color-accent-a50);
+  color: var(--color-accent-soft);
   font-weight: 600;
   transform: translateY(-1px);
 }
@@ -63,7 +63,7 @@ css
 }
 .day-badge-index--active  {
   color: var(--color-text);
-  background: #4F6EF7;
+  background: var(--color-accent);
 }
 .day-badge-content {
    display: flex;

@@ -4,8 +4,8 @@
   display: grid;
   place-items: center;
   padding: 6px;
-  border-radius: 8px;
-  border: 1px solid #3A3A52;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-strong);
   background: none;
   cursor: pointer;
 }
@@ -19,11 +19,11 @@
   background: transparent;
 }
 .action-btn svg {
-     color: #6B6B80;
+     color: var(--color-muted);
   width: 16px;
 }
 .action-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: var(--color-danger-a12);
 
 } 
 
@@ -33,19 +33,19 @@
 
 /* Ghost (por defecto) */
 .icon-btn--ghost {
-  background: #1C1C26;
-  color: #B7B7C8;
-  border: 1px solid #2A2A38;
+  background: var(--color-card);
+  color: var(--color-muted-light);
+  border: 1px solid var(--color-border);
 }
 
 .icon-btn--ghost:hover:not(:disabled) {
-  background: #232331;
-  border-color: #3A3A52;
-  color: #F0F0F5;
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
 }
 
 .icon-btn--ghost:active:not(:disabled) {
-  background: #181821;
+  background: var(--color-surface-sunken);
   transform: scale(.96);
 }
 
@@ -63,11 +63,11 @@ stroke: var( --color-accent);
 }
 .icon-btn--primary:hover:not(:disabled) {
 
-  box-shadow: 0 8px 20px rgba(79,110,247,.35);
+  box-shadow: 0 8px 20px var(--color-accent-a40);
 }
 
 .icon-btn--primary:active:not(:disabled) {
-  background: #4563E6;
+  background: var(--color-accent-hover);
   transform: scale(.96);
 }
 
@@ -75,19 +75,19 @@ stroke: var( --color-accent);
 
 /* Danger */
 .icon-btn--danger {
-  background: rgba(220, 38, 38, .12);
-  color: #F87171;
-  border: 1px solid rgba(220,38,38,.25);
+  background: var(--color-danger-a12);
+  color: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-a30);
 }
 
 .icon-btn--danger:hover:not(:disabled) {
-  background: rgba(220,38,38,.22);
-  border-color: rgba(220,38,38,.45);
-  color: #FCA5A5;
+  background: var(--color-danger-a30);
+  border-color: var(--color-danger-a50);
+  color: var(--color-danger-soft);
 }
 
 .icon-btn--danger:active:not(:disabled) {
-  background: rgba(220,38,38,.28);
+  background: var(--color-danger-a30);
   transform: scale(.96);
 }
 .icon-btn {
@@ -108,7 +108,7 @@ stroke: var( --color-accent);
 }
 
 .icon-btn:focus-visible {
-  outline: 2px solid #4F6EF7;
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
 

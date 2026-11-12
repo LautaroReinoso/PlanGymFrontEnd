@@ -8,10 +8,10 @@
 
 /* Colores configurables desde el padre si hace falta */
 svg {
-  --mi-body: #2F2F40;
-  --mi-neutral: #3A3A4E;
-  --mi-muscle: #4E4E68;
-  --mi-primary: var(--color-accent, #4F6EF7);
+  --mi-body: var(--color-surface-raised);
+  --mi-neutral: var(--color-border-strong);
+  --mi-muscle: var(--color-border-strong);
+  --mi-primary: var(--color-accent, var(--color-accent));
 }
 
 .s { fill: var(--mi-body); }

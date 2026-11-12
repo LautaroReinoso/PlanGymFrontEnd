@@ -24,7 +24,7 @@
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6B6B80;
+  color: var(--color-muted);
   pointer-events: none;
   transition: color 200ms;
 }
@@ -32,27 +32,27 @@
 .search-input {
   width: 100%;
   max-width: 400px;
-  background: #1C1C26;
-  border: 1.5px solid #2A2A38;
-  border-radius: 10px;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 11px 16px 11px 40px;
   font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 14px;
-  color: #F0F0F5;
+  color: var(--color-text);
   outline: none;
   transition: border-color 200ms, box-shadow 200ms;
 }
 
-.search-input::placeholder { color: #6B6B80; }
+.search-input::placeholder { color: var(--color-muted); }
 
 .search-input:focus {
-  border-color: #4F6EF7;
-  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.1);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-a12);
 }
 
 .search-input:focus + .search-icon,
 .search-bar:focus-within .search-icon {
-  color: #4F6EF7;
+  color: var(--color-accent);
 }
 
 /* ── Error ───────────────────────────────────── */
@@ -62,27 +62,27 @@
   align-items: center;
   gap: 10px;
   padding: 14px 16px;
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 12px;
+  background: var(--color-danger-a8);
+  border: 1px solid var(--color-danger-a20);
+  border-radius: var(--radius-md);
   font-size: 14px;
-  color: #FCA5A5;
+  color: var(--color-danger-soft);
   margin-bottom: 24px;
 }
 
 .error-retry {
   margin-left: auto;
   background: none;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 6px;
+  border: 1px solid var(--color-danger-a30);
+  border-radius: var(--radius-sm);
   padding: 4px 12px;
   font-size: 13px;
-  color: #FCA5A5;
+  color: var(--color-danger-soft);
   cursor: pointer;
   transition: background 150ms;
 }
 
-.error-retry:hover { background: rgba(239, 68, 68, 0.1); }
+.error-retry:hover { background: var(--color-danger-a12); }
 
 /* ── Grid ────────────────────────────────────── */
 
@@ -95,9 +95,9 @@
 /* ── Skeleton card ───────────────────────────── */
 
 .skeleton-card {
-  background: #1C1C26;
-  border: 1px solid #2A2A38;
-  border-radius: 16px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -122,7 +122,7 @@
   align-items: center;
   justify-content: space-between;
   padding-top: 14px;
-  border-top: 1px solid #2A2A38;
+  border-top: 1px solid var(--color-border);
 }
 
 /* ── Estado vacío ────────────────────────────── */
@@ -141,23 +141,23 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: #1C1C26;
-  border: 1px solid #2A2A38;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
   display: grid;
   place-items: center;
-  color: #6B6B80;
+  color: var(--color-muted);
 }
 
 .empty-title {
   font-family: 'Syne', system-ui, sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #F0F0F5;
+  color: var(--color-text);
 }
 
 .empty-sub {
   font-size: 14px;
-  color: #6B6B80;
+  color: var(--color-muted);
   max-width: 280px;
 }
 

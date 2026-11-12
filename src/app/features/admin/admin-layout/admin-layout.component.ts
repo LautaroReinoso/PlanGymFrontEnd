@@ -48,7 +48,7 @@ import { AuthService } from '../../../core/auth/services/auth.service';
       width: 36px; height: 36px; display: grid; place-items: center; border: 0; border-radius: 8px;
       background: none; color: var(--color-muted-light); cursor: pointer; flex-shrink: 0;
     }
-    .admin-logout:hover { background: rgba(239, 68, 68, .08); color: var(--color-danger); }
+    .admin-logout:hover { background: var(--color-danger-a8); color: var(--color-danger); }
     .admin-content { max-width: 1000px; margin: 0 auto; padding: 28px 20px 48px; }
     @media (max-width: 560px) { .admin-mail { display: none; } .admin-content { padding: 20px 16px 40px; } }
   `],

@@ -5,14 +5,7 @@
 ───────────────────────────────────────────── */
 
 :host {
-  --color-bg:          #0A0A0F;
-  --color-card:        #1C1C26;
-  --color-border:      #2A2A38;
-  --color-accent:      #4F6EF7;
-  --color-accent-glow: rgba(79, 110, 247, 0.25);
-  --color-danger:      #EF4444;
-  --color-text:        #F0F0F5;
-  --color-muted:       #6B6B80;
+  --color-accent-glow: var(--color-accent-a30);
   --font-display: 'Syne', system-ui, sans-serif;
   --font-body:    'DM Sans', system-ui, sans-serif;
   --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -38,7 +31,7 @@
 
 @keyframes shimmerGlow {
   0%, 100% { box-shadow: 0 0 20px var(--color-accent-glow); }
-  50%       { box-shadow: 0 0 36px rgba(79, 110, 247, 0.4); }
+  50%       { box-shadow: 0 0 36px var(--color-accent-a40); }
 }
 
 /* ── Página ──────────────────────────────────── */
@@ -67,7 +60,7 @@
 
 .grid-line {
   flex: 1;
-  border-right: 1px solid rgba(79, 110, 247, 0.06);
+  border-right: 1px solid var(--color-accent-a8);
   animation: gridDrift 12s linear infinite alternate;
 }
 
@@ -104,7 +97,7 @@
   max-width: 420px;
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   padding: 40px 36px;
   animation: slideUp 0.6s var(--ease-spring) 0.1s both;
 }
@@ -133,7 +126,7 @@
 
 .logo-mark {
   width: 52px; height: 52px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   display: grid;
   place-items: center;
   animation: shimmerGlow 3s ease-in-out infinite;
@@ -169,11 +162,11 @@
   align-items: center;
   gap: 8px;
   padding: 12px 14px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 10px;
+  background: var(--color-danger-a12);
+  border: 1px solid var(--color-danger-a20);
+  border-radius: var(--radius-sm);
   font-size: 14px;
-  color: #FCA5A5;
+  color: var(--color-danger-soft);
   animation: slideUp 0.3s var(--ease-smooth);
 }
 
@@ -211,7 +204,7 @@
 }
 
 .register-link:hover {
-  color: #818CF8;
+  color: var(--color-accent-soft);
 }
 
 .register-link:hover::after {
@@ -237,7 +230,7 @@
 /* ── Mobile ──────────────────────────────────── */
 
 @media (max-width: 480px) {
-  .login-panel { padding: 32px 24px; border-radius: 16px; }
+  .login-panel { padding: 32px 24px; border-radius: var(--radius-md); }
 }
 
 /* ─────────────────────────────────────────────
@@ -256,7 +249,7 @@
   margin-bottom: 28px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   animation: slideUp 0.6s var(--ease-spring) 0.25s both;
 }
 
@@ -264,7 +257,7 @@
   position: absolute;
   top: 4px; bottom: 4px; left: 4px;
   width: calc(50% - 4px);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--color-accent-glow);
   box-shadow: inset 0 0 0 1px var(--color-accent);
   transition: transform 300ms var(--ease-spring);
@@ -294,7 +287,7 @@
 .mode-tab:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 
 /* Al cambiar de modo el formulario aparece rápido (sin el delay de entrada) */

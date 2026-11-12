@@ -77,7 +77,7 @@
 .day:hover { border-color: var(--color-accent); }
 .day__check {
   width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center;
-  border-radius: 50%; border: 2px solid var(--color-border); color: #fff;
+  border-radius: 50%; border: 2px solid var(--color-border); color: var(--color-on-accent);
 }
 .day__check svg { width: 14px; height: 14px; }
 .day--done .day__check { background: var(--color-success); border-color: var(--color-success); }

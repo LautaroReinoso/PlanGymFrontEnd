@@ -18,9 +18,41 @@
   --color-success-dim: #22C55E20;
   --color-celeste:     #38BDF8;
 
+  /* Variantes (todo color de la app sale de acá — ver CLAUDE.md "Política de colores") */
+  --color-border-strong:  #3A3A52;  /* bordes en hover / separadores marcados */
+  --color-surface-raised: #232330;  /* capa sobre card: hover de filas, chips, skeleton */
+  --color-surface-sunken: #16161F;  /* inputs y zonas hundidas */
+  --color-accent-hover:   #3D5CE8;
+  --color-accent-soft:    #818CF8;  /* texto azul claro sobre tinte de acento */
+  --color-celeste-soft:   #7DD3FC;
+  --color-danger-soft:    #FCA5A5;  /* texto de error sobre tinte rojo */
+  --color-warning-soft:   #FCD34D;
+  --color-success-soft:   #4ADE80;
+  --color-violet:         #8B5CF6;  /* solo identificación de avatares */
+  --color-violet-soft:    #C4B5FD;
+  --color-on-accent:      #FFFFFF;  /* texto/ícono sobre fondo de color */
+
+  /* Tintes con transparencia: --color-<color>-a<%>. Escala única 8 · 12 · 20 · 30 · 40 · 50 */
+  --color-accent-a8: color-mix(in srgb, var(--color-accent) 8%, transparent);  --color-accent-a12: color-mix(in srgb, var(--color-accent) 12%, transparent);  --color-accent-a20: color-mix(in srgb, var(--color-accent) 20%, transparent);  --color-accent-a30: color-mix(in srgb, var(--color-accent) 30%, transparent);  --color-accent-a40: color-mix(in srgb, var(--color-accent) 40%, transparent);  --color-accent-a50: color-mix(in srgb, var(--color-accent) 50%, transparent);
+  --color-celeste-a8: color-mix(in srgb, var(--color-celeste) 8%, transparent);  --color-celeste-a20: color-mix(in srgb, var(--color-celeste) 20%, transparent);  --color-celeste-a40: color-mix(in srgb, var(--color-celeste) 40%, transparent);
+  --color-success-a12: color-mix(in srgb, var(--color-success) 12%, transparent);  --color-success-a20: color-mix(in srgb, var(--color-success) 20%, transparent);  --color-success-a30: color-mix(in srgb, var(--color-success) 30%, transparent);  --color-success-a40: color-mix(in srgb, var(--color-success) 40%, transparent);
+  --color-warning-a8: color-mix(in srgb, var(--color-warning) 8%, transparent);  --color-warning-a12: color-mix(in srgb, var(--color-warning) 12%, transparent);  --color-warning-a20: color-mix(in srgb, var(--color-warning) 20%, transparent);  --color-warning-a30: color-mix(in srgb, var(--color-warning) 30%, transparent);  --color-warning-a40: color-mix(in srgb, var(--color-warning) 40%, transparent);
+  --color-danger-a8: color-mix(in srgb, var(--color-danger) 8%, transparent);  --color-danger-a12: color-mix(in srgb, var(--color-danger) 12%, transparent);  --color-danger-a20: color-mix(in srgb, var(--color-danger) 20%, transparent);  --color-danger-a30: color-mix(in srgb, var(--color-danger) 30%, transparent);  --color-danger-a40: color-mix(in srgb, var(--color-danger) 40%, transparent);  --color-danger-a50: color-mix(in srgb, var(--color-danger) 50%, transparent);
+  --color-muted-a12: color-mix(in srgb, var(--color-muted) 12%, transparent);  --color-muted-a20: color-mix(in srgb, var(--color-muted) 20%, transparent);
+  --color-violet-a20: color-mix(in srgb, var(--color-violet) 20%, transparent);  --color-violet-a40: color-mix(in srgb, var(--color-violet) 40%, transparent);
+
+  --gradient-accent: linear-gradient(90deg, var(--color-accent), var(--color-celeste));
+
   /* Typography */
   --font-display:    'Syne', sans-serif;
   --font-body:       'DM Sans', sans-serif;
+
+  /* Escala tipográfica (nada por debajo de 12px; texto de lectura ≥ 14px) */
+  --text-xs: 12px;  --leading-xs: 16px;
+  --text-sm: 14px;  --leading-sm: 20px;
+  --text-md: 16px;  --leading-md: 24px;
+  --text-lg: 20px;  --leading-lg: 28px;
+  --text-xl: 26px;  --leading-xl: 32px;
 
   /* Spacing (escala 4px) */
   --space-1: 4px;  --space-2: 8px;

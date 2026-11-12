@@ -3,7 +3,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--color-surface);
   border: 1px solid transparent;
   transition: border-color 0.2s var(--ease-smooth), background 0.2s var(--ease-smooth);
@@ -17,7 +17,7 @@
 
 .exercise-item.selected {
   border-color: var(--color-accent);
-  background: rgba(79, 110, 247, 0.07);
+  background: var(--color-accent-a8);
 }
 
 .exercise-check {
@@ -78,7 +78,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   border: none;
   background: transparent;
   color: var(--color-muted-light);
@@ -92,6 +92,6 @@
 }
 
 .exercise-icon-btn.danger:hover {
-  background: rgba(239, 68, 68, 0.12);
+  background: var(--color-danger-a12);
   color: var(--color-danger);
 }

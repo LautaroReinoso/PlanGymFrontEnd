@@ -17,7 +17,7 @@
 .cal__title::first-letter { text-transform: uppercase; }
 .cal__switch { display: flex; background: var(--color-card); border-radius: var(--radius-sm); padding: 2px; border: 1px solid var(--color-border); }
 .cal__switch button { border: none; background: transparent; color: var(--color-muted-light); }
-.cal__switch button.on { background: var(--color-accent); color: #fff; }
+.cal__switch button.on { background: var(--color-accent); color: var(--color-on-accent); }
 
 .cal__empty, .cal__hint { color: var(--color-muted-light); font-size: 14px; text-align: center; margin: var(--space-2) 0; }
 
@@ -48,7 +48,7 @@
 .cal-grid__dayhead.today { box-shadow: inset 0 -2px 0 var(--color-accent); }
 .cal-grid__hour { font: 600 12px var(--font-body); color: var(--color-muted-light); padding: 8px 6px; border-top: 1px solid var(--color-border); text-align: right; }
 .cal-grid__cell { border-top: 1px solid var(--color-border); border-left: 1px solid var(--color-border); padding: 4px; display: flex; flex-direction: column; gap: 4px; min-height: 44px; min-width: 0; }
-.cal-grid__cell.today { background: color-mix(in srgb, var(--color-accent) 5%, transparent); }
+.cal-grid__cell.today { background: var(--color-accent-a8); }
 .cal-grid__cell .cal-entry { grid-template-columns: auto 1fr; grid-template-areas: "time meta" "body body"; padding: 4px 6px; }
 .cal-grid__cell .cal-entry__sub, .cal-grid__cell .cal-entry__fixed { display: none; }
 .cal-grid__more { align-self: flex-start; background: none; border: 0; padding: 0 2px; color: var(--color-celeste); font: 600 12px var(--font-body); cursor: pointer; }
@@ -67,8 +67,8 @@
 .cal-strip__dow { font-size: 11px; color: var(--color-muted-light); text-transform: uppercase; }
 .cal-strip__num { font: 700 16px var(--font-display); }
 .cal-strip__mark { height: 16px; display: flex; align-items: center; }
-.cal-strip__mark b { font-size: 10px; min-width: 16px; padding: 0 4px; border-radius: 999px; text-align: center; line-height: 16px; background: color-mix(in srgb, var(--color-accent) 25%, transparent); color: var(--color-text); }
-.cal-strip__mark b.full { background: color-mix(in srgb, var(--color-danger) 30%, transparent); }
+.cal-strip__mark b { font-size: 10px; min-width: 16px; padding: 0 4px; border-radius: var(--radius-full); text-align: center; line-height: 16px; background: var(--color-accent-a30); color: var(--color-text); }
+.cal-strip__mark b.full { background: var(--color-danger-a30); }
 .cal-strip__mark i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-muted); }
 .cal-strip__title { margin: 0; font: 700 15px var(--font-display); }
 .cal-strip__title::first-letter { text-transform: uppercase; }
@@ -138,12 +138,12 @@
 /* Completo: rojo PlanGym, suave (tinte + borde), sin gritar sobre el fondo oscuro */
 .cal-entry--full {
   border-left-color: var(--color-danger);
-  background: linear-gradient(90deg, color-mix(in srgb, var(--color-danger) 14%, transparent), transparent 75%), var(--color-card);
+  background: linear-gradient(90deg, var(--color-danger-a12), transparent 75%), var(--color-card);
 }
 .cal-entry--full .cal-entry__meta { color: var(--color-danger); font-weight: 700; }
 .cal-entry--full.cal-entry--free { border-style: solid; border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); border-left-color: var(--color-danger); }
 .cal-entry--full.cal-entry--free .cal-entry__title { color: var(--color-text); }
 .cal-entry--full:hover { border-color: var(--color-danger); }
 .cal-month__full { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; color: var(--color-danger); }
-.cal-month__full i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 6px color-mix(in srgb, var(--color-danger) 60%, transparent); }
+.cal-month__full i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger); box-shadow: 0 0 6px var(--color-danger-a50); }
 @container (max-width: 520px) { .cal-month__full { font-size: 0; gap: 0; } .cal-month__full i { width: 7px; height: 7px; } }

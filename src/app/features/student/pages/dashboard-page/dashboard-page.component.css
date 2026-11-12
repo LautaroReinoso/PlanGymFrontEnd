@@ -50,7 +50,7 @@
 
 .plan-card__accent {
   height: 4px;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-celeste, #38BDF8));
+  background: linear-gradient(90deg, var(--color-accent), var(--color-celeste, var(--color-celeste)));
 }
 
 .plan-card__body {

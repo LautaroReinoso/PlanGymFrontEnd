@@ -24,10 +24,10 @@
 
 .detail-hero {
   width: 100%;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid #2A2A38;
-  background: #1C1C26;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
   max-height: 260px;
 }
 
@@ -43,9 +43,9 @@
   flex-shrink: 0;
   width: 64px;
   height: 64px;
-  border-radius: 16px;
-  background: #1C1C26;
-  border: 1px solid #2A2A38;
+  border-radius: var(--radius-md);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -63,7 +63,7 @@
   font-weight: 800;
   font-size: 24px;
   line-height: 1.15;
-  color: #F0F0F5;
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -79,17 +79,17 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  border-radius: 12px;
+  background: var(--color-celeste-a8);
+  border: 1px solid var(--color-celeste-a20);
+  border-radius: var(--radius-md);
   padding: 14px 16px;
-  color: #9898A8;
+  color: var(--color-muted-light);
 }
 
 .global-notice svg {
   flex-shrink: 0;
   margin-top: 1px;
-  color: #38BDF8;
+  color: var(--color-celeste);
 }
 
 .global-notice p {
@@ -98,14 +98,14 @@
   line-height: 1.5;
 }
 
-.global-notice strong { color: #F0F0F5; }
+.global-notice strong { color: var(--color-text); }
 
 /* ── Dificultad ──────────────────────────────────── */
 
 .difficulty-card {
-  background: #1C1C26;
-  border: 1px solid #2A2A38;
-  border-radius: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 16px 18px;
   display: flex;
   flex-direction: column;
@@ -123,36 +123,36 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6B6B80;
+  color: var(--color-muted);
 }
 
 .difficulty-card-value {
   font-size: 13px;
   font-weight: 600;
-  color: #F0F0F5;
+  color: var(--color-text);
 }
 
 .difficulty-bar {
   height: 8px;
-  border-radius: 999px;
-  background: #13131A;
-  border: 1px solid #2A2A38;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   overflow: hidden;
 }
 
 .difficulty-bar-fill {
   height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #22C55E, #F59E0B);
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--color-success), var(--color-warning));
   transition: width 300ms ease;
 }
 
 /* ── Cards ───────────────────────────────────────── */
 
 .detail-card {
-  background: #1C1C26;
-  border: 1px solid #2A2A38;
-  border-radius: 14px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -168,7 +168,7 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #6B6B80;
+  color: var(--color-muted);
 }
 
 .section-title svg { flex-shrink: 0; }
@@ -177,7 +177,7 @@
   margin: 0;
   font-size: 14.5px;
   line-height: 1.6;
-  color: #9898A8;
+  color: var(--color-muted-light);
 }
 
 .technique-list {
@@ -195,7 +195,7 @@
   gap: 10px;
   font-size: 14px;
   line-height: 1.55;
-  color: #9898A8;
+  color: var(--color-muted-light);
 }
 
 .technique-step-index {
@@ -203,8 +203,8 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: rgba(79, 110, 247, 0.12);
-  color: #4F6EF7;
+  background: var(--color-accent-a12);
+  color: var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,7 +241,7 @@
   padding: 14px 8px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 .stat-value { font: 700 20px 'DM Sans', sans-serif; color: var(--color-text); }
 .stat-label { font: 500 12px 'DM Sans', sans-serif; color: var(--color-muted-light); }
@@ -267,7 +267,7 @@
   padding: 16px 12px 12px;
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 .muscle-map__legend { display: flex; gap: 16px; font-size: 12px; color: var(--color-muted-light); }
 .muscle-map__dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }

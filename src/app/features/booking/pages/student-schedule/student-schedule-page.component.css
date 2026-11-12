@@ -15,13 +15,13 @@
   padding: 8px 0; cursor: pointer; font-family: var(--font-body); color: var(--color-text);
   background: var(--color-card); border: 1px solid var(--color-border); border-radius: var(--radius-sm);
 }
-.days__btn.on { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.days__btn.on { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
 .days__btn.empty:not(.on) { opacity: .45; }
 .days__dow { font-size: 11px; text-transform: uppercase; letter-spacing: .03em; }
 .days__num { font: 700 17px var(--font-display); }
 .days__dot { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
 .days__dot.has { background: var(--color-celeste); }
-.days__btn.on .days__dot.has { background: #fff; }
+.days__btn.on .days__dot.has { background: var(--color-on-accent); }
 
 .day-title { text-transform: none; }
 .day-title::first-letter { text-transform: uppercase; }
@@ -39,7 +39,7 @@
 .slot__state { font-size: 12px; font-weight: 700; color: var(--color-muted-light); text-align: right; flex-shrink: 0; }
 .slot--mine { border-color: var(--color-accent); background: var(--color-accent-dim); }
 .slot--mine .slot__state { color: var(--color-accent); }
-.slot--full { opacity: .85; border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); border-left: 3px solid var(--color-danger); background: linear-gradient(90deg, color-mix(in srgb, var(--color-danger) 12%, transparent), transparent 70%); }
+.slot--full { opacity: .85; border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); border-left: 3px solid var(--color-danger); background: linear-gradient(90deg, var(--color-danger-a12), transparent 70%); }
 .slot--full .slot__state { color: var(--color-danger); font-weight: 700; }
 .slot--recover { cursor: pointer; border-color: var(--color-celeste);
   transition: transform var(--duration-fast) var(--ease-spring); }
