@@ -5,7 +5,8 @@ import { catchError, forkJoin, of } from 'rxjs';
 //  Anotarse = todo o nada. Cambiar o dejar gasta 1 cambio del mes.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -30,6 +31,7 @@ type Pending =
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentChoosePageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingStudentService);
   private readonly toast = inject(ToastService);
 
@@ -77,7 +79,7 @@ export class StudentChoosePageComponent {
     forkJoin({
       list: this.api.services(),
       mine: this.api.myEnrollments().pipe(catchError(() => of([]))),
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ list, mine }) => {
         const live = mine.find(e => e.status !== 'ENDED');
         this.myPlanId.set(live?.serviceId ?? null);
@@ -102,7 +104,7 @@ export class StudentChoosePageComponent {
     this.picked.set([]);
     this.selected.set(null);
     this.changing.set(false);
-    this.api.options(id).subscribe({
+    this.api.options(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: o => { this.options.set(o); this.isLoading.set(false); },
       error: err => { this.isLoading.set(false); this.error.set(apiErrorText(err)); },
     });
@@ -139,7 +141,7 @@ export class StudentChoosePageComponent {
       return { dayOfWeek: Number(d) as DayOfWeek, startTime: t };
     });
     this.isSaving.set(true);
-    this.api.enroll(id, slots).subscribe({
+    this.api.enroll(id, slots).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => { this.isSaving.set(false); this.toast.success('¡Listo! Ya estás anotado.'); this.load(); },
       error: err => { this.isSaving.set(false); this.toast.error(apiErrorText(err)); this.load(); },
     });
@@ -157,7 +159,7 @@ export class StudentChoosePageComponent {
     const req = p.kind === 'change'
       ? this.api.change(p.from.enrollmentId, { dayOfWeek: p.to.dayOfWeek, startTime: hhmm(p.to.startTime) })
       : this.api.leave(p.from.enrollmentId);
-    req.subscribe({
+    req.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.pending.set(null);

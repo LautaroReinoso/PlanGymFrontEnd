@@ -8,14 +8,7 @@
 //   · Alumno     → solo DNI
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  DestroyRef,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -101,7 +94,7 @@ export class LoginComponent {
     const dni = this.studentForm.controls.dni;
     dni.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(value => {
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
         const clean = value.replace(/\D/g, '').slice(0, 8);
         if (clean !== value) dni.setValue(clean, { emitEvent: false });
       });
@@ -130,7 +123,7 @@ export class LoginComponent {
       ? this.auth.loginStudent(this.studentForm.getRawValue().dni)
       : this.auth.login(this.trainerForm.getRawValue());
 
-    request$.subscribe({
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: (err: Error) => {
         this.errorMessage.set(err.message);
         this.isLoading.set(false);

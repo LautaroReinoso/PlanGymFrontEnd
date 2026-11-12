@@ -4,7 +4,8 @@
 //  suscripción activa (sus alumnos no pueden entrar).
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { BillingService } from '../../../services/billing.service';
 
@@ -17,6 +18,7 @@ import { BillingService } from '../../../services/billing.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubscriptionBannerComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly billing = inject(BillingService);
 
   /** Solo se muestra cuando ya sabemos el estado y no es AUTHORIZED. */
@@ -26,6 +28,6 @@ export class SubscriptionBannerComponent implements OnInit {
   ngOnInit(): void {
     if (!this.billing.enabled) return; // período de prueba: ni consultamos
     // Si falla, no mostramos nada: es un aviso, no debe romper la página.
-    this.billing.getMySubscription().subscribe({ error: () => {} });
+    this.billing.getMySubscription().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ error: () => {} });
   }
 }

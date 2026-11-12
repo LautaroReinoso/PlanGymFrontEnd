@@ -4,7 +4,8 @@
 //  (active = false): se muestran aparte con "Reactivar".
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -33,6 +34,7 @@ const EMPTY_SERVICE: BookingServiceRequest = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainerServicesPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingTrainerService);
   private readonly toast = inject(ToastService);
 
@@ -60,14 +62,14 @@ export class TrainerServicesPageComponent {
 
   load(): void {
     this.isLoading.set(true);
-    this.api.allServices().subscribe({
+    this.api.allServices().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.services.set(list); this.isLoading.set(false); },
       error: err => { this.isLoading.set(false); this.toast.error(apiErrorText(err)); },
     });
   }
 
   private reload(): void {
-    this.api.allServices().subscribe({
+    this.api.allServices().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => this.services.set(list),
       error: err => this.toast.error(apiErrorText(err)),
     });
@@ -113,7 +115,7 @@ export class TrainerServicesPageComponent {
     };
     const editing = this.editingService();
     this.isSavingService.set(true);
-    (editing ? this.api.updateService(editing.id, body) : this.api.createService(body)).subscribe({
+    (editing ? this.api.updateService(editing.id, body) : this.api.createService(body)).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSavingService.set(false);
         this.serviceForm.set(null);
@@ -128,7 +130,7 @@ export class TrainerServicesPageComponent {
     const s = this.deleteTarget();
     if (!s) return;
     this.isSavingService.set(true);
-    this.api.deleteService(s.id).subscribe({
+    this.api.deleteService(s.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSavingService.set(false);
         this.deleteTarget.set(null);
@@ -143,7 +145,7 @@ export class TrainerServicesPageComponent {
 
   reactivate(s: BookingService): void {
     this.busyId.set(s.id);
-    this.api.updateService(s.id, this.toRequest(s, true)).subscribe({
+    this.api.updateService(s.id, this.toRequest(s, true)).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => { this.busyId.set(null); this.toast.success('Servicio activado.'); this.reload(); },
       error: err => { this.busyId.set(null); this.toast.error(apiErrorText(err)); },
     });

@@ -5,7 +5,8 @@ import { absenceCapNotice, ddmm, expiresSoon, latestRecoveryDeadline, pendingRec
 //  Horario fijo → "Avisar que no voy" · suelta → preview + cancelar.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
@@ -35,6 +36,7 @@ const VIEW_KEY = 'pg.student.calendarView';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentAgendaPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingStudentService);
   private readonly toast = inject(ToastService);
 
@@ -152,8 +154,8 @@ export class StudentAgendaPageComponent {
     this.isLoading.set(true);
     this.loadError.set(null);
     this.api.schedule(this.range()).pipe(catchError(() => of([] as ScheduleSlot[])))
-      .subscribe(list => this.slots.set(list));
-    this.api.myBookings(this.range()).subscribe({
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => this.slots.set(list));
+    this.api.myBookings(this.range()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.bookings.set(list); this.isLoading.set(false); },
       error: err => {
         this.loadError.set(apiErrorText(err, 'No se pudieron cargar tus clases.'));
@@ -163,13 +165,13 @@ export class StudentAgendaPageComponent {
   }
 
   private loadFixed(): void {
-    this.api.myEnrollments().pipe(catchError(() => of([]))).subscribe(list => this.enrollments.set(list));
-    this.api.services().pipe(catchError(() => of([]))).subscribe(list => this.services.set(list));
+    this.api.myEnrollments().pipe(catchError(() => of([]))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => this.enrollments.set(list));
+    this.api.services().pipe(catchError(() => of([]))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => this.services.set(list));
     this.loadRecovery();
   }
 
   private loadRecovery(): void {
-    this.api.recoveries().pipe(catchError(() => of(null))).subscribe(r => this.recovery.set(r));
+    this.api.recoveries().pipe(catchError(() => of(null))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(r => this.recovery.set(r));
   }
 
   onView(v: CalendarView): void { this.view.set(v); saveView(VIEW_KEY, v); this.load(); }
@@ -193,7 +195,7 @@ export class StudentAgendaPageComponent {
     const b = this.open();
     if (!b) return;
     this.isWorking.set(true);
-    this.api.absenceWithMessage(b.id).subscribe({
+    this.api.absenceWithMessage(b.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: msg => {
         this.isWorking.set(false);
         this.toast.success(msg);
@@ -210,7 +212,7 @@ export class StudentAgendaPageComponent {
     const b = this.open();
     if (!b) return;
     this.isWorking.set(true);
-    this.api.cancellationPreview(b.id).subscribe({
+    this.api.cancellationPreview(b.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: p => {
         this.isWorking.set(false);
         if (!p.canCancel) { this.blockId(b.id, p.message); return; }
@@ -225,7 +227,7 @@ export class StudentAgendaPageComponent {
     const b = this.open();
     if (!b) return;
     this.isWorking.set(true);
-    this.api.cancel(b.id).subscribe({
+    this.api.cancel(b.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isWorking.set(false);
         this.toast.success(b.recoveryOfBookingId ? 'Recuperación cancelada: la volvés a tener disponible.' : 'Clase cancelada.');
@@ -276,7 +278,7 @@ export class StudentAgendaPageComponent {
     const s = this.freeSlot();
     if (!s) return;
     this.isRecovering.set(true);
-    this.api.recover({ serviceId: s.serviceId, professionalId: s.professionalId, startAt: s.startAt }).subscribe({
+    this.api.recover({ serviceId: s.serviceId, professionalId: s.professionalId, startAt: s.startAt }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isRecovering.set(false);
         this.freeSlot.set(null);

@@ -4,7 +4,8 @@ import { absenceCapNotice, ddmm } from '../../utils/recovery.util';
 //  Próxima clase con acción rápida. Sin clases: atajos a elegir/reservar.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 
@@ -25,6 +26,7 @@ import { apiErrorText } from '../../../../core/http/api-error.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NextClassCardComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly classes = inject(StudentClassesService);
   private readonly api = inject(BookingStudentService);
   private readonly toast = inject(ToastService);
@@ -79,7 +81,7 @@ export class NextClassCardComponent {
       upcoming: this.classes.upcoming(),
       services: this.api.services().pipe(catchError(() => of([] as BookingService[]))),
       recovery: this.api.recoveries().pipe(catchError(() => of(null))),
-    }).subscribe(({ upcoming, services, recovery }) => {
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ upcoming, services, recovery }) => {
       this.upcoming.set(upcoming);
       this.services.set(services);
       this.recovery.set(recovery);
@@ -91,7 +93,7 @@ export class NextClassCardComponent {
     const b = this.next();
     if (!b) return;
     this.isWorking.set(true);
-    this.api.absenceWithMessage(b.id).subscribe({
+    this.api.absenceWithMessage(b.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: msg => {
         this.isWorking.set(false);
         this.confirming.set(false);

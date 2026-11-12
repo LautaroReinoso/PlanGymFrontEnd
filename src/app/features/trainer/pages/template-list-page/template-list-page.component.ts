@@ -5,14 +5,8 @@
 //  (página dedicada, no modal).
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -38,6 +32,7 @@ import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TemplatesListPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly templateSvc = inject(TemplateService);
   private readonly router      = inject(Router);
@@ -57,14 +52,13 @@ export class TemplatesListPageComponent implements OnInit {
   // ── Lifecycle ─────────────────────────────────
   ngOnInit(): void {
     this.loadTemplates();
-    console.log(this.templates());
   }
 
   loadTemplates(): void {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.templateSvc.getAll().subscribe({
+    this.templateSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.templates.set(data);
         this.isLoading.set(false);

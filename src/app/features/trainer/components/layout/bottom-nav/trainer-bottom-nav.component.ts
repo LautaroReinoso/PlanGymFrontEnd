@@ -5,7 +5,8 @@
 //  Perfil, Suscripción y Cerrar sesión siguen en el menú (☰).
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { BookingTrainerService } from '../../../../booking/services/booking-trainer.service';
 
@@ -55,10 +56,11 @@ const ITEMS: Item[] = [
   `],
 })
 export class TrainerBottomNavComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly enabled = signal(false);
   readonly items = computed(() => ITEMS.filter(i => !i.booking || this.enabled()));
 
   constructor() {
-    inject(BookingTrainerService).probe().subscribe(ok => this.enabled.set(ok));
+    inject(BookingTrainerService).probe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(ok => this.enabled.set(ok));
   }
 }

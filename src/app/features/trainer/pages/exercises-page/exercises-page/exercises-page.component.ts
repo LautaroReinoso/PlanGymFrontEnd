@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -46,6 +46,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExercisesPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly exerciseService = inject(ExerciseService);
   private readonly router = inject(Router);
 
@@ -98,7 +99,7 @@ export class ExercisesPageComponent {
         }),
       )),
       takeUntilDestroyed(),
-    ).subscribe(list => {
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
       this.exercises.set(list);
       this.isLoading.set(false);
     });
@@ -136,7 +137,7 @@ export class ExercisesPageComponent {
   /** El item de listado no trae técnica ni secundarios: se pide el detalle antes de editar */
   onEdit(ex: Exercise): void {
     if (ex.global) return;
-    this.exerciseService.getById(ex.id).subscribe({
+    this.exerciseService.getById(ex.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (detail) => {
         if (!detail.canEdit) return;
         this.editingExercise.set(detail);
@@ -150,7 +151,7 @@ export class ExercisesPageComponent {
     if (ex.global) return;
     if (!confirm(`¿Eliminar "${ex.name}"? Se quita de tu catálogo; las plantillas que ya lo usan no se modifican.`)) return;
 
-    this.exerciseService.delete(ex.id).subscribe({
+    this.exerciseService.delete(ex.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => this.exercises.update(list => list.filter(e => e.id !== ex.id)),
       error: () => this.error.set('No se pudo eliminar el ejercicio.'),
     });
@@ -170,7 +171,7 @@ export class ExercisesPageComponent {
       ? this.exerciseService.update(editing.id, payload)
       : this.exerciseService.create(payload);
 
-    request.subscribe({
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (saved) => {
         const item = this.toListItem(saved);
         if (editing) {

@@ -16,21 +16,13 @@
 //  />
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  input,
-  output,
-  signal,
-  computed,
-  effect,
-  ChangeDetectionStrategy,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ExerciseService } from '../../../services/exercise.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { Exercise, AddExerciseToDayRequest, CreateExerciseRequest } from '../../../models/trainer.models';
+import { Exercise, CreateExerciseRequest } from '../../../models/trainer.models';
 import { muscleGroupLabel } from '../../../models/muscle-group.util';
 import { toExercisePayload } from '../../../models/exercise-meta.util';
 import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
@@ -63,6 +55,7 @@ export interface ExerciseSelection {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddExercisesModalComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly exerciseService = inject(ExerciseService);
 
   // ── Inputs ────────────────────────────────────
@@ -133,7 +126,7 @@ export class AddExercisesModalComponent {
    *  (si los tiene). El trainer los puede cambiar antes de confirmar. */
   private prefillFromDefaults(id: number): void {
     this.loadingDefaults.set(true);
-    this.exerciseService.getById(id).subscribe({
+    this.exerciseService.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (d) => {
         this.loadingDefaults.set(false);
         if (this.selectedExerciseId() !== id) return; // cambió la selección

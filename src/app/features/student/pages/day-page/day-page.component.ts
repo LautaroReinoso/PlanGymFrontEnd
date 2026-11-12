@@ -12,14 +12,8 @@
 import { ExerciseDetail } from '../../../trainer/models/trainer.models';
 import { TodayClassesComponent } from '../../../booking/components/today-classes/today-classes.component';
 import { dayExerciseSummary } from '../../../trainer/models/exercise-meta.util';
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -53,6 +47,7 @@ import { PageLoaderComponent } from '../../../../shared/components/page-loader/p
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DayPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly workoutService = inject(StudentWorkoutService);
   private readonly route          = inject(ActivatedRoute);
@@ -97,9 +92,9 @@ export class DayPageComponent implements OnInit {
     this.dayId.set(workoutDayId);
     // Siempre se pide la semana actual: es liviano y evita mostrar datos viejos
     // (p. ej. otro alumno que usó el mismo navegador antes).
-    this.weekService.load().subscribe({ error: () => { /* el botón queda en "Marcar" */ } });
+    this.weekService.load().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ error: () => { /* el botón queda en "Marcar" */ } });
 
-    this.workoutService.getMyWorkoutDay(workoutDayId).subscribe({
+    this.workoutService.getMyWorkoutDay(workoutDayId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: res => {
         this.data.set(res);
         this.isLoading.set(false);
@@ -125,7 +120,7 @@ export class DayPageComponent implements OnInit {
   markAsDone(): void {
     if (this.doneToday() || this.isMarking()) return;
     this.markError.set(null);
-    this.weekService.markDone(this.dayId()).subscribe({
+    this.weekService.markDone(this.dayId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => this.markError.set('No pudimos registrar el entrenamiento. Probá de nuevo.'),
     });
   }
@@ -134,7 +129,7 @@ export class DayPageComponent implements OnInit {
   unmark(): void {
     if (!this.doneToday() || this.isMarking()) return;
     this.markError.set(null);
-    this.weekService.unmark(this.dayId()).subscribe({
+    this.weekService.unmark(this.dayId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => this.markError.set('No pudimos desmarcar el día. Probá de nuevo.'),
     });
   }
@@ -150,7 +145,7 @@ export class DayPageComponent implements OnInit {
     this.fullDetail.set(cached ?? null);
     if (cached) return;
     this.loadingDetail.set(true);
-    this.workoutService.exerciseDetail(ex.exerciseId).subscribe({
+    this.workoutService.exerciseDetail(ex.exerciseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: d => {
         this.detailCache.set(ex.exerciseId, d);
         if (this.selectedExercise()?.exerciseId === ex.exerciseId) this.fullDetail.set(d);

@@ -6,7 +6,8 @@
 //  otra fecha.
 // ─────────────────────────────────────────────
 
-import { Component, ChangeDetectionStrategy, computed, inject, signal, OnInit, effect, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -40,6 +41,7 @@ interface WeekCell {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WeeklyPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly weekService = inject(WeekStatusService);
   private readonly router = inject(Router);
 
@@ -76,7 +78,7 @@ export class WeeklyPageComponent implements OnInit {
       const w = this.week();
       if (!w) return;
       untracked(() => this.classesSvc.classesIn({ from: w.weekStart, to: w.weekEnd })
-        .subscribe(list => this.weekClasses.set(list)));
+        .pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => this.weekClasses.set(list)));
     });
   }
 
@@ -122,7 +124,7 @@ export class WeeklyPageComponent implements OnInit {
   load(date?: string): void {
     this.error.set(null);
     this.noPlan.set(false);
-    this.weekService.load(date).subscribe({
+    this.weekService.load(date).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: (err) => {
         if (err?.status === 404) this.noPlan.set(true);
         else this.error.set('No pudimos cargar tu semana. Intentá nuevamente.');

@@ -6,7 +6,8 @@
 //  (tope por mes que pone el entrenador). Se recupera en cualquier servicio.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, forkJoin, of, switchMap } from 'rxjs';
 import { absenceCapNotice, ddmm, expiresSoon, latestRecoveryDeadline, pendingRecoveries, withinRecoveryWindow } from '../../utils/recovery.util';
@@ -38,6 +39,7 @@ interface DayTab { key: string; dow: string; num: number; count: number; free: n
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentSchedulePageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingStudentService);
   private readonly toast = inject(ToastService);
 
@@ -111,7 +113,7 @@ export class StudentSchedulePageComponent {
           summary: of(summary),
         });
       }),
-    ).subscribe({
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ slots, summary }) => {
         this.slots.set(slots);
         this.summary.set(summary);
@@ -148,7 +150,7 @@ export class StudentSchedulePageComponent {
     const s = this.chosen();
     if (!s) return;
     this.isSaving.set(true);
-    this.api.recover({ serviceId: s.serviceId, professionalId: s.professionalId, startAt: s.startAt }).subscribe({
+    this.api.recover({ serviceId: s.serviceId, professionalId: s.professionalId, startAt: s.startAt }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.chosen.set(null);

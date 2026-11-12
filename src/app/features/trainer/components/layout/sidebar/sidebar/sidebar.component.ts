@@ -4,15 +4,8 @@
 //  Desktop: fijo. Mobile: drawer desde la izquierda.
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  input,
-  output,
-  inject,
-  computed,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../../../../core/auth/services/auth.service';
 import { ENVIRONMENT } from '../../../../../../../environments/tokens/environment.token';
@@ -33,6 +26,7 @@ interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly auth = inject(AuthService);
   private readonly billingEnabled = inject(ENVIRONMENT).billingEnabled;
@@ -77,7 +71,7 @@ export class SidebarComponent {
   private readonly bookingEnabled = signal(false);
 
   constructor() {
-    inject(BookingTrainerService).probe().subscribe(ok => this.bookingEnabled.set(ok));
+    inject(BookingTrainerService).probe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(ok => this.bookingEnabled.set(ok));
   }
 
   // "Suscripción" solo aparece con billingEnabled; "Turnos" si el módulo responde

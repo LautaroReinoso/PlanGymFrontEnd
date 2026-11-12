@@ -4,7 +4,8 @@
 //  y resumen de cupos por franja.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -67,6 +68,7 @@ function saveCapacity(n: number): void {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainerAvailabilityPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingTrainerService);
   private readonly toast = inject(ToastService);
 
@@ -174,7 +176,7 @@ export class TrainerAvailabilityPageComponent {
     this.isLoadingRules.set(true);
     this.rulesError.set(null);
     this.rulesConflict.set(false);
-    this.api.availability().subscribe({
+    this.api.availability().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         const norm = normalizeRules(list);
         this.rules.set(norm);
@@ -297,7 +299,7 @@ export class TrainerAvailabilityPageComponent {
     this.isSaving.set(true);
     this.rulesError.set(null);
     this.rulesConflict.set(false);
-    this.api.saveAvailability(this.rules()).subscribe({
+    this.api.saveAvailability(this.rules()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         const norm = normalizeRules(list);
         this.rules.set(norm);
@@ -317,7 +319,7 @@ export class TrainerAvailabilityPageComponent {
   // ── Cupos ──
   loadOverview(): void {
     this.isLoadingOverview.set(true);
-    this.api.scheduleOverview().subscribe({
+    this.api.scheduleOverview().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.overview.set(list); this.isLoadingOverview.set(false); },
       error: err => { this.isLoadingOverview.set(false); this.toast.error(apiErrorText(err)); },
     });
@@ -326,7 +328,7 @@ export class TrainerAvailabilityPageComponent {
   // ── Bloqueos ──
   loadBlocks(): void {
     this.isLoadingBlocks.set(true);
-    this.api.blocks().subscribe({
+    this.api.blocks().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         this.blocks.set([...list].sort((a, b) => a.startAt.localeCompare(b.startAt)));
         this.isLoadingBlocks.set(false);
@@ -348,7 +350,7 @@ export class TrainerAvailabilityPageComponent {
     if (to <= from) { this.blockError.set('El fin tiene que ser después del inicio.'); return; }
     this.busyBlock.set('new');
     this.blockError.set(null);
-    this.api.createBlock({ startAt: toArgIso(from), endAt: toArgIso(to), reason: this.blockReason().trim() }, confirm).subscribe({
+    this.api.createBlock({ startAt: toArgIso(from), endAt: toArgIso(to), reason: this.blockReason().trim() }, confirm).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.busyBlock.set(null);
         this.blockConflict.set(null);
@@ -366,7 +368,7 @@ export class TrainerAvailabilityPageComponent {
 
   deleteBlock(b: Block): void {
     this.busyBlock.set(b.id);
-    this.api.deleteBlock(b.id).subscribe({
+    this.api.deleteBlock(b.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => { this.busyBlock.set(null); this.toast.success('Bloqueo eliminado.'); this.loadBlocks(); },
       error: err => { this.busyBlock.set(null); this.toast.error(apiErrorText(err)); },
     });

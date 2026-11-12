@@ -116,7 +116,6 @@ updateDay( templateId: number, workoutDayId: number,dto: UpdateDayRequest): Obse
       dayId: number,
       exerciseId: number
     ): Observable < void> {
-      console.log(`Removing exercise ${exerciseId} from day ${dayId}`);
       return this.http.delete<void>(
         `${this.api}/day-exercises/days/${dayId}/exercises/${exerciseId}`
       );

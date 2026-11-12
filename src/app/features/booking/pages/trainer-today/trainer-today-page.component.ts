@@ -6,7 +6,8 @@
 //  marcó hoy o, si no, el primer día del plan pendiente esta semana.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, forkJoin, of } from 'rxjs';
 
@@ -46,6 +47,7 @@ interface TodayState {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainerTodayPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingTrainerService);
   private readonly logsApi = inject(TrainerWorkoutLogService);
   private readonly toast = inject(ToastService);
@@ -107,7 +109,7 @@ export class TrainerTodayPageComponent {
   load(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.api.agenda({ from: this.today, to: this.today }).subscribe({
+    this.api.agenda({ from: this.today, to: this.today }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         this.items.set(list);
         this.isLoading.set(false);
@@ -129,7 +131,7 @@ export class TrainerTodayPageComponent {
     forkJoin({
       detail: this.logsApi.studentDetail(id).pipe(catchError(() => of(null))),
       logs: this.logsApi.history(id).pipe(catchError(() => of([] as TrainerWorkoutLog[]))),
-    }).subscribe(({ detail, logs }) => {
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ detail, logs }) => {
       this.students.update(all => ({ ...all, [id]: { loading: false, detail, logs, error: !detail } }));
     });
   }
@@ -177,7 +179,7 @@ export class TrainerTodayPageComponent {
     const id = this.openUserId(), day = this.openDay();
     if (id == null || !day) return;
     this.isMarking.set(true);
-    this.logsApi.markDone(id, day.workoutDayId, this.today).subscribe({
+    this.logsApi.markDone(id, day.workoutDayId, this.today).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: log => {
         this.isMarking.set(false);
         this.students.update(all => ({ ...all, [id]: { ...all[id], logs: [log, ...all[id].logs] } }));

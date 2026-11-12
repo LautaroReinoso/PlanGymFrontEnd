@@ -3,7 +3,8 @@
 //  Clase suelta (servicios SELF o BOTH). Sin pago.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, Router } from '@angular/router';
 
 import { BookingStudentService } from '../../services/booking-student.service';
@@ -25,6 +26,7 @@ const DAYS_AHEAD = 14;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentBookPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingStudentService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
@@ -56,7 +58,7 @@ export class StudentBookPageComponent {
   });
 
   constructor() {
-    this.api.services().subscribe({
+    this.api.services().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         this.services.set(list);
         const first = this.bookable()[0];
@@ -79,7 +81,7 @@ export class StudentBookPageComponent {
     if (!id) return;
     this.isLoading.set(true);
     this.error.set(null);
-    this.api.slots(id, { from: this.from(), to: addDays(this.from(), DAYS_AHEAD - 1) }).subscribe({
+    this.api.slots(id, { from: this.from(), to: addDays(this.from(), DAYS_AHEAD - 1) }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.slots.set(list); this.isLoading.set(false); },
       error: err => { this.isLoading.set(false); this.error.set(apiErrorText(err)); },
     });
@@ -92,7 +94,7 @@ export class StudentBookPageComponent {
     const s = this.chosen(), id = this.serviceId();
     if (!s || !id) return;
     this.isSaving.set(true);
-    this.api.book(id, s.startAt, s.professionalId).subscribe({
+    this.api.book(id, s.startAt, s.professionalId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.chosen.set(null);

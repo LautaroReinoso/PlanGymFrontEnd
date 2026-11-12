@@ -5,7 +5,8 @@
 //  Después de cada acción se recarga el rango visible.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
@@ -49,6 +50,7 @@ export function toneOf(s: BookingStatus): CalTone {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainerAgendaPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingTrainerService);
   private readonly toast = inject(ToastService);
 
@@ -143,7 +145,7 @@ export class TrainerAgendaPageComponent {
   load(): void {
     this.isLoading.set(true);
     this.loadError.set(null);
-    this.api.agenda(this.range()).subscribe({
+    this.api.agenda(this.range()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.items.set(list); this.isLoading.set(false); },
       error: err => {
         this.loadError.set(apiErrorText(err, 'No se pudo cargar la agenda.'));
@@ -153,7 +155,7 @@ export class TrainerAgendaPageComponent {
   }
 
   private loadCapacities(): void {
-    this.api.scheduleOverview().pipe(catchError(() => of([]))).subscribe(list => {
+    this.api.scheduleOverview().pipe(catchError(() => of([]))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
       this.capacityMap.set(new Map(list.map(r => [`${r.dayOfWeek}-${hhmm(r.startTime)}`, r.capacity])));
     });
   }
@@ -198,7 +200,7 @@ export class TrainerAgendaPageComponent {
     }
     if (!present.length && !absent.length) return;
     this.isSaving.set(true);
-    this.api.attendance(present, absent).subscribe({
+    this.api.attendance(present, absent).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.marks.set({});
@@ -216,7 +218,7 @@ export class TrainerAgendaPageComponent {
     const reason = this.cancelReason().trim();
     if (!id || !reason) return;
     this.isSaving.set(true);
-    this.api.cancelBooking(id, reason).subscribe({
+    this.api.cancelBooking(id, reason).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.cancelId.set(null);

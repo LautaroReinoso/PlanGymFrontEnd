@@ -4,7 +4,8 @@
 //  Solo muestra algo si el módulo está prendido y hay clase hoy.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { StudentClassesService } from '../../services/student-classes.service';
 import { Booking } from '../../models/booking.models';
@@ -38,6 +39,7 @@ import { isPast, isoTime, todayKey } from '../../utils/booking-date.util';
   `],
 })
 export class TodayClassesComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly classes = inject(StudentClassesService);
   readonly today = signal<Booking[]>([]);
   /** "Funcional 18:00 y Musculación 20:00 (ya pasó)" */
@@ -49,6 +51,6 @@ export class TodayClassesComponent {
 
   constructor() {
     const k = todayKey();
-    this.classes.classesIn({ from: k, to: k }).subscribe(list => this.today.set(list));
+    this.classes.classesIn({ from: k, to: k }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => this.today.set(list));
   }
 }

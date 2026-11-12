@@ -6,7 +6,8 @@
 //  justo después de dar de alta un alumno en "Mis alumnos".
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 
@@ -34,6 +35,7 @@ function norm(s: string): string {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EnrollStudentModalComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingTrainerService);
   private readonly studentsApi = inject(StudentService);
   private readonly toast = inject(ToastService);
@@ -136,26 +138,26 @@ export class EnrollStudentModalComponent {
 
   private loadData(dni: string): void {
     this.loadingData.set(true);
-    this.studentsApi.getMyStudents().pipe(catchError(() => of([] as StudentSummary[]))).subscribe(list => {
+    this.studentsApi.getMyStudents().pipe(catchError(() => of([] as StudentSummary[]))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
       this.students.set(list);
       if (dni && !this.selectedId()) {
         const match = list.find(s => s.dni === dni);
         if (match) this.select(match);
       }
     });
-    this.api.services().pipe(catchError(() => of([]))).subscribe(list => {
+    this.api.services().pipe(catchError(() => of([]))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
       this.services.set(list);
       const fixed = list.filter(s => s.bookingMode !== 'SELF');
       if (!this.serviceId() && fixed.length) this.serviceId.set(fixed[0].id);
     });
-    this.api.scheduleOverview().pipe(catchError(() => of([]))).subscribe(list => {
+    this.api.scheduleOverview().pipe(catchError(() => of([]))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
       this.slots.set(list);
       this.loadingData.set(false);
     });
   }
 
   private loadAlreadyIn(userId: number): void {
-    this.api.enrollments({ status: '' }).pipe(catchError(() => of([]))).subscribe(list => {
+    this.api.enrollments({ status: '' }).pipe(catchError(() => of([]))).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
       const mine = list.filter(e => e.userId === userId && e.status !== 'ENDED');
       this.alreadyIn.set(new Set(mine.map(e => `${e.dayOfWeek}-${hhmm(e.startTime)}`)));
       this.myEnrollments.set(mine.map(e => ({ serviceId: e.serviceId })));
@@ -229,7 +231,7 @@ export class EnrollStudentModalComponent {
       slots,
       validFrom: this.validFrom() || undefined,
       validTo: this.validTo() || undefined,
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isSaving.set(false);
         this.toast.success('Alumno anotado. Sus clases ya están en el calendario.');

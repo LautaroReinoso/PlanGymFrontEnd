@@ -4,7 +4,8 @@
 //  copia a mis plantillas y abre la copia para editarla y asignarla.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 
 import { TemplateService } from '../../services/template.service';
@@ -29,6 +30,7 @@ const LEVEL_TEXT: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReferenceTemplatesPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(TemplateService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
@@ -47,7 +49,7 @@ export class ReferenceTemplatesPageComponent {
   load(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.api.getReferences().subscribe({
+    this.api.getReferences().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.plans.set(list); this.isLoading.set(false); },
       error: err => { this.error.set(apiErrorText(err, 'No pudimos cargar los planes de referencia.')); this.isLoading.set(false); },
     });
@@ -62,7 +64,7 @@ export class ReferenceTemplatesPageComponent {
     this.openId.set(p.id);
     this.detail.set(null);
     this.loadingDetail.set(true);
-    this.api.getReference(p.id).subscribe({
+    this.api.getReference(p.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: d => { if (this.openId() === p.id) this.detail.set(d); this.loadingDetail.set(false); },
       error: err => { this.loadingDetail.set(false); this.toast.error(apiErrorText(err)); },
     });
@@ -74,7 +76,7 @@ export class ReferenceTemplatesPageComponent {
 
   use(p: ReferenceTemplate): void {
     this.copyingId.set(p.id);
-    this.api.copyReference(p.id).subscribe({
+    this.api.copyReference(p.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: copy => {
         this.copyingId.set(null);
         this.toast.success(`"${copy.name}" quedó en tus plantillas. Adaptalo a tu alumno.`);

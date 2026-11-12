@@ -7,7 +7,8 @@
 // ─────────────────────────────────────────────
 
 import { plus30 } from '../../utils/recovery.util';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { StudentClassesService } from '../../services/student-classes.service';
 import { BookingStudentService } from '../../services/booking-student.service';
@@ -65,6 +66,7 @@ function saveSeen(ids: Set<number>): void {
   `],
 })
 export class CancelNoticeComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly classes = inject(StudentClassesService);
   private readonly api = inject(BookingStudentService);
   private readonly router = inject(Router);
@@ -79,7 +81,7 @@ export class CancelNoticeComponent {
     this.classes.ready().pipe(
       switchMap(ok => ok ? this.api.myBookings({ from: addDays(today, -1), to: addDays(today, 30) }) : of([] as Booking[])),
       catchError(() => of([] as Booking[])),
-    ).subscribe(list => {
+    ).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(list => {
       const seen = loadSeen();
       this.pending.set(list
         .filter(b => b.status === 'CANCELLED' && b.cancelledBy === 'PROFESSIONAL' && !seen.has(b.id) && !isPast(b.endAt))

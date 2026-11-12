@@ -3,7 +3,8 @@
 //  Llega desde el link del mail. Elige contraseña nueva y vuelve al login.
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -27,6 +28,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -66,7 +68,7 @@ export class ResetPasswordComponent {
     }
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.service.reset(this.token, this.form.controls.password.value).subscribe({
+    this.service.reset(this.token, this.form.controls.password.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.done.set(true);

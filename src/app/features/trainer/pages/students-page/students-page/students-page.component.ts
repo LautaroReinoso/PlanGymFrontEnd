@@ -4,14 +4,8 @@
 //  loader, estado vacío y búsqueda local.
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -47,6 +41,7 @@ import { BookingTrainerService } from '../../../../booking/services/booking-trai
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentsPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
     private readonly studentService = inject(StudentService);
   private readonly billing = inject(BillingService);
@@ -98,7 +93,7 @@ export class StudentsPageComponent implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────
   ngOnInit(): void {
-    this.booking.probe().subscribe(ok => {
+    this.booking.probe().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(ok => {
       this.bookingEnabled.set(ok);
       if (ok) this.loadTurnos();
     });
@@ -109,7 +104,7 @@ export class StudentsPageComponent implements OnInit {
   readonly turnosText = signal<Map<number, string>>(new Map());
 
   private loadTurnos(): void {
-    this.booking.students('', 'ALL').subscribe({
+    this.booking.students('', 'ALL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         const m = new Map<number, string>();
         for (const s of list) {
@@ -131,7 +126,7 @@ export class StudentsPageComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.studentService.getMyStudents().subscribe({
+    this.studentService.getMyStudents().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.students.set(data);
         this.isLoading.set(false);
@@ -159,7 +154,7 @@ export class StudentsPageComponent implements OnInit {
     this.isCreating.set(true);
     this.createError.set(null);
 
-    this.studentService.createStudent(request).subscribe({
+    this.studentService.createStudent(request).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
     this.showCreateStudentModal.set(false);
       if (this.bookingEnabled()) this.enrollDni.set(request.dni);

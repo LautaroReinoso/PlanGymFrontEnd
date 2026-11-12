@@ -10,12 +10,7 @@
 //  que son exclusivas de Trainer.
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -45,6 +40,7 @@ import { ExerciseFormValue } from '../../../components/exercises/exercise-form/e
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExerciseDetailPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly route            = inject(ActivatedRoute);
   private readonly router           = inject(Router);
   private readonly exerciseService  = inject(ExerciseService);
@@ -63,7 +59,7 @@ export class ExerciseDetailPageComponent {
   constructor() {
     // paramMap (no snapshot): "Crear variante" navega a /exercises/:nuevoId
     // y Angular reutiliza este mismo componente.
-    this.route.paramMap.pipe(takeUntilDestroyed()).subscribe(params => {
+    this.route.paramMap.pipe(takeUntilDestroyed()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       this.exerciseId = Number(params.get('id'));
       this.isModalOpen.set(false);
       this.loadExercise();
@@ -73,7 +69,7 @@ export class ExerciseDetailPageComponent {
   loadExercise(): void {
     this.isLoading.set(true);
     this.error.set(null);
-    this.exerciseService.getById(this.exerciseId).subscribe({
+    this.exerciseService.getById(this.exerciseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.exercise.set(data);
         this.isLoading.set(false);
@@ -103,7 +99,7 @@ export class ExerciseDetailPageComponent {
     if (!confirm(`¿Eliminar "${ex.name}"? Se quita de tu catálogo; las plantillas que ya lo usan no se modifican.`)) return;
 
     this.isSaving.set(true);
-    this.exerciseService.delete(ex.id).subscribe({
+    this.exerciseService.delete(ex.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => this.router.navigate(['/trainer/exercises']),
       error: () => {
         this.error.set('No se pudo eliminar el ejercicio.');
@@ -120,7 +116,7 @@ export class ExerciseDetailPageComponent {
 
     this.isSaving.set(true);
     this.error.set(null);
-    this.exerciseService.createVariant(ex.id).subscribe({
+    this.exerciseService.createVariant(ex.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (variant) => {
         this.isSaving.set(false);
         this.router.navigate(['/trainer/exercises', variant.id]);
@@ -149,7 +145,7 @@ export class ExerciseDetailPageComponent {
     if (!ex) return;
 
     this.isSaving.set(true);
-    this.exerciseService.update(ex.id, toExercisePayload(value)).subscribe({
+    this.exerciseService.update(ex.id, toExercisePayload(value)).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (saved) => {
         this.exercise.set(saved);
         this.isSaving.set(false);

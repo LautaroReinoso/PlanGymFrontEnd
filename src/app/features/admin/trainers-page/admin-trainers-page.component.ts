@@ -4,7 +4,8 @@
 //  y habilitar / deshabilitar (no borra datos).
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
@@ -23,6 +24,7 @@ type StatusFilter = 'ALL' | 'ENABLED' | 'DISABLED';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminTrainersPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly adminService = inject(AdminService);
 
   readonly trainers  = signal<AdminTrainer[]>([]);
@@ -54,7 +56,7 @@ export class AdminTrainersPageComponent implements OnInit {
   }
 
   loadCandidates(): void {
-    this.adminService.bookingCandidates().subscribe({
+    this.adminService.bookingCandidates().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => this.notInBooking.set(new Set(list.map(c => c.userId))),
       error: () => this.notInBooking.set(new Set()),   // módulo apagado o sin permiso: no se ofrece
     });
@@ -68,7 +70,7 @@ export class AdminTrainersPageComponent implements OnInit {
     if (!confirm(msg)) return;
     this.pendingId.set(t.id);
     this.error.set(null);
-    this.adminService.setSubscription(t.id, next).subscribe({
+    this.adminService.setSubscription(t.id, next).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: u => {
         this.trainers.update(list => list.map(x => x.id === t.id ? { ...x, subscriptionActive: u?.subscriptionActive ?? next } : x));
         this.pendingId.set(null);
@@ -80,7 +82,7 @@ export class AdminTrainersPageComponent implements OnInit {
   addToBooking(t: AdminTrainer): void {
     this.pendingId.set(t.id);
     this.error.set(null);
-    this.adminService.addProfessional(t.id).subscribe({
+    this.adminService.addProfessional(t.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.notInBooking.update(s => { const n = new Set(s); n.delete(t.id); return n; });
         this.pendingId.set(null);
@@ -93,7 +95,7 @@ export class AdminTrainersPageComponent implements OnInit {
     this.loadCandidates();
     this.isLoading.set(true);
     this.error.set(null);
-    this.adminService.getTrainers().subscribe({
+    this.adminService.getTrainers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => { this.trainers.set(list); this.isLoading.set(false); },
       error: () => {
         this.error.set('No pudimos cargar los entrenadores.');
@@ -121,7 +123,7 @@ export class AdminTrainersPageComponent implements OnInit {
 
     this.pendingId.set(t.id);
     this.error.set(null);
-    this.adminService.setTrainerEnabled(t.id, next).subscribe({
+    this.adminService.setTrainerEnabled(t.id, next).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: updated => {
         this.trainers.update(list => list.map(x => (x.id === updated.id ? updated : x)));
         this.pendingId.set(null);

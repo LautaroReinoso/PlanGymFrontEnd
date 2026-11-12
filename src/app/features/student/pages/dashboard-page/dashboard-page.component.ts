@@ -5,14 +5,8 @@
 //  (no se resuelve "el de hoy" por día de la semana).
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 
@@ -35,6 +29,7 @@ import { NextClassCardComponent } from '../../../booking/components/next-class/n
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly workoutService = inject(StudentWorkoutService);
   private readonly router         = inject(Router);
@@ -75,7 +70,7 @@ export class DashboardPageComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.workoutService.getMyWorkoutDetail().subscribe({
+    this.workoutService.getMyWorkoutDetail().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: detail => {
         this.detail.set(detail);
         this.isLoading.set(false);
@@ -88,7 +83,6 @@ export class DashboardPageComponent implements OnInit {
           return;
         }
         // Mostrar el motivo real del backend (403 sin suscripción, 500, sin conexión…)
-        console.error('[Dashboard] my-workout falló', err);
         this.error.set(apiErrorText(err, 'No pudimos cargar tu entrenamiento. Intentá nuevamente.'));
         this.isLoading.set(false);
       },

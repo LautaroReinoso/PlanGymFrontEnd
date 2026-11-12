@@ -6,14 +6,8 @@
 
 import { apiErrorText } from '../../../../../core/http/api-error.util';
 import { todayKey } from '../../../../booking/utils/booking-date.util';
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -53,6 +47,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StudentDetailPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly route       = inject(ActivatedRoute);
   private readonly router      = inject(Router);
@@ -126,7 +121,7 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.studentSvc.getStudentById(this.studentId()).subscribe({
+    this.studentSvc.getStudentById(this.studentId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data: any) => {
         this.student.set(data);
         this.isLoading.set(false);
@@ -151,7 +146,7 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
 
     if (this.templates().length === 0) {
       this.templatesLoading.set(true);
-      this.templateSvc.getAll().subscribe({
+      this.templateSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (t) => {
           this.templates.set(t);
           this.templatesLoading.set(false);
@@ -177,7 +172,7 @@ readonly selectedDay = computed<WorkoutTemplateDay | null>(() => {
       workoutTemplateId: templateId,
       // Fecha LOCAL (toISOString da UTC: después de las 21 h en Argentina mandaba mañana)
       startDate:         todayKey(),
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isAssigning.set(false);
         this.showAssignModal.set(false);

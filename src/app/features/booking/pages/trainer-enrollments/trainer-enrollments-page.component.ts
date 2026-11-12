@@ -3,7 +3,8 @@
 //  Horarios fijos de los alumnos (servicios: TrainerServicesPage).
 // ─────────────────────────────────────────────
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
@@ -32,6 +33,7 @@ const STATUS_TEXT: Record<EnrollmentStatus, string> = { ACTIVE: 'Activo', PAUSED
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainerEnrollmentsPageComponent {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(BookingTrainerService);
   private readonly toast = inject(ToastService);
 
@@ -164,7 +166,7 @@ export class TrainerEnrollmentsPageComponent {
     if (!g || !to || !this.canConfirmChange()) return;
     this.isChanging.set(true);
     this.changeError.set(null);
-    this.api.changeService(g.userId, { fromServiceId: g.serviceId, toServiceId: to, from: this.changeFrom() }).subscribe({
+    this.api.changeService(g.userId, { fromServiceId: g.serviceId, toServiceId: to, from: this.changeFrom() }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         this.isChanging.set(false);
         this.changeTarget.set(null);
@@ -186,7 +188,7 @@ export class TrainerEnrollmentsPageComponent {
   load(): void {
     this.isLoading.set(true);
     const st = this.statusFilter();
-    this.api.enrollments({ status: st === 'CURRENT' ? '' : st, serviceId: this.serviceFilter() }).subscribe({
+    this.api.enrollments({ status: st === 'CURRENT' ? '' : st, serviceId: this.serviceFilter() }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => {
         this.enrollments.set(st === 'CURRENT' ? list.filter(e => e.status !== 'ENDED') : list);
         this.isLoading.set(false);
@@ -196,14 +198,14 @@ export class TrainerEnrollmentsPageComponent {
   }
 
   loadServices(): void {
-    this.api.services().subscribe({
+    this.api.services().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => this.services.set(list),
       error: err => this.toast.error(apiErrorText(err)),
     });
   }
 
   loadMe(): void {
-    this.api.me().subscribe({
+    this.api.me().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: me => { this.me.set(me); this.recoveriesValue.set(me.recoveriesPerMonth ?? 0); },
       error: () => this.me.set(null),
     });
@@ -214,7 +216,7 @@ export class TrainerEnrollmentsPageComponent {
     const n = Math.max(0, Math.min(31, Math.round(this.recoveriesValue() || 0)));
     if (!me) return;
     this.isSavingMe.set(true);
-    this.api.updateMe({ displayName: me.displayName, recoveriesPerMonth: n }).subscribe({
+    this.api.updateMe({ displayName: me.displayName, recoveriesPerMonth: n }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: updated => {
         this.isSavingMe.set(false);
         this.me.set(updated);
@@ -233,7 +235,7 @@ export class TrainerEnrollmentsPageComponent {
   // ── Acciones de horario fijo ──
   setEnrollmentStatus(e: Enrollment, status: EnrollmentStatus): void {
     this.busyId.set(e.id);
-    this.api.updateEnrollment(e.id, { status }).subscribe({
+    this.api.updateEnrollment(e.id, { status }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.busyId.set(null);
         this.toast.success(status === 'PAUSED' ? 'Horario en pausa.' : 'Horario reactivado.');
@@ -250,7 +252,7 @@ export class TrainerEnrollmentsPageComponent {
     if (!e) return;
     this.busyId.set(e.id);
     const body = this.endDate() ? { validTo: this.endDate() } : { status: 'ENDED' as EnrollmentStatus };
-    this.api.updateEnrollment(e.id, body).subscribe({
+    this.api.updateEnrollment(e.id, body).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.busyId.set(null);
         this.endTarget.set(null);

@@ -4,13 +4,8 @@
 //  POST /auth/register → redirige a /login
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -44,6 +39,7 @@ function passwordMatchValidator(ctrl: AbstractControl): ValidationErrors | null 
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly fb     = inject(FormBuilder);
   private readonly router = inject(Router);
@@ -103,7 +99,7 @@ export class RegisterComponent {
 
     this.http
       .post(`${this.env.apiUrl}/auth/register`, { mail, password })
-      .subscribe({
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.isLoading.set(false);
           this.registerOk.set(true);

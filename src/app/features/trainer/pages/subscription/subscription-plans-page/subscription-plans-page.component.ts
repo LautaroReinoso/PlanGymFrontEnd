@@ -4,14 +4,8 @@
 //  Lista de planes (desde el backend) y alta de suscripción.
 // ─────────────────────────────────────────────
 
-import {
-  ChangeDetectionStrategy,
-  Component,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Observable, forkJoin, of, switchMap } from 'rxjs';
@@ -31,6 +25,7 @@ import { PageLoaderComponent } from '../../../../../shared/components/page-loade
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubscriptionPlansPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly billing = inject(BillingService);
 
   // ── Estado ────────────────────────────────────
@@ -62,7 +57,7 @@ export class SubscriptionPlansPageComponent implements OnInit {
     forkJoin({
       plans: this.billing.getPlans(),
       sub: this.billing.getMySubscription(),
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ({ plans }) => {
         this.plans.set(plans);
         this.isLoading.set(false);
@@ -88,7 +83,7 @@ export class SubscriptionPlansPageComponent implements OnInit {
 
     cancelPending$
       .pipe(switchMap(() => this.billing.createSubscription({ planCode: plan.code })))
-      .subscribe({
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: sub => {
         if (sub.initPoint) {
           // Checkout de Mercado Pago (sale de la app)

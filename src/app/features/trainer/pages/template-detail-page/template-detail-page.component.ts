@@ -5,15 +5,8 @@
 //  Fix #5: dead code eliminado de addDay()
 // ─────────────────────────────────────────────
 
-import {
-  Component,
-  inject,
-  signal,
-  computed,
-  effect,
-  OnInit,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -62,6 +55,7 @@ import { GymLoaderComponent } from '../../../../shared/components/gym-loader/gym
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TemplateDetailPageComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -160,7 +154,7 @@ export class TemplateDetailPageComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    this.templateSvc.getById(this.templateId()).subscribe({
+    this.templateSvc.getById(this.templateId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => {
         this.template.set(data);
         this.isLoading.set(false);
@@ -189,7 +183,7 @@ export class TemplateDetailPageComponent implements OnInit {
 
     this.isAddingDay.set(true);
 
-    this.templateSvc.addDay(this.templateId()).subscribe({
+    this.templateSvc.addDay(this.templateId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (newDay) => {
         this.isAddingDay.set(false);
         this.template.update(t => t ? { ...t, days: [...t.days, newDay] } : t);
@@ -203,7 +197,7 @@ export class TemplateDetailPageComponent implements OnInit {
   }
 
   removeDay(dayId: number): void {
-    this.templateSvc.deleteDay(this.templateId(), dayId).subscribe({
+    this.templateSvc.deleteDay(this.templateId(), dayId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.template.update(t => t
           ? { ...t, days: this.renumber(t.days.filter(d => d.id !== dayId)) }
@@ -222,7 +216,7 @@ export class TemplateDetailPageComponent implements OnInit {
     // Cargar ejercicios solo la primera vez
     if (this.exercises().length === 0) {
       this.exercisesLoading.set(true);
-      this.exerciseSvc.getAll().subscribe({
+      this.exerciseSvc.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (data) => { this.exercises.set(data); this.exercisesLoading.set(false); },
         error: () => { this.exercisesLoading.set(false); },
       });
@@ -250,7 +244,7 @@ export class TemplateDetailPageComponent implements OnInit {
       orderIndex: order,
       notes: selection.notes
 
-    }).subscribe({
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (newExercise) => {
         this.isAddingExercise.set(false);
         this.showExerciseModal.set(false);
@@ -279,7 +273,7 @@ export class TemplateDetailPageComponent implements OnInit {
 
     this.isAddingExercise.set(true);
 
-    this.exerciseSvc.create(dto).subscribe({
+    this.exerciseSvc.create(dto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (newExercise) => {
         // Ejercicio creado → ahora agregarlo al día seleccionado
         this.templateSvc.addExerciseToDay(dayId, {
@@ -288,7 +282,7 @@ export class TemplateDetailPageComponent implements OnInit {
           reps: 10,
           restSeconds: 60,
           orderIndex: order,
-        }).subscribe({
+        }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: (newDayExercise) => {
             this.isAddingExercise.set(false);
             this.showExerciseModal.set(false);
@@ -316,7 +310,7 @@ export class TemplateDetailPageComponent implements OnInit {
     const dayId = this.selectedDayId();
     if (!dayId) return;
 
-    this.templateSvc.removeExerciseFromDay(dayId, exerciseId).subscribe({
+    this.templateSvc.removeExerciseFromDay(dayId, exerciseId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.template.update(t => t ? {
           ...t,
@@ -357,7 +351,7 @@ export class TemplateDetailPageComponent implements OnInit {
     } : t);
 
     // El backend espera WorkoutDay.id (workoutDayId), no WorkoutTemplateDay.id
-    this.templateSvc.reorderExercises(day.workoutDayId, orderedIds).subscribe({
+    this.templateSvc.reorderExercises(day.workoutDayId, orderedIds).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => {
         this.template.set(snapshot);
         this.error.set('No se pudo guardar el nuevo orden de los ejercicios.');
@@ -379,7 +373,7 @@ export class TemplateDetailPageComponent implements OnInit {
     this.isSavingEdit.set(true);
     this.editError.set(null);
 
-    this.templateSvc.update(this.templateId(), dto).subscribe({
+    this.templateSvc.update(this.templateId(), dto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (updated) => {
         this.isSavingEdit.set(false);
         this.showEditTemplateModal.set(false);
@@ -405,7 +399,7 @@ export class TemplateDetailPageComponent implements OnInit {
   confirmDelete(): void {
     this.isDeleting.set(true);
 
-    this.templateSvc.delete(this.templateId()).subscribe({
+    this.templateSvc.delete(this.templateId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.isDeleting.set(false);
         this.router.navigate(['/trainer/templates']);
@@ -429,11 +423,11 @@ onDaySaved(dto: UpdateDayRequest): void {
   this.isSavingDay.set(true);
 
   // ✅ workoutDayId — el que espera el endpoint
-  this.templateSvc.updateDay(this.templateId(), day.workoutDayId, dto).subscribe({
+  this.templateSvc.updateDay(this.templateId(), day.workoutDayId, dto).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
     next: () => {
       // Si cambió el orden, el backend desplaza a los demás días: se recarga el
       // template para tener los orderIndex consistentes (1..n).
-      this.templateSvc.getById(this.templateId()).subscribe({
+      this.templateSvc.getById(this.templateId()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (data) => {
           this.template.set(data);
           this.selectedDayId.set(day.id);
